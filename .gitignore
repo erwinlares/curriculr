@@ -4,3 +4,9 @@
 .httr-oauth
 .DS_Store
 .quarto
+.positai
+*.pdf
+PLAN.md
+.Rprofile
+renv/library/
+renv/staging/

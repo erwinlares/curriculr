@@ -1,5 +1,10 @@
+^renv$
+^renv\.lock$
 ^curriculr\.Rproj$
 ^\.Rproj\.user$
 ^\.positai$
 ^\.claude$
 ^LICENSE\.md$
+^\.Rprofile$
+^PLAN\.md$
+^man/figures/.*\.png$  # hex sticker and favicon aren't part of the built package
