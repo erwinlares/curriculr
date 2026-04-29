@@ -10,3 +10,4 @@ PLAN.md
 .Rprofile
 renv/library/
 renv/staging/
+inst/extdata/erwinlares-cv-data.xlsx
