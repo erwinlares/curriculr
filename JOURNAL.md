@@ -247,7 +247,7 @@ glue remains available for other parts of the package — particularly
 
 ---
 
-### Decision: `create_cv()` will delegate to `toolero::create_qmd()`
+### Decision: `create_cv()` architecture — Model A abandoned, self-contained instead
 
 Two models were considered for how `create_cv()` should relate to
 `create_qmd()` in toolero:
@@ -256,10 +256,21 @@ Two models were considered for how `create_cv()` should relate to
   CV-specific template and YAML structure.
 - **Model B:** extract a shared internal helper that both functions call.
 
-Model A was chosen. It keeps the dependency explicit, avoids duplicating
-scaffolding logic, and naturally positions toolero as the foundational layer.
-`create_cv()` adds CV-specific scaffolding on top — the workbook, the photo
-placeholder, CV assets — then delegates document creation to toolero.
+Model A was initially chosen. However, when we examined toolero's actual
+`create_qmd()` function signature:
+
+```r
+create_qmd(filename, path, yaml_data, overwrite, use_purl)
+```
+
+it became clear that `create_qmd()` does not accept a `template` argument
+and always uses its own internal template. The delegation model was not
+implementable without a toolero release. `create_cv()` was therefore written
+as a self-contained function that handles all scaffolding steps directly —
+workbook copy, placeholder image copy, and Quarto template copy — without
+calling toolero at all. The toolero dependency was removed from `DESCRIPTION`.
+Delegation can be revisited when toolero v0.4.0 adds a `template` argument
+to `create_qmd()`.
 
 ---
 
@@ -274,9 +285,8 @@ R/typst-dates.R          — .cv_date_range(), .cv_year_range()
 R/typst-layout.R         — .cv_section(), .cv_entry()
 R/typst-render.R         — cv_render_section(), .build_section_blocks()
 R/read-cv-data.R         — read_cv_data()
+R/create-cv.R            — create_cv()
 ```
-
-One file remains: `R/create-cv.R`.
 
 ---
 
@@ -289,31 +299,265 @@ usethis::use_readme_md()
 usethis::use_news_md()
 usethis::use_testthat()
 usethis::use_git()
-usethis::use_package("toolero")
 usethis::use_package("readxl")
 usethis::use_package("cli")
 usethis::use_package("fs")
-usethis::use_package("glue")
-usethis::use_package("purrr")
 fs::dir_create("inst/extdata/img")
 fs::dir_create("inst/templates")
 fs::dir_create("man/figures")
 renv::init()       # explicit mode — DESCRIPTION-driven
 renv::install("devtools")
 renv::snapshot()
+usethis::use_github_action("check-standard")
+usethis::use_github()
 ```
 
 ---
 
-### What remains for the next session
+## Session 2 — 2026-04-30
+
+### What we set out to do
+
+Session 2 picked up where Session 1 left off. The R source files were all
+written and loading cleanly. The remaining work was: write the generalized
+Quarto template, write the test suite, fix `R CMD check` issues, finalize
+`DESCRIPTION`, `README.md`, and `NEWS.md`, and prepare the package for its
+first GitHub push.
+
+---
+
+### `inst/templates/CV.qmd` — the generalized template
+
+The original `CV.qmd` had three problems that needed solving before it could
+be shipped as a package template:
+
+1. Personal information hardcoded in a raw Typst block
+2. Helper scripts loaded via `source()` rather than via a package
+3. Column names from the old schema (`degree`, `accomplishment`, `area`)
+
+The generalized template addresses all three.
+
+**Personal information** now comes from `cv$profile`. The raw Typst header
+block was converted into an R chunk with `results: asis`. The chunk reads
+each profile field from the named character vector returned by
+`read_cv_data()`, escapes every value with `.typst_escape()`, assembles the
+contact line dynamically — omitting blank fields automatically — and writes
+the Typst block via `sprintf()`. No personal data appears anywhere in the
+template file itself.
+
+**Helper scripts** are gone. The template now loads curriculr with
+`library(curriculr)` and calls `read_cv_data()` directly. The two `source()`
+calls from the original are replaced by one `library()` call.
+
+**Column names** are updated throughout to reflect the normalized schema:
+`title` everywhere, `institution` for the education organization line.
+`emit_entries()` and `emit_simple_entries()` are replaced by
+`cv_render_section()` in every section block.
+
+The document style settings block — font, size, color palette — remains as
+a raw `{=typst}` block. These are rendering concerns, not data concerns, and
+belong in the template rather than in the workbook.
+
+---
+
+### Test suite — 74 tests, zero failures
+
+Five test files were written covering all testable units:
 
 ```text
-R/create-cv.R               — the last source file
-inst/templates/CV.qmd       — generalized template, no hardcoded personal info
-tests/testthat/             — unit tests for builders and helpers
-DESCRIPTION                 — finalize metadata
-README.md                   — package documentation
-NEWS.md                     — changelog
-devtools::check()           — clean run
-CRAN submission prep
+tests/testthat/test-typst-helpers.R   — %||%, .cv_value(), .typst_escape()
+tests/testthat/test-typst-dates.R     — .cv_date_range(), .cv_year_range()
+tests/testthat/test-typst-layout.R    — .cv_section(), .cv_entry()
+tests/testthat/test-typst-render.R    — .build_section_blocks(), cv_render_section()
+tests/testthat/test-read-cv-data.R    — read_cv_data()
 ```
+
+The key testing insight was the builder/printer split established in Session
+1. `.build_section_blocks()` returns a character vector and is fully testable
+without capturing stdout. `cv_render_section()` is tested only for its
+return value (`NULL` invisibly) — the output it writes to the stream is
+covered indirectly through the builder tests.
+
+`create_cv()` and `cv_render_section()`'s `cat()` side effect are not unit
+tested. Both require filesystem scaffolding or stdout capture that belongs in
+integration tests planned for a future session.
+
+Final result: 74 tests passing, 0 failures, 0 warnings, 0 skips.
+
+---
+
+### `R CMD check` issues resolved
+
+Running `devtools::check()` surfaced two errors and four notes:
+
+**Error: internal functions not found in examples.** Functions with a `.`
+prefix are not exported and therefore not available when `R CMD check` runs
+examples. All `@examples` blocks were removed from internal function
+documentation. Internal functions do not need runnable examples — the test
+suite covers them instead.
+
+**Error: stray markdown heading in `.cv_entry()` roxygen block.** A comment
+line beginning with `#` inside the documentation was being interpreted by
+roxygen2 as a level-1 heading, which is not supported in `@return`. The
+orphaned example block that contained it was removed. All `@return` tags on
+internal functions were simplified to plain one-line descriptions.
+
+**Note: `setNames` has no visible global function definition.** Replaced the
+`setNames()` call in `read_cv_data()` with explicit assignment:
+
+```r
+out <- vector("list", length(sheets))
+names(out) <- sheets
+```
+
+**Note: `JOURNAL.md` at top level.** Added to `.Rbuildignore` with
+`usethis::use_build_ignore("JOURNAL.md")`.
+
+**Note: `NEWS.md` has no entries.** Added the v0.1.0 entry.
+
+**Note: unable to verify current time.** Environment-level issue unrelated
+to package code. Will not affect CRAN submission.
+
+After fixes: 0 errors, 0 warnings, 1 note (timestamp verification — not
+actionable).
+
+---
+
+### `DESCRIPTION` finalized
+
+The `Description` field was expanded to acknowledge the two prior works that
+inspired curriculr:
+
+```dcf
+Inspired by the vitae package (O'Hara-Wild et al., 2024,
+<https://CRAN.R-project.org/package=vitae>) and the Awesome CV LaTeX
+template (Park, 2015, <https://github.com/posquit0/Awesome-CV>).
+```
+
+The `RoxygenNote` field was updated from 7.3.2 to 7.3.3 to match the
+installed version.
+
+---
+
+### `README.md` finalized
+
+The README was restructured to match toolero's pattern: hex sticker logo
+aligned right, badges, one-paragraph pitch, installation, requirements,
+getting started (three numbered steps), functions, workbook schema, date
+conventions, roadmap, related packages, known limitations, and license.
+
+Key change from the first draft: the `cv_render_section()` example no longer
+shows internal functions (`.cv_section()`, `.cv_date_range()`) directly.
+Users interact with `CV.qmd` rather than calling these functions themselves,
+so the README example shows only what a user would actually write.
+
+The CRAN installation block was omitted — the package is not yet on CRAN and
+a non-working install command is worse than no command at all.
+
+An acknowledgements section was added crediting vitae and Awesome CV, and
+the `DESCRIPTION` field was updated to include formal citations for both.
+
+---
+
+### GitHub Actions configured
+
+`usethis::use_github_action("check-standard")` created the R-CMD-check
+workflow at `.github/workflows/R-CMD-check.yaml`. The `.github/` directory
+was added to `.Rbuildignore` automatically. The workflow will trigger on
+every push and pull request once the GitHub remote is connected.
+
+---
+
+### Package structure at end of Session 2
+
+```text
+curriculr/
+├── .github/
+│   └── workflows/
+│       └── R-CMD-check.yaml
+├── .Rbuildignore
+├── DESCRIPTION
+├── JOURNAL.md
+├── LICENSE
+├── LICENSE.md
+├── NAMESPACE
+├── NEWS.md
+├── PLAN.md
+├── R/
+│   ├── create-cv.R
+│   ├── curriculr-package.R
+│   ├── read-cv-data.R
+│   ├── typst-dates.R
+│   ├── typst-helpers.R
+│   ├── typst-layout.R
+│   └── typst-render.R
+├── README.md
+├── curriculr.Rproj
+├── inst/
+│   ├── extdata/
+│   │   ├── cv-data-template.xlsx
+│   │   ├── erwinlares-cv-data.xlsx
+│   │   └── img/
+│   │       └── placeholder.png
+│   └── templates/
+│       └── CV.qmd
+├── man/
+│   ├── create_cv.Rd
+│   ├── curriculr-package.Rd
+│   ├── cv_render_section.Rd
+│   ├── dot-build_section_blocks.Rd
+│   ├── dot-cv_date_range.Rd
+│   ├── dot-cv_entry.Rd
+│   ├── dot-cv_section.Rd
+│   ├── dot-cv_value.Rd
+│   ├── dot-cv_year_range.Rd
+│   ├── dot-typst_escape.Rd
+│   ├── figures/
+│   │   ├── favicon.ico
+│   │   └── hex-sticker.png
+│   └── read_cv_data.Rd
+├── renv/
+│   ├── activate.R
+│   └── settings.json
+├── renv.lock
+└── tests/
+    ├── testthat/
+    │   ├── test-read-cv-data.R
+    │   ├── test-typst-dates.R
+    │   ├── test-typst-helpers.R
+    │   ├── test-typst-layout.R
+    │   └── test-typst-render.R
+    └── testthat.R
+```
+
+---
+
+### What remains
+
+- Push to GitHub and verify R-CMD-check Action passes
+- Render `CV.qmd` using the Frank Palmer workbook to verify the full
+  pipeline works end-to-end
+- Create `inst/CITATION`
+- CRAN submission prep (future milestone)
+
+**v0.2.0 roadmap:**
+
+- Add `template` argument to `toolero::create_qmd()` and restore delegation
+  from `create_cv()`
+- Filtering logic for CV variants (`resume: true`, `years`, `npresentations`)
+- Section-level `include` flags in the workbook
+- Integration tests for `create_cv()`
+    - The tests we wrote this session are unit tests — they test individual
+    functions in isolation. .build_section_blocks() takes a data frame and returns
+    a character vector. .typst_escape() takes a string and returns a string. These
+    are pure, self-contained, and easy to verify.
+    create_cv() is different. It doesn't return a value you can inspect — it
+    creates files and folders on disk.
+- Testing it properly means:
+    Creating a temporary directory
+    Calling create_cv() on it
+    Checking that the expected files and folders actually exist
+    Checking that the workbook was copied correctly
+    Checking that the placeholder image is in the right place
+    Checking that CV.qmd was created with the right name
+    Cleaning up afterward
