@@ -8,10 +8,10 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/erwinlares/curriculr/blob/main/DESCRIPTION)
+[`inst/CITATION`](https://github.com/erwinlares/curriculr/blob/main/inst/CITATION)
 
-Lares E (2026). *curriculr: Data-Driven CVs with Quarto and Typst*. R
-package version 0.2.0, <https://github.com/erwinlares/curriculr>.
+Lares, E. (2026). curriculr: Data-Driven CVs with Quarto and Typst. R
+package version 0.2.0. https://doi.org/10.5281/zenodo.19930400
 
     @Manual{,
       title = {curriculr: Data-Driven CVs with Quarto and Typst},
@@ -19,4 +19,5 @@ package version 0.2.0, <https://github.com/erwinlares/curriculr>.
       year = {2026},
       note = {R package version 0.2.0},
       url = {https://github.com/erwinlares/curriculr},
+      doi = {10.5281/zenodo.19930400},
     }

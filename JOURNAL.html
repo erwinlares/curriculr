@@ -460,6 +460,101 @@ inst/templates/CV.qmd   -- sections loop replaces hardcoded blocks, sentinels</c
 <li>add support for awesomefont icons</li>
 </ul></div>
 </div>
+<div class="section level2">
+<h2 id="session-4">Session 4<a class="anchor" aria-label="anchor" href="#session-4"></a></h2>
+<hr><div class="section level3">
+<h3 id="package-structure-at-end-of-session-4">Package structure at end of Session 4<a class="anchor" aria-label="anchor" href="#package-structure-at-end-of-session-4"></a></h3>
+</div>
+</div>
+<div class="section level2">
+<h2 id="session-4--2026-04-30">Session 4 — 2026-04-30<a class="anchor" aria-label="anchor" href="#session-4--2026-04-30"></a></h2>
+<div class="section level3">
+<h3 id="what-we-set-out-to-do-3">What we set out to do<a class="anchor" aria-label="anchor" href="#what-we-set-out-to-do-3"></a></h3>
+<p>Session 4 was a documentation and polish pass following the v0.2.0 code work in Session 3. The goals were: restructure the README for new and existing users, add a vignette, configure the favicon, add a CITATION file, and commit everything cleanly.</p>
+<hr></div>
+<div class="section level3">
+<h3 id="readme-restructured">README restructured<a class="anchor" aria-label="anchor" href="#readme-restructured"></a></h3>
+<p>The v0.1.0 README described the package in the third person and assumed the reader already understood the workflow. The v0.2.0 README is addressed directly to two distinct audiences:</p>
+<p><strong>New users</strong> get a three-step onboarding path: call <code><a href="reference/create_cv.html">create_cv()</a></code> with no arguments to scaffold, fill in the workbook, call <code><a href="reference/create_cv.html">create_cv()</a></code> again with <code>data</code> and <code>photo</code> to render. The scaffold mode output and the step-by-step instructions are shown verbatim so the user knows exactly what to expect.</p>
+<p><strong>Existing users migrating from v0.1.0</strong> get a concise explanation of what changed: <code><a href="reference/create_cv.html">create_cv()</a></code> has two modes now, the workbook needs a <code>sections</code> sheet, and the <code>date_fun</code> token vocabulary is documented in a quick-reference table.</p>
+<p>A third section covers customization — changing section order, colors, fonts, and margins — with concrete examples of what to edit and where. This replaces the vague “Known limitations” language from v0.1.0 with actionable instructions.</p>
+<hr></div>
+<div class="section level3">
+<h3 id="vignette-why-curriculr">Vignette: Why curriculr<a class="anchor" aria-label="anchor" href="#vignette-why-curriculr"></a></h3>
+<p>A new vignette was added at <code>vignettes/curriculr-why.Rmd</code> making the case for the data-driven CV approach. The vignette is structured as an argument rather than a tutorial: it identifies the problem (content and presentation bundled together in Word or LaTeX), explains the curriculr model, and positions curriculr honestly against the closest prior art.</p>
+<p>The comparisons cover:</p>
+<ul><li>
+<strong>Word and Pages</strong> — the most common approach, and its limitations for maintaining multiple versions</li>
+<li>
+<strong>LaTeX CVs</strong> — better separation of concerns but a high barrier to entry</li>
+<li>
+<strong>vitae</strong> — the closest R-based prior art, directly acknowledged as an inspiration. curriculr differs in using Quarto/Typst instead of R Markdown/LaTeX, Excel instead of R data frames, and a sections-driven render model instead of hardcoded template blocks</li>
+<li>
+<strong>datadrivencv</strong> — Nick Strayer’s package, acknowledged for sharing the same philosophy</li>
+</ul><p>The vignette closes with the reproducibility argument: a curriculr CV is reproducible in the same sense that an R analysis script is reproducible.</p>
+<p><strong>On the vignette engine:</strong> the question of whether to use R Markdown or Quarto for the vignette was considered. The decision was to keep R Markdown (<code>VignetteEngine: knitr::rmarkdown</code>) for the initial release. Quarto vignettes are supported as of Quarto 1.4 and knitr 1.43 but require Quarto to be present in the check environment, which is not yet universal on CRAN check machines. Since the package already requires Quarto at runtime for <code><a href="reference/create_cv.html">create_cv()</a></code>, this adds no new burden for users — but it does add risk for CRAN infrastructure. R Markdown is the safer choice until Quarto vignettes are more broadly established.</p>
+<p><strong>DESCRIPTION additions for vignette support:</strong></p>
+<pre class="dcf"><code>Suggests:
+    knitr,
+    rmarkdown,
+    ...
+VignetteBuilder: knitr</code></pre>
+<hr></div>
+<div class="section level3">
+<h3 id="favicon-configured-in-pkgdown">Favicon configured in pkgdown<a class="anchor" aria-label="anchor" href="#favicon-configured-in-pkgdown"></a></h3>
+<p>The favicon was already in <code>man/figures/favicon.ico</code> from Session 1 but was not wired into the pkgdown site. Added to <code>_pkgdown.yml</code>:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">template</span><span class="kw">:</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="at">  </span><span class="fu">bootstrap</span><span class="kw">:</span><span class="at"> </span><span class="dv">5</span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="at">  </span><span class="fu">favicon</span><span class="kw">:</span><span class="at"> man/figures/favicon.ico</span></span></code></pre></div>
+<hr></div>
+<div class="section level3">
+<h3 id="instcitation-added">inst/CITATION added<a class="anchor" aria-label="anchor" href="#instcitation-added"></a></h3>
+<p>A <code>CITATION</code> file was added to <code>inst/</code> so that <code>citation("curriculr")</code> returns a properly formatted citation. The file uses <code>meta$Version</code> to pull the installed version number automatically from <code>DESCRIPTION</code>, and <code>format(Sys.Date(), "%Y")</code> for the year so neither field needs manual updating on future releases.</p>
+<p>The initial attempt produced a <code>????</code> year and a warning: could not determine year for ‘curriculr’ from package DESCRIPTION file</p>
+<p>The fix was to add a <code>Date</code> field to <code>DESCRIPTION</code>:</p>
+<pre class="dcf"><code><span><span class="va">Date</span><span class="op">:</span> <span class="fl">2026</span><span class="op">-</span><span class="fl">04</span><span class="op">-</span><span class="fl">30</span></span></code></pre>
+<p>R uses this field to populate the year in <code><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation()</a></code>. After adding it, <code>citation("curriculr")</code> returns a clean formatted citation with no warnings.</p>
+<hr></div>
+<div class="section level3">
+<h3 id="planmd-updated">PLAN.md updated<a class="anchor" aria-label="anchor" href="#planmd-updated"></a></h3>
+<p>The PLAN.md was substantially revised:</p>
+<ul><li>Completed work marked clearly for v0.1.0 and v0.2.0</li>
+<li>v0.3.0 roadmap expanded with prioritized items: integration tests, CITATION, Frank Palmer workbook update, CV variant support, HTML output, theming, toolero delegation, <code>add_section()</code> helper, and an <code>include</code> column for the sections sheet</li>
+<li>Three open design questions added covering <code>overwrite</code> behavior, scaffold mode writing <code>CV.qmd</code>, and the <code>include</code> column</li>
+</ul><hr></div>
+<div class="section level3">
+<h3 id="newsmd-updated">NEWS.md updated<a class="anchor" aria-label="anchor" href="#newsmd-updated"></a></h3>
+<p>The v0.2.0 entry was expanded to explicitly call out breaking changes at the top, since the <code><a href="reference/create_cv.html">create_cv()</a></code> redesign is a significant behavior change for anyone upgrading from v0.1.0.</p>
+<hr></div>
+<div class="section level3">
+<h3 id="commit-structure">Commit structure<a class="anchor" aria-label="anchor" href="#commit-structure"></a></h3>
+<p>Changes were committed in two logical groups to keep the history readable: v0.2.0: sections-driven rendering, scaffold/render mode split, exported typst_escape/cv_section/resolve_date_fun, why-curriculr vignette v0.2.0 docs: README restructured, NEWS updated, JOURNAL session 3, pkgdown favicon, CITATION added, Date field in DESCRIPTION</p>
+<hr></div>
+<div class="section level3">
+<h3 id="package-structure-at-end-of-session-4-1">Package structure at end of Session 4<a class="anchor" aria-label="anchor" href="#package-structure-at-end-of-session-4-1"></a></h3>
+<p>New files added since Session 3:</p>
+<pre class="text"><code>inst/CITATION
+vignettes/
+└── curriculr-why.Rmd</code></pre>
+<p>Fields added to DESCRIPTION:</p>
+<pre class="dcf"><code><span><span class="va">Date</span><span class="op">:</span> <span class="fl">2026</span><span class="op">-</span><span class="fl">04</span><span class="op">-</span><span class="fl">30</span></span>
+<span><span class="va">VignetteBuilder</span><span class="op">:</span> <span class="va">knitr</span></span></code></pre>
+<hr></div>
+<div class="section level3">
+<h3 id="what-remains-for-v030-1">What remains for v0.3.0<a class="anchor" aria-label="anchor" href="#what-remains-for-v030-1"></a></h3>
+<ul><li>Integration tests for <code><a href="reference/create_cv.html">create_cv()</a></code> scaffold and render modes</li>
+<li>Frank Palmer workbook updated with <code>sections</code> sheet</li>
+<li>CV variant support wired into <code>CV.qmd</code> params</li>
+<li>HTML output alongside PDF</li>
+<li>Theming support – color palette and font configurable from workbook</li>
+<li>
+<code>add_section()</code> convenience function</li>
+<li>
+<code>sections</code> sheet <code>include</code> boolean column</li>
+<li>
+<code>toolero</code> delegation once <code>create_qmd()</code> accepts a <code>template</code> argument</li>
+</ul></div>
+</div>
 
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
