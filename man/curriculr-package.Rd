@@ -13,6 +13,7 @@ Useful links:
 \itemize{
   \item \url{https://github.com/erwinlares/curriculr}
   \item \url{https://erwinlares.github.io/curriculr/}
+  \item \doi{10.5281/zenodo.19930400}
   \item Report bugs at \url{https://github.com/erwinlares/curriculr/issues}
 }
 
