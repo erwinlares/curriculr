@@ -24,6 +24,8 @@ Useful links:
 
 - <https://erwinlares.github.io/curriculr/>
 
+- [doi:10.5281/zenodo.19930400](https://doi.org/10.5281/zenodo.19930400)
+
 - Report bugs at <https://github.com/erwinlares/curriculr/issues>
 
 ## Author
