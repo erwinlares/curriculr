@@ -254,7 +254,7 @@ Leave cells blank rather than typing `NA`.
 ## Roadmap
 
 Planned for v0.3.0: CV variant support (short resume, year filtering),
-HTML output, integration tests, and `inst/CITATION`.
+HTML output, integration tests, and AwesomeFont support.
 
 ------------------------------------------------------------------------
 
