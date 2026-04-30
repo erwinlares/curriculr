@@ -1,0 +1,309 @@
+---
+# The title is intentionally commented out.
+#
+# In Quarto's Typst format, a YAML title is rendered as a visible title block.
+# This CV builds its own custom header below, so leaving `title` active would
+# print an unwanted heading before the profile image and header block.
+# title: "Your Name CV"
+
+# Render this document with Quarto's Typst engine.
+#
+# Typst gives us a PDF-first workflow without relying on LaTeX, vitae,
+# awesomecv, custom .cls files, or custom .sty files.
+format:
+  typst:
+    # Do not generate a table of contents.
+    toc: false
+
+    # Typst uses `us-letter`, not `letter`, for U.S. Letter paper.
+    papersize: us-letter
+
+    # Page margins. These are tuned to fit comfortably on U.S. Letter paper.
+    # Adjust here if you need more or less whitespace.
+    margin:
+      x: 0.62in
+      y: 0.58in
+
+# Parameters reserved for future CV variants.
+#
+# These are not yet fully wired into the document, but they provide a place to
+# support things like a shorter resume, a rolling year window, or a limited
+# number of presentations.
+params:
+  resume: false
+  years: 5
+  npresentations: 10
+
+# Global execution defaults for R chunks.
+#
+# The CV should only show formatted CV content, not source code, package
+# messages, or warnings.
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+
+# Load the curriculr package.
+#
+# curriculr provides read_cv_data() and cv_render_section(), as well as the
+# internal Typst layout functions that convert data-frame rows into raw Typst
+# blocks.
+library(curriculr)
+
+# Read the CV workbook.
+#
+# read_cv_data() reads all sheets from the Excel workbook and returns a named
+# list. Each sheet becomes one list element:
+#   cv$education
+#   cv$experience
+#   cv$projects
+#   ... and so on
+#
+# The profile sheet is returned as a named character vector:
+#   cv$profile[["first_name"]]
+#   cv$profile[["email"]]
+#
+# Edit the path below if your workbook has a different name or location.
+cv <- read_cv_data("data/cv-data-template.xlsx")
+```
+
+```{=typst}
+// -----------------------------------------------------------------------------
+// Document style settings
+// -----------------------------------------------------------------------------
+//
+// These settings control the global typography and color palette for the CV.
+// The page size and margins are controlled in the Quarto YAML front matter
+// above. Adjust font, sizes, and colors here to change the overall look.
+
+#set text(font: "Lato", size: 8.8pt, fill: rgb("#3f3f3f"))
+#set par(justify: false, leading: 0.48em)
+
+#let accent    = rgb("#c5050c")
+#let dark      = rgb("#303030")
+#let bodygray  = rgb("#555555")
+#let lightgray = rgb("#777777")
+#let rulegray  = rgb("#d9d9d9")
+```
+
+```{r}
+#| label: header
+#| results: asis
+
+# Build the CV header block from the profile sheet.
+#
+# All personal information — name, address, contact details, profile statement,
+# and photo path — comes from the `profile` sheet of the Excel workbook.
+# Edit the workbook, not this file, to update your personal information.
+
+first_name       <- cv$profile[["first_name"]]
+last_name        <- cv$profile[["last_name"]]
+address          <- cv$profile[["address"]]
+email            <- cv$profile[["email"]]
+website          <- cv$profile[["website"]]
+github           <- cv$profile[["github"]]
+linkedin         <- cv$profile[["linkedin"]]
+profile_statement <- cv$profile[["profile_statement"]]
+photo            <- cv$profile[["photo"]]
+
+# Escape all profile values for safe use in Typst.
+first_name        <- .typst_escape(first_name)
+last_name         <- .typst_escape(last_name)
+address           <- .typst_escape(address)
+email             <- .typst_escape(email)
+website           <- .typst_escape(website)
+github            <- .typst_escape(github)
+linkedin          <- .typst_escape(linkedin)
+profile_statement <- .typst_escape(profile_statement)
+
+# The contact line assembles website, email, github, and linkedin.
+# Fields that are blank are omitted automatically.
+contact_parts <- c(website, email,
+                   if (nzchar(github))   paste0("github.com/", github),
+                   if (nzchar(linkedin)) paste0("linkedin.com/", linkedin))
+contact_parts <- contact_parts[nzchar(contact_parts)]
+contact_line  <- paste(contact_parts, collapse = " \u00b7 ")  # middle dot
+
+cat(sprintf(
+  paste0(
+    '\n```{=typst}\n',
+    '#grid(columns: (1.36in, 1fr), gutter: 0.42in,\n',
+    '  [#image("%s", width: 1.27in)],\n',
+    '  [\n',
+    '    #align(center)[\n',
+    '      #text(size: 27pt, weight: "light",  fill: rgb("#777777"))[%s]',
+    '#h(0.16em)',
+    '#text(size: 27pt, weight: "bold", fill: dark)[%s]\n',
+    '      #v(0.16em)\n',
+    '      #text(size: 8.2pt, fill: lightgray)[%s]\n',
+    '      #v(0.18em)\n',
+    '      #text(size: 8.3pt, fill: lightgray)[%s]\n',
+    '      #v(0.46em)\n',
+    '      #text(size: 9pt, style: "italic", fill: bodygray)[%s]\n',
+    '    ]\n',
+    '  ]\n',
+    ')\n',
+    '#v(0.85em)\n',
+    '```\n'
+  ),
+  photo, first_name, last_name,
+  address, contact_line, profile_statement
+))
+```
+
+```{r}
+#| label: cv-sections
+#| results: asis
+
+# The following section renders raw Typst from the Excel workbook.
+#
+# Each section is built in two steps:
+#   1. cat(.cv_section(...))  prints the section heading.
+#   2. cv_render_section(...) prints entries row-by-row.
+#
+# `results = 'asis'` is required because the functions output raw Typst code
+# that Quarto should pass through directly into the final document.
+#
+# To reorder sections, move the corresponding block up or down.
+# To remove a section, delete or comment out its block.
+# To add a section, follow the pattern established below.
+
+# Education ---------------------------------------------------------------
+# Uses year-only date ranges. Maps:
+#   title       -> entry title (degree name)
+#   institution -> organization line
+#   detail      -> secondary description
+cat(.cv_section("Education"))
+cv_render_section(
+  cv$education,
+  title_col  = "title",
+  org_col    = "institution",
+  detail_col = "detail",
+  date_fun   = .cv_year_range
+)
+
+# Experience --------------------------------------------------------------
+# Uses full month/year ranges. Maps:
+#   title  -> entry title
+#   unit   -> organization line
+#   detail -> secondary description
+cat(.cv_section("Experience"))
+cv_render_section(
+  cv$experience,
+  title_col  = "title",
+  org_col    = "unit",
+  detail_col = "detail",
+  date_fun   = .cv_date_range
+)
+
+# Projects ----------------------------------------------------------------
+# Uses full month/year ranges. Maps:
+#   title  -> entry title (project name)
+#   unit   -> organization line
+#   detail -> secondary description
+cat(.cv_section("Projects"))
+cv_render_section(
+  cv$projects,
+  title_col  = "title",
+  org_col    = "unit",
+  detail_col = "detail",
+  date_fun   = .cv_date_range
+)
+
+# Invited Teaching --------------------------------------------------------
+# Uses a custom inline date function: "Month Year" only, no end date.
+cat(.cv_section("Invited Teaching"))
+cv_render_section(
+  cv$invited_teaching,
+  title_col = "title",
+  org_col   = "unit",
+  date_fun  = function(row) {
+    trimws(paste(.cv_value(row, "startMonth"), .cv_value(row, "startYear")))
+  }
+)
+
+# Publications ------------------------------------------------------------
+# Uses publication year only. Maps:
+#   title -> entry title
+#   unit  -> publisher or venue
+#   detail -> additional context
+cat(.cv_section("Publications"))
+cv_render_section(
+  cv$publications,
+  title_col  = "title",
+  org_col    = "unit",
+  detail_col = "detail",
+  date_fun   = function(row) .cv_value(row, "startYear")
+)
+
+# Presentations -----------------------------------------------------------
+# The event/venue is the entry title; the presentation title is the secondary
+# line. Date is formatted as "Month Year".
+cat(.cv_section("Presentations"))
+cv_render_section(
+  cv$presentations,
+  title_col = "unit",
+  org_col   = "title",
+  date_fun  = function(row) {
+    trimws(paste(.cv_value(row, "startMonth"), .cv_value(row, "startYear")))
+  }
+)
+
+# Certifications ----------------------------------------------------------
+# Simple entries: no dates, no location.
+cat(.cv_section("Certifications"))
+cv_render_section(
+  cv$certifications,
+  title_col = "title",
+  org_col   = "unit",
+  date_fun  = NULL,
+  where_col = NULL
+)
+
+# Grants and Awards -------------------------------------------------------
+# Uses full date ranges where available.
+cat(.cv_section("Grants and Awards"))
+cv_render_section(
+  cv$grants_and_awards,
+  title_col  = "title",
+  org_col    = "unit",
+  date_fun   = .cv_date_range
+)
+
+# Administrative Services -------------------------------------------------
+# Uses full date ranges where available.
+cat(.cv_section("Administrative Services"))
+cv_render_section(
+  cv$admin_services,
+  title_col  = "title",
+  org_col    = "unit",
+  date_fun   = .cv_date_range
+)
+
+# Skills ------------------------------------------------------------------
+# Simple entries: no dates, no location.
+#   title -> skill area
+#   unit  -> skill list
+cat(.cv_section("Skills"))
+cv_render_section(
+  cv$skills,
+  title_col = "title",
+  org_col   = "unit",
+  date_fun  = NULL,
+  where_col = NULL
+)
+
+# Affiliations ------------------------------------------------------------
+# Single-column entries: organization name only.
+cat(.cv_section("Affiliations"))
+cv_render_section(
+  cv$affiliations,
+  title_col = "title",
+  date_fun  = NULL,
+  where_col = NULL
+)
+```

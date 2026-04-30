@@ -8,3 +8,5 @@
 ^\.Rprofile$
 ^PLAN\.md$
 ^man/figures/.*\.png$  # hex sticker and favicon aren't part of the built package
+^JOURNAL\.md$
+^\.github$
