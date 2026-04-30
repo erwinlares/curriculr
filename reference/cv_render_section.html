@@ -9,7 +9,7 @@ calling .cv_entry() for each row and passing the result to base::cat()."></head>
 
     <a class="navbar-brand me-2" href="../index.html">curriculr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,6 +18,10 @@ calling .cv_entry() for each row and passing the result to base::cat()."></head>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/curriculr-why.html">Why curriculr: The Case for a Data-Driven CV</a></li>
+  </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -109,14 +113,14 @@ entirely for its side effect.</p>
 <span class="r-in"><span><span class="co"># Inside a Quarto chunk with results = 'asis':</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Full entry with date range and location</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="dot-cv_section.html">.cv_section</a></span><span class="op">(</span><span class="st">"Experience"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu">.cv_section</span><span class="op">(</span><span class="st">"Experience"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">cv_render_section</span><span class="op">(</span><span class="va">cv</span><span class="op">$</span><span class="va">experience</span>,</span></span>
 <span class="r-in"><span>                  title_col  <span class="op">=</span> <span class="st">"title"</span>,</span></span>
 <span class="r-in"><span>                  org_col    <span class="op">=</span> <span class="st">"unit"</span>,</span></span>
 <span class="r-in"><span>                  detail_col <span class="op">=</span> <span class="st">"detail"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Year-only dates</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="dot-cv_section.html">.cv_section</a></span><span class="op">(</span><span class="st">"Education"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu">.cv_section</span><span class="op">(</span><span class="st">"Education"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">cv_render_section</span><span class="op">(</span><span class="va">cv</span><span class="op">$</span><span class="va">education</span>,</span></span>
 <span class="r-in"><span>                  title_col  <span class="op">=</span> <span class="st">"title"</span>,</span></span>
 <span class="r-in"><span>                  org_col    <span class="op">=</span> <span class="st">"institution"</span>,</span></span>
@@ -124,7 +128,7 @@ entirely for its side effect.</p>
 <span class="r-in"><span>                  date_fun   <span class="op">=</span> <span class="va">.cv_year_range</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># No dates, no location</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="dot-cv_section.html">.cv_section</a></span><span class="op">(</span><span class="st">"Skills"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu">.cv_section</span><span class="op">(</span><span class="st">"Skills"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">cv_render_section</span><span class="op">(</span><span class="va">cv</span><span class="op">$</span><span class="va">skills</span>,</span></span>
 <span class="r-in"><span>                  title_col <span class="op">=</span> <span class="st">"title"</span>,</span></span>
 <span class="r-in"><span>                  org_col   <span class="op">=</span> <span class="st">"unit"</span>,</span></span>
@@ -132,7 +136,7 @@ entirely for its side effect.</p>
 <span class="r-in"><span>                  where_col <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Custom inline date function</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="dot-cv_section.html">.cv_section</a></span><span class="op">(</span><span class="st">"Presentations"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu">.cv_section</span><span class="op">(</span><span class="st">"Presentations"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">cv_render_section</span><span class="op">(</span><span class="va">cv</span><span class="op">$</span><span class="va">presentations</span>,</span></span>
 <span class="r-in"><span>                  title_col <span class="op">=</span> <span class="st">"unit"</span>,</span></span>
 <span class="r-in"><span>                  org_col   <span class="op">=</span> <span class="st">"title"</span>,</span></span>

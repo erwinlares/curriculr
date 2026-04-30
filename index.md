@@ -8,7 +8,7 @@ files.
 
 ## Installation
 
-You can install the development version from GitHub:
+Install the development version from GitHub:
 
 ``` r
 
@@ -22,32 +22,35 @@ pak::pak("erwinlares/curriculr")
 - [Quarto](https://quarto.org) 1.4 or later (ships with Typst support
   built in)
 
-## Getting started
+------------------------------------------------------------------------
 
-### 1. Scaffold a new CV project
+## For new users
+
+### Step 1 — scaffold your project
+
+Call
+[`create_cv()`](https://erwinlares.github.io/curriculr/reference/create_cv.md)
+with no arguments. This copies the template workbook and a placeholder
+profile image into your current working directory:
 
 ``` r
 
 library(curriculr)
-
-create_cv(path = "~/my-cv")
+create_cv()
 ```
 
-This creates the following structure:
+You will see:
 
-``` text
-my-cv/
-├── CV.qmd
-├── data/
-│   └── cv-data-template.xlsx
-└── img/
-    └── placeholder.png
-```
+    v Created cv-data-template.xlsx
+    v Created placeholder.png
+    i Next steps:
+    1. Open cv-data-template.xlsx and fill in the profile sheet.
+    2. Replace placeholder.png with your own profile photo.
+    3. Call create_cv(data = 'cv-data-template.xlsx', photo = 'your-photo.png')
 
-### 2. Fill in the workbook
+### Step 2 — fill in the workbook
 
-Open `data/cv-data-template.xlsx`. Start with the `profile` sheet — it
-controls the CV header:
+Open `cv-data-template.xlsx`. Start with the `profile` sheet:
 
 | field             | value                                    |
 |-------------------|------------------------------------------|
@@ -60,70 +63,173 @@ controls the CV header:
 | github            | your-github-username                     |
 | linkedin          | in/your-linkedin                         |
 | profile_statement | One or two sentence professional summary |
-| photo             | img/your-photo.png                       |
 
-Then fill in the remaining sheets with your CV content. Each sheet
-corresponds to one section: `education`, `experience`, `projects`,
-`publications`, `presentations`, `invited_teaching`,
-`grants_and_awards`, `certifications`, `admin_services`, `skills`, and
-`affiliations`.
+Then fill in the remaining sheets with your CV content. The `readme`
+sheet inside the workbook explains the column schema and date entry
+conventions in detail.
 
-The `readme` sheet inside the workbook explains the column schema and
-date entry conventions in detail.
+### Step 3 — render
 
-### 3. Render
+``` r
 
-``` bash
-quarto render CV.qmd
+create_cv(
+  data  = "cv-data-template.xlsx",
+  photo = "your-photo.png"
+)
 ```
 
-The output is `CV.pdf`. To update your CV, edit the workbook and
-re-render. In most cases you will never need to touch `CV.qmd`.
+This writes `CV.qmd` and `CV.pdf` next to your workbook. Open `CV.pdf`
+to review the output. To update your CV, edit the workbook and call
+[`create_cv()`](https://erwinlares.github.io/curriculr/reference/create_cv.md)
+again with `overwrite = TRUE`.
+
+------------------------------------------------------------------------
+
+## For existing users updating from v0.1.0
+
+v0.2.0 changes how
+[`create_cv()`](https://erwinlares.github.io/curriculr/reference/create_cv.md)
+works and adds a `sections` sheet to the workbook schema. Here is what
+you need to know.
+
+**[`create_cv()`](https://erwinlares.github.io/curriculr/reference/create_cv.md)
+now has two modes:**
+
+- **Scaffold mode** (no arguments) — copies template files to your
+  current directory. Use this once to get started or to reset.
+- **Render mode** (with arguments) — reads your workbook and renders the
+  PDF. Use this every time you update your CV.
+
+**Your workbook needs a `sections` sheet.** This sheet controls which
+sections appear in the rendered PDF and in what order. Add it manually
+or copy it from the updated template workbook. The schema is:
+
+| section    | label      | title_col | org_col     | detail_col | date_fun | where_col |
+|------------|------------|-----------|-------------|------------|----------|-----------|
+| education  | Education  | title     | institution | detail     | year     | where     |
+| experience | Experience | title     | unit        | detail     | date     | where     |
+
+Row order is render order. Delete a row to exclude a section. Add a row
+for any sheet that follows the standard column schema and it will render
+automatically without any R code changes.
+
+The `date_fun` column accepts five tokens:
+
+| token        | produces            |
+|--------------|---------------------|
+| `date`       | Jan 2018 - Dec 2022 |
+| `year`       | 2018 - 2022         |
+| `month_year` | Jan 2018            |
+| `year_only`  | 2021                |
+| `none`       | *(no date)*         |
+
+------------------------------------------------------------------------
+
+## Customizing the rendered PDF
+
+### Changing section order or content
+
+Edit the `sections` sheet in your workbook. Reorder rows to reorder
+sections. Delete a row to remove a section. Add a row for a new section.
+
+### Changing colors and fonts
+
+Open `CV.qmd` and find the `{=typst}` style block near the top:
+
+``` typst
+#set text(font: "Lato", size: 8.8pt, fill: rgb("#3f3f3f"))
+#let accent   = rgb("#c5050c")
+#let dark     = rgb("#303030")
+#let bodygray = rgb("#555555")
+```
+
+Change `accent` to change the section heading and date color. Change
+`font` to use a different typeface. Change `size` to adjust the base
+text size.
+
+### Changing page margins
+
+In the YAML front matter of `CV.qmd`:
+
+``` yaml
+format:
+  typst:
+    papersize: us-letter
+    margin:
+      x: 0.62in
+      y: 0.58in
+```
+
+### Regenerating CV.qmd after changes
+
+``` r
+
+create_cv(
+  data      = "cv-data-template.xlsx",
+  photo     = "your-photo.png",
+  overwrite = TRUE
+)
+```
+
+------------------------------------------------------------------------
 
 ## Functions
 
 ### `create_cv()`
 
-Scaffolds a new CV project at the given path. Copies the template
-workbook, a placeholder profile image, and a ready-to-render `CV.qmd`.
+The main entry point. No arguments triggers scaffold mode. With `data`
+and `photo` triggers render mode.
 
 ``` r
 
-create_cv(path = "~/my-cv")
-create_cv(path = "~/my-cv", filename = "academic-cv.qmd", overwrite = TRUE)
+# Scaffold mode
+create_cv()
+
+# Render mode
+create_cv(
+  data        = "~/my_cv/cv-data.xlsx",
+  photo       = "~/my_cv/me.jpeg",
+  output_file = "erwin-lares-cv.pdf"
+)
 ```
 
 ### `read_cv_data()`
 
-Reads all sheets from the workbook into a named list. Section sheets
-become data frames; the `profile` sheet becomes a named character
-vector. Dated sheets are sorted in descending order automatically so the
-most recent entries appear first.
+Reads all sheets from the workbook into a named list. The `profile`
+sheet becomes a named character vector; section sheets become data
+frames; the `sections` sheet is returned in row order.
 
 ``` r
 
-cv <- read_cv_data("data/cv-data-template.xlsx")
+cv <- read_cv_data("cv-data-template.xlsx")
 
 cv$experience           # a data frame
+cv$sections             # the sections control sheet
 cv$profile[["email"]]  # a scalar string
 ```
 
 ### `cv_render_section()`
 
-The main rendering function. Iterates over a CV data frame and writes
-each row as a formatted Typst entry. Called inside `CV.qmd` — you will
-not normally call this directly.
+Iterates over a CV data frame and writes each row as a formatted Typst
+entry. Called inside `CV.qmd` — you will not normally call this
+directly.
 
-``` r
+### `typst_escape()`
 
-#| results: asis
-cv_render_section(
-  cv$experience,
-  title_col  = "title",
-  org_col    = "unit",
-  detail_col = "detail"
-)
-```
+Escapes Typst-sensitive characters in a string. Useful when building
+custom Quarto templates.
+
+### `cv_section()`
+
+Returns a raw Typst string for a section heading. Useful when building
+custom Quarto templates.
+
+### `resolve_date_fun()`
+
+Maps a `date_fun` token string to an R date formatting function. Useful
+when building custom rendering logic outside the standard template.
+
+------------------------------------------------------------------------
 
 ## Workbook schema
 
@@ -131,9 +237,8 @@ Every section sheet shares a common column spine:
 
     title | unit | startMonth | startYear | endMonth | endYear | where | detail
 
-`title` is always the primary entry label. `unit` is the secondary line:
-employer, institution, publisher, or venue. Leave cells blank rather
-than typing `NA`.
+`title` is always the primary entry label. `unit` is the secondary line.
+Leave cells blank rather than typing `NA`.
 
 ### Date conventions
 
@@ -144,50 +249,38 @@ than typing `NA`.
 | Single-year event | *(blank)*  | 2021      | *(blank)* | *(blank)* |
 | No date           | *(blank)*  | *(blank)* | *(blank)* | *(blank)* |
 
+------------------------------------------------------------------------
+
 ## Roadmap
 
-The `CV.qmd` template includes YAML params for future variant support:
+Planned for v0.3.0: CV variant support (short resume, year filtering),
+HTML output, integration tests, and `inst/CITATION`.
 
-``` yaml
-params:
-  resume: false
-  years: 5
-  npresentations: 10
-```
-
-Planned for v0.2.0: filtering logic for short resume variants, rolling
-year windows, and section-level inclusion flags in the workbook.
+------------------------------------------------------------------------
 
 ## Related packages
 
 curriculr is one of three sibling packages:
 
-- [toolero](https://github.com/erwinlares/toolero) — a toolkit for
-  research workflows: project initialization, Quarto templates, data
-  reading, and execution context detection.
-- [containr](https://github.com/erwinlares/containr) — tools for
-  containerizing R projects with Docker and HTCondor.
-- **curriculr** — data-driven CV generation with Quarto and Typst.
+- [toolero](https://github.com/erwinlares/toolero) — research workflow
+  toolkit
+- [containr](https://github.com/erwinlares/containr) — Docker
+  containerization
+- **curriculr** — data-driven CV generation with Quarto and Typst
 
-## Known limitations
-
-- Font rendering may differ across operating systems if Lato is not
-  installed locally.
-- Page breaks may need manual tuning for longer CVs.
-- The Typst color palette and font sizes are not yet user-configurable
-  without editing `CV.qmd` directly.
+------------------------------------------------------------------------
 
 ## Acknowledgements
 
 curriculr was inspired by two prior projects:
 
 - [vitae](https://pkg.mitchelloharawild.com/vitae/) by Mitchell
-  O’Hara-Wild, Rob Hyndman, and contributors — an R package for
-  producing CV documents from R Markdown templates.
+  O’Hara-Wild, Rob Hyndman, and contributors
 - [Awesome CV](https://github.com/posquit0/Awesome-CV) by Byungjin Park
-  (posquit0) — the LaTeX CV template that shaped the visual design
-  curriculr attempts to preserve in Typst.
+  (posquit0)
+
+------------------------------------------------------------------------
 
 ## License
 
-MIT © Erwin Lares
+MIT (c) Erwin Lares

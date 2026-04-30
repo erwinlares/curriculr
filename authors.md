@@ -11,12 +11,12 @@ Source:
 [`DESCRIPTION`](https://github.com/erwinlares/curriculr/blob/main/DESCRIPTION)
 
 Lares E (2026). *curriculr: Data-Driven CVs with Quarto and Typst*. R
-package version 0.1.0, <https://github.com/erwinlares/curriculr>.
+package version 0.2.0, <https://github.com/erwinlares/curriculr>.
 
     @Manual{,
       title = {curriculr: Data-Driven CVs with Quarto and Typst},
       author = {Erwin Lares},
       year = {2026},
-      note = {R package version 0.1.0},
+      note = {R package version 0.2.0},
       url = {https://github.com/erwinlares/curriculr},
     }

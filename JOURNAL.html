@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">curriculr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -16,6 +16,10 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="articles/curriculr-why.html">Why curriculr: The Case for a Data-Driven CV</a></li>
+  </ul></li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json"></form></li>
@@ -51,7 +55,7 @@
 <p>The R helper scripts provided:</p>
 <ul><li>
 <code><a href="reference/read_cv_data.html">read_cv_data()</a></code> — read all sheets into a named list of data frames</li>
-<li>A family of Typst-building functions: <code>typst_escape()</code>, <code>cv_value()</code>, <code>cv_date_range()</code>, <code>cv_year_range()</code>, <code>cv_section()</code>, <code>cv_entry()</code>, <code>emit_entries()</code>, and <code>emit_simple_entries()</code>
+<li>A family of Typst-building functions: <code><a href="reference/typst_escape.html">typst_escape()</a></code>, <code>cv_value()</code>, <code>cv_date_range()</code>, <code>cv_year_range()</code>, <code><a href="reference/cv_section.html">cv_section()</a></code>, <code>cv_entry()</code>, <code>emit_entries()</code>, and <code>emit_simple_entries()</code>
 </li>
 </ul><p>The code was well-written and well-documented, but it had two problems that needed solving before it could become a package: it contained hardcoded personal information, and it had a schema inconsistency across sheets that made the rendering functions more complex than necessary.</p>
 <hr></div>
@@ -156,11 +160,11 @@
 <th>Example</th>
 </tr></thead><tbody><tr><td>Internal</td>
 <td>
-<code><a href="reference/dot-cv_value.html">.cv_value()</a></code>, <code><a href="reference/dot-typst_escape.html">.typst_escape()</a></code>, <code><a href="reference/dot-cv_date_range.html">.cv_date_range()</a></code>
+<code><a href="reference/dot-cv_value.html">.cv_value()</a></code>, <code>.typst_escape()</code>, <code><a href="reference/dot-cv_date_range.html">.cv_date_range()</a></code>
 </td>
 </tr><tr><td>Internal</td>
 <td>
-<code><a href="reference/dot-cv_year_range.html">.cv_year_range()</a></code>, <code><a href="reference/dot-cv_section.html">.cv_section()</a></code>, <code><a href="reference/dot-cv_entry.html">.cv_entry()</a></code>
+<code><a href="reference/dot-cv_year_range.html">.cv_year_range()</a></code>, <code>.cv_section()</code>, <code><a href="reference/dot-cv_entry.html">.cv_entry()</a></code>
 </td>
 </tr><tr><td>Internal</td>
 <td><code><a href="reference/dot-build_section_blocks.html">.build_section_blocks()</a></code></td>
@@ -234,7 +238,7 @@ R/create-cv.R            — create_cv()</code></pre>
 <li>Helper scripts loaded via <code><a href="https://rdrr.io/r/base/source.html" class="external-link">source()</a></code> rather than via a package</li>
 <li>Column names from the old schema (<code>degree</code>, <code>accomplishment</code>, <code>area</code>)</li>
 </ol><p>The generalized template addresses all three.</p>
-<p><strong>Personal information</strong> now comes from <code>cv$profile</code>. The raw Typst header block was converted into an R chunk with <code>results: asis</code>. The chunk reads each profile field from the named character vector returned by <code><a href="reference/read_cv_data.html">read_cv_data()</a></code>, escapes every value with <code><a href="reference/dot-typst_escape.html">.typst_escape()</a></code>, assembles the contact line dynamically — omitting blank fields automatically — and writes the Typst block via <code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf()</a></code>. No personal data appears anywhere in the template file itself.</p>
+<p><strong>Personal information</strong> now comes from <code>cv$profile</code>. The raw Typst header block was converted into an R chunk with <code>results: asis</code>. The chunk reads each profile field from the named character vector returned by <code><a href="reference/read_cv_data.html">read_cv_data()</a></code>, escapes every value with <code>.typst_escape()</code>, assembles the contact line dynamically — omitting blank fields automatically — and writes the Typst block via <code><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf()</a></code>. No personal data appears anywhere in the template file itself.</p>
 <p><strong>Helper scripts</strong> are gone. The template now loads curriculr with <code><a href="https://github.com/erwinlares/curriculr" class="external-link">library(curriculr)</a></code> and calls <code><a href="reference/read_cv_data.html">read_cv_data()</a></code> directly. The two <code><a href="https://rdrr.io/r/base/source.html" class="external-link">source()</a></code> calls from the original are replaced by one <code><a href="https://rdrr.io/r/base/library.html" class="external-link">library()</a></code> call.</p>
 <p><strong>Column names</strong> are updated throughout to reflect the normalized schema: <code>title</code> everywhere, <code>institution</code> for the education organization line. <code>emit_entries()</code> and <code>emit_simple_entries()</code> are replaced by <code><a href="reference/cv_render_section.html">cv_render_section()</a></code> in every section block.</p>
 <p>The document style settings block — font, size, color palette — remains as a raw <code>{=typst}</code> block. These are rendering concerns, not data concerns, and belong in the template rather than in the workbook.</p>
@@ -279,7 +283,7 @@ template (Park, 2015, &lt;https://github.com/posquit0/Awesome-CV&gt;).</code></p
 <h3 id="readmemd-finalized">
 <code>README.md</code> finalized<a class="anchor" aria-label="anchor" href="#readmemd-finalized"></a></h3>
 <p>The README was restructured to match toolero’s pattern: hex sticker logo aligned right, badges, one-paragraph pitch, installation, requirements, getting started (three numbered steps), functions, workbook schema, date conventions, roadmap, related packages, known limitations, and license.</p>
-<p>Key change from the first draft: the <code><a href="reference/cv_render_section.html">cv_render_section()</a></code> example no longer shows internal functions (<code><a href="reference/dot-cv_section.html">.cv_section()</a></code>, <code><a href="reference/dot-cv_date_range.html">.cv_date_range()</a></code>) directly. Users interact with <code>CV.qmd</code> rather than calling these functions themselves, so the README example shows only what a user would actually write.</p>
+<p>Key change from the first draft: the <code><a href="reference/cv_render_section.html">cv_render_section()</a></code> example no longer shows internal functions (<code>.cv_section()</code>, <code><a href="reference/dot-cv_date_range.html">.cv_date_range()</a></code>) directly. Users interact with <code>CV.qmd</code> rather than calling these functions themselves, so the README example shows only what a user would actually write.</p>
 <p>The CRAN installation block was omitted — the package is not yet on CRAN and a non-working install command is worse than no command at all.</p>
 <p>An acknowledgements section was added crediting vitae and Awesome CV, and the <code>DESCRIPTION</code> field was updated to include formal citations for both.</p>
 <hr></div>
@@ -363,6 +367,97 @@ template (Park, 2015, &lt;https://github.com/posquit0/Awesome-CV&gt;).</code></p
 <ul><li>The tests we wrote this session are unit tests — they test individual functions in isolation. .build_section_blocks() takes a data frame and returns a character vector. .typst_escape() takes a string and returns a string. These are pure, self-contained, and easy to verify. create_cv() is different. It doesn’t return a value you can inspect — it creates files and folders on disk.</li>
 </ul></li>
 <li>Testing it properly means: Creating a temporary directory Calling create_cv() on it Checking that the expected files and folders actually exist Checking that the workbook was copied correctly Checking that the placeholder image is in the right place Checking that CV.qmd was created with the right name Cleaning up afterward</li>
+</ul></div>
+</div>
+<div class="section level2">
+<h2 id="session-3--2026-04-30">Session 3 – 2026-04-30<a class="anchor" aria-label="anchor" href="#session-3--2026-04-30"></a></h2>
+<div class="section level3">
+<h3 id="what-we-set-out-to-do-2">What we set out to do<a class="anchor" aria-label="anchor" href="#what-we-set-out-to-do-2"></a></h3>
+<p>Session 3 built v0.2.0 from the ground up. The core insight driving the entire session was that v0.1.0 had two fundamental design problems: the user had no control over what got rendered in their CV, and create_cv() was the wrong kind of function. We fixed both.</p>
+<hr></div>
+<div class="section level3">
+<h3 id="decision-sections-sheet-drives-rendering">Decision: sections sheet drives rendering<a class="anchor" aria-label="anchor" href="#decision-sections-sheet-drives-rendering"></a></h3>
+<p>In v0.1.0, the section structure of the CV was entirely hardcoded in CV.qmd. Eleven section blocks in a fixed order, each with column arguments hardcoded as strings. A user who wanted to remove a section, reorder sections, or add a custom section had to edit CV.qmd directly – which required knowing Quarto and Typst and meant the package was doing less than it should.</p>
+<p>The fix was to add a sections sheet to the workbook. Each row in the sheet corresponds to one CV section. The columns encode every argument that cv_render_section() needs: title_col, org_col, detail_col, date_fun, and where_col. Row order is render order. Deleting a row excludes the section. Adding a row for any sheet that follows the standard column schema renders it automatically – no R code changes required.</p>
+<p>This design means the answer to “how do I add a new section?” is “add a row to the sections sheet and create a matching workbook sheet.” Nothing else.</p>
+<hr></div>
+<div class="section level3">
+<h3 id="decision-date_fun-tokens">Decision: date_fun tokens<a class="anchor" aria-label="anchor" href="#decision-date_fun-tokens"></a></h3>
+<p>The sections sheet needed a way to encode the date_fun argument – an R function – as a spreadsheet value. The solution was a small vocabulary of string tokens:</p>
+<table class="table"><thead><tr><th>token</th>
+<th>produces</th>
+</tr></thead><tbody><tr><td>date</td>
+<td>full month/year range</td>
+</tr><tr><td>year</td>
+<td>year range only</td>
+</tr><tr><td>month_year</td>
+<td>single point in time</td>
+</tr><tr><td>year_only</td>
+<td>single year</td>
+</tr><tr><td>none</td>
+<td>no date</td>
+</tr></tbody></table><p>A new exported function, resolve_date_fun(), maps these tokens to the corresponding R functions. Unknown tokens produce a cli warning and fall back to NULL rather than crashing. This makes the system forgiving of typos while still giving clear feedback.</p>
+<hr></div>
+<div class="section level3">
+<h3 id="decision-create_cv-scaffoldrender-mode-split">Decision: create_cv() scaffold/render mode split<a class="anchor" aria-label="anchor" href="#decision-create_cv-scaffoldrender-mode-split"></a></h3>
+<p>v0.1.0’s create_cv() was a project scaffolding function – it created directories, copied files, and set up a folder structure. That’s a one-time operation and not what most users need most of the time.</p>
+<p>The right mental model for a CV tool is a render function, not a scaffold function. You run it repeatedly as you update your data. It takes your workbook and produces a PDF.</p>
+<p>The redesign gives create_cv() two modes triggered by whether data is NULL:</p>
+<p>Scaffold mode (no arguments): copies the template workbook and placeholder image to getwd() and prints instructions. Does not render. Designed for the first-run experience – a new user calls create_cv(), gets the files, edits the workbook, and then calls create_cv() again in render mode.</p>
+<p>Render mode (with data and photo): reads the workbook, validates the sections sheet, writes CV.qmd by injecting resolved paths into the template, and calls quarto::quarto_render() to produce the PDF. Both CV.qmd and CV.pdf land next to the workbook.</p>
+<hr></div>
+<div class="section level3">
+<h3 id="the-sentinel-substitution-pattern">The sentinel substitution pattern<a class="anchor" aria-label="anchor" href="#the-sentinel-substitution-pattern"></a></h3>
+<p>CV.qmd cannot have hardcoded paths because the workbook and photo live in different places on different users’ machines. The solution was to put two placeholder strings in the template:</p>
+<p><strong>CURRICULR_DATA_PATH</strong> <strong>CURRICULR_PHOTO_PATH</strong></p>
+<p>When create_cv() writes CV.qmd it calls gsub() to replace these sentinels with the actual resolved paths. The photo path is computed relative to the output directory using fs::path_rel() so that Quarto can find it when rendering from that location.</p>
+<hr></div>
+<div class="section level3">
+<h3 id="exported-functions-typst_escape-cv_section-resolve_date_fun">Exported functions: typst_escape(), cv_section(), resolve_date_fun()<a class="anchor" aria-label="anchor" href="#exported-functions-typst_escape-cv_section-resolve_date_fun"></a></h3>
+<p>v0.1.0 kept all layout functions internal with the dot prefix. That worked for CV.qmd when it sourced R scripts directly, but when Quarto renders CV.qmd it starts a fresh R session that can only see exported functions. Calling .typst_escape() in a fresh session fails with “could not find function”.</p>
+<p>The fix was to export the three functions called directly in CV.qmd: typst_escape(), cv_section(), and resolve_date_fun(). These are also genuinely useful to anyone building a custom Quarto template, so exporting them is honest rather than just a workaround.</p>
+<p>.cv_entry() stays internal – it is only ever called by .build_section_blocks() inside the package.</p>
+<hr></div>
+<div class="section level3">
+<h3 id="bug-unexpected-img-folder-creation">Bug: unexpected img/ folder creation<a class="anchor" aria-label="anchor" href="#bug-unexpected-img-folder-creation"></a></h3>
+<p>The first version of render mode copied the photo into an img/ subfolder of the output directory. This was wrong – the photo stays where the user put it. The fix was to remove the copy entirely and instead compute the photo path relative to the output directory using fs::path_rel(). The file is not moved or copied; only the path written into CV.qmd changes.</p>
+<hr></div>
+<div class="section level3">
+<h3 id="bug-fresh-r-session-cannot-find-curriculr">Bug: fresh R session cannot find curriculr<a class="anchor" aria-label="anchor" href="#bug-fresh-r-session-cannot-find-curriculr"></a></h3>
+<p>When Quarto renders CV.qmd it starts a fresh R session. That session calls library(curriculr) and fails if the package is only loaded via devtools::load_all() rather than properly installed. The fix for local development is devtools::install() before testing. The fix for end users is that they install the package properly via pak or install.packages().</p>
+<p>The check run during R CMD check passes because the check environment installs the package before running examples.</p>
+<hr></div>
+<div class="section level3">
+<h3 id="r-cmd-check-issues-resolved-1">R CMD check issues resolved<a class="anchor" aria-label="anchor" href="#r-cmd-check-issues-resolved-1"></a></h3>
+<p>Non-ASCII em dash in cli messages. The em dash character used in two “Skipping – already exists” messages was flagged as non-ASCII by R CMD check. Replaced with 014 Unicode escape.</p>
+<p>CV.qmd and img/ in check directory. The check run of create_cv() leaves CV.qmd, CV.pdf, and img/ in the check directory. Added CV.qmd, CV.pdf, and img/ to .gitignore. The note is cosmetic and does not affect CRAN submission.</p>
+<hr></div>
+<div class="section level3">
+<h3 id="files-changed-in-v020">Files changed in v0.2.0<a class="anchor" aria-label="anchor" href="#files-changed-in-v020"></a></h3>
+<pre><code>R/typst-helpers.R       -- typst_escape() and resolve_date_fun() exported
+R/typst-layout.R        -- cv_section() exported
+R/read-cv-data.R        -- sections validation, readme skip, sections no-sort
+R/create-cv.R           -- full rewrite: scaffold/render mode split
+inst/templates/CV.qmd   -- sections loop replaces hardcoded blocks, sentinels</code></pre>
+<hr></div>
+<div class="section level3">
+<h3 id="package-structure-at-end-of-session-3">Package structure at end of Session 3<a class="anchor" aria-label="anchor" href="#package-structure-at-end-of-session-3"></a></h3>
+<p>Same as Session 2 with these additions:</p>
+<ul><li>sections sheet in both workbooks</li>
+<li>readme sheet updated to document sections schema</li>
+<li>.gitignore updated to exclude CV.qmd, CV.pdf, img/</li>
+<li>Version bumped to 0.2.0</li>
+</ul><hr></div>
+<div class="section level3">
+<h3 id="what-remains-for-v030">What remains for v0.3.0<a class="anchor" aria-label="anchor" href="#what-remains-for-v030"></a></h3>
+<ul><li>Integration tests for create_cv()</li>
+<li>inst/CITATION</li>
+<li>Frank Palmer workbook updated with sections sheet</li>
+<li>CV variant support (resume: true, years, npresentations)</li>
+<li>HTML output</li>
+<li>Theming support</li>
+<li>sections include column</li>
+<li>add support for awesomefont icons</li>
 </ul></div>
 </div>
 

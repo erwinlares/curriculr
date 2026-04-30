@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">curriculr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,12 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="articles/curriculr-why.html">Why curriculr: The Case for a Data-Driven CV</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -55,7 +61,7 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version from GitHub:</p>
+<p>Install the development version from GitHub:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"erwinlares/curriculr"</span><span class="op">)</span></span></code></pre></div>
@@ -68,29 +74,30 @@
 <li>
 <a href="https://quarto.org" class="external-link">Quarto</a> 1.4 or later (ships with Typst support built in)</li>
 </ul>
+<hr>
 </div>
 <div class="section level2">
-<h2 id="getting-started">Getting started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
+<h2 id="for-new-users">For new users<a class="anchor" aria-label="anchor" href="#for-new-users"></a>
 </h2>
 <div class="section level3">
-<h3 id="id_1-scaffold-a-new-cv-project">1. Scaffold a new CV project<a class="anchor" aria-label="anchor" href="#id_1-scaffold-a-new-cv-project"></a>
+<h3 id="step-1--scaffold-your-project">Step 1 — scaffold your project<a class="anchor" aria-label="anchor" href="#step-1--scaffold-your-project"></a>
 </h3>
+<p>Call <code><a href="reference/create_cv.html">create_cv()</a></code> with no arguments. This copies the template workbook and a placeholder profile image into your current working directory:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/erwinlares/curriculr" class="external-link">curriculr</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">"~/my-cv"</span><span class="op">)</span></span></code></pre></div>
-<p>This creates the following structure:</p>
-<pre class="text"><code>my-cv/
-├── CV.qmd
-├── data/
-│   └── cv-data-template.xlsx
-└── img/
-    └── placeholder.png</code></pre>
+<span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>You will see:</p>
+<pre><code>v Created cv-data-template.xlsx
+v Created placeholder.png
+i Next steps:
+1. Open cv-data-template.xlsx and fill in the profile sheet.
+2. Replace placeholder.png with your own profile photo.
+3. Call create_cv(data = 'cv-data-template.xlsx', photo = 'your-photo.png')</code></pre>
 </div>
 <div class="section level3">
-<h3 id="id_2-fill-in-the-workbook">2. Fill in the workbook<a class="anchor" aria-label="anchor" href="#id_2-fill-in-the-workbook"></a>
+<h3 id="step-2--fill-in-the-workbook">Step 2 — fill in the workbook<a class="anchor" aria-label="anchor" href="#step-2--fill-in-the-workbook"></a>
 </h3>
-<p>Open <code>data/cv-data-template.xlsx</code>. Start with the <code>profile</code> sheet — it controls the CV header:</p>
+<p>Open <code>cv-data-template.xlsx</code>. Start with the <code>profile</code> sheet:</p>
 <table class="table">
 <thead><tr>
 <th>field</th>
@@ -133,20 +140,145 @@
 <td>profile_statement</td>
 <td>One or two sentence professional summary</td>
 </tr>
+</tbody>
+</table>
+<p>Then fill in the remaining sheets with your CV content. The <code>readme</code> sheet inside the workbook explains the column schema and date entry conventions in detail.</p>
+</div>
+<div class="section level3">
+<h3 id="step-3--render">Step 3 — render<a class="anchor" aria-label="anchor" href="#step-3--render"></a>
+</h3>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span></span>
+<span>  data  <span class="op">=</span> <span class="st">"cv-data-template.xlsx"</span>,</span>
+<span>  photo <span class="op">=</span> <span class="st">"your-photo.png"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>This writes <code>CV.qmd</code> and <code>CV.pdf</code> next to your workbook. Open <code>CV.pdf</code> to review the output. To update your CV, edit the workbook and call <code><a href="reference/create_cv.html">create_cv()</a></code> again with <code>overwrite = TRUE</code>.</p>
+<hr>
+</div>
+</div>
+<div class="section level2">
+<h2 id="for-existing-users-updating-from-v010">For existing users updating from v0.1.0<a class="anchor" aria-label="anchor" href="#for-existing-users-updating-from-v010"></a>
+</h2>
+<p>v0.2.0 changes how <code><a href="reference/create_cv.html">create_cv()</a></code> works and adds a <code>sections</code> sheet to the workbook schema. Here is what you need to know.</p>
+<p><strong><code><a href="reference/create_cv.html">create_cv()</a></code> now has two modes:</strong></p>
+<ul>
+<li>
+<strong>Scaffold mode</strong> (no arguments) — copies template files to your current directory. Use this once to get started or to reset.</li>
+<li>
+<strong>Render mode</strong> (with arguments) — reads your workbook and renders the PDF. Use this every time you update your CV.</li>
+</ul>
+<p><strong>Your workbook needs a <code>sections</code> sheet.</strong> This sheet controls which sections appear in the rendered PDF and in what order. Add it manually or copy it from the updated template workbook. The schema is:</p>
+<table style="width:100%;" class="table">
+<colgroup>
+<col width="14%">
+<col width="14%">
+<col width="14%">
+<col width="14%">
+<col width="14%">
+<col width="14%">
+<col width="14%">
+</colgroup>
+<thead><tr>
+<th>section</th>
+<th>label</th>
+<th>title_col</th>
+<th>org_col</th>
+<th>detail_col</th>
+<th>date_fun</th>
+<th>where_col</th>
+</tr></thead>
+<tbody>
 <tr>
-<td>photo</td>
-<td>img/your-photo.png</td>
+<td>education</td>
+<td>Education</td>
+<td>title</td>
+<td>institution</td>
+<td>detail</td>
+<td>year</td>
+<td>where</td>
+</tr>
+<tr>
+<td>experience</td>
+<td>Experience</td>
+<td>title</td>
+<td>unit</td>
+<td>detail</td>
+<td>date</td>
+<td>where</td>
 </tr>
 </tbody>
 </table>
-<p>Then fill in the remaining sheets with your CV content. Each sheet corresponds to one section: <code>education</code>, <code>experience</code>, <code>projects</code>, <code>publications</code>, <code>presentations</code>, <code>invited_teaching</code>, <code>grants_and_awards</code>, <code>certifications</code>, <code>admin_services</code>, <code>skills</code>, and <code>affiliations</code>.</p>
-<p>The <code>readme</code> sheet inside the workbook explains the column schema and date entry conventions in detail.</p>
+<p>Row order is render order. Delete a row to exclude a section. Add a row for any sheet that follows the standard column schema and it will render automatically without any R code changes.</p>
+<p>The <code>date_fun</code> column accepts five tokens:</p>
+<table class="table">
+<thead><tr>
+<th>token</th>
+<th>produces</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>date</code></td>
+<td>Jan 2018 - Dec 2022</td>
+</tr>
+<tr>
+<td><code>year</code></td>
+<td>2018 - 2022</td>
+</tr>
+<tr>
+<td><code>month_year</code></td>
+<td>Jan 2018</td>
+</tr>
+<tr>
+<td><code>year_only</code></td>
+<td>2021</td>
+</tr>
+<tr>
+<td><code>none</code></td>
+<td><em>(no date)</em></td>
+</tr>
+</tbody>
+</table>
+<hr>
+</div>
+<div class="section level2">
+<h2 id="customizing-the-rendered-pdf">Customizing the rendered PDF<a class="anchor" aria-label="anchor" href="#customizing-the-rendered-pdf"></a>
+</h2>
+<div class="section level3">
+<h3 id="changing-section-order-or-content">Changing section order or content<a class="anchor" aria-label="anchor" href="#changing-section-order-or-content"></a>
+</h3>
+<p>Edit the <code>sections</code> sheet in your workbook. Reorder rows to reorder sections. Delete a row to remove a section. Add a row for a new section.</p>
 </div>
 <div class="section level3">
-<h3 id="id_3-render">3. Render<a class="anchor" aria-label="anchor" href="#id_3-render"></a>
+<h3 id="changing-colors-and-fonts">Changing colors and fonts<a class="anchor" aria-label="anchor" href="#changing-colors-and-fonts"></a>
 </h3>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="ex">quarto</span> render CV.qmd</span></code></pre></div>
-<p>The output is <code>CV.pdf</code>. To update your CV, edit the workbook and re-render. In most cases you will never need to touch <code>CV.qmd</code>.</p>
+<p>Open <code>CV.qmd</code> and find the <code>{=typst}</code> style block near the top:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode typst"><code class="sourceCode typst"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="kw">#set</span> <span class="va">text</span><span class="op">(</span>font<span class="op">:</span> <span class="st">"Lato"</span><span class="op">,</span> size<span class="op">:</span> <span class="fl">8.8pt</span><span class="op">,</span> fill<span class="op">:</span> rgb<span class="op">(</span><span class="st">"#3f3f3f"</span><span class="op">))</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="kw">#let</span> <span class="va">accent</span>   <span class="op">=</span> rgb<span class="op">(</span><span class="st">"#c5050c"</span><span class="op">)</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="kw">#let</span> <span class="va">dark</span>     <span class="op">=</span> rgb<span class="op">(</span><span class="st">"#303030"</span><span class="op">)</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="kw">#let</span> <span class="va">bodygray</span> <span class="op">=</span> rgb<span class="op">(</span><span class="st">"#555555"</span><span class="op">)</span></span></code></pre></div>
+<p>Change <code>accent</code> to change the section heading and date color. Change <code>font</code> to use a different typeface. Change <code>size</code> to adjust the base text size.</p>
+</div>
+<div class="section level3">
+<h3 id="changing-page-margins">Changing page margins<a class="anchor" aria-label="anchor" href="#changing-page-margins"></a>
+</h3>
+<p>In the YAML front matter of <code>CV.qmd</code>:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">format</span><span class="kw">:</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="at">  </span><span class="fu">typst</span><span class="kw">:</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="at">    </span><span class="fu">papersize</span><span class="kw">:</span><span class="at"> us-letter</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="at">    </span><span class="fu">margin</span><span class="kw">:</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="at">      </span><span class="fu">x</span><span class="kw">:</span><span class="at"> 0.62in</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="at">      </span><span class="fu">y</span><span class="kw">:</span><span class="at"> 0.58in</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="regenerating-cvqmd-after-changes">Regenerating CV.qmd after changes<a class="anchor" aria-label="anchor" href="#regenerating-cvqmd-after-changes"></a>
+</h3>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span></span>
+<span>  data      <span class="op">=</span> <span class="st">"cv-data-template.xlsx"</span>,</span>
+<span>  photo     <span class="op">=</span> <span class="st">"your-photo.png"</span>,</span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<hr>
 </div>
 </div>
 <div class="section level2">
@@ -156,35 +288,54 @@
 <h3 id="create_cv">
 <code>create_cv()</code><a class="anchor" aria-label="anchor" href="#create_cv"></a>
 </h3>
-<p>Scaffolds a new CV project at the given path. Copies the template workbook, a placeholder profile image, and a ready-to-render <code>CV.qmd</code>.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">"~/my-cv"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span>path <span class="op">=</span> <span class="st">"~/my-cv"</span>, filename <span class="op">=</span> <span class="st">"academic-cv.qmd"</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>The main entry point. No arguments triggers scaffold mode. With <code>data</code> and <code>photo</code> triggers render mode.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Scaffold mode</span></span>
+<span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Render mode</span></span>
+<span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span></span>
+<span>  data        <span class="op">=</span> <span class="st">"~/my_cv/cv-data.xlsx"</span>,</span>
+<span>  photo       <span class="op">=</span> <span class="st">"~/my_cv/me.jpeg"</span>,</span>
+<span>  output_file <span class="op">=</span> <span class="st">"erwin-lares-cv.pdf"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="read_cv_data">
 <code>read_cv_data()</code><a class="anchor" aria-label="anchor" href="#read_cv_data"></a>
 </h3>
-<p>Reads all sheets from the workbook into a named list. Section sheets become data frames; the <code>profile</code> sheet becomes a named character vector. Dated sheets are sorted in descending order automatically so the most recent entries appear first.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_cv_data.html">read_cv_data</a></span><span class="op">(</span><span class="st">"data/cv-data-template.xlsx"</span><span class="op">)</span></span>
+<p>Reads all sheets from the workbook into a named list. The <code>profile</code> sheet becomes a named character vector; section sheets become data frames; the <code>sections</code> sheet is returned in row order.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_cv_data.html">read_cv_data</a></span><span class="op">(</span><span class="st">"cv-data-template.xlsx"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">cv</span><span class="op">$</span><span class="va">experience</span>           <span class="co"># a data frame</span></span>
+<span><span class="va">cv</span><span class="op">$</span><span class="va">sections</span>             <span class="co"># the sections control sheet</span></span>
 <span><span class="va">cv</span><span class="op">$</span><span class="va">profile</span><span class="op">[[</span><span class="st">"email"</span><span class="op">]</span><span class="op">]</span>  <span class="co"># a scalar string</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="cv_render_section">
 <code>cv_render_section()</code><a class="anchor" aria-label="anchor" href="#cv_render_section"></a>
 </h3>
-<p>The main rendering function. Iterates over a CV data frame and writes each row as a formatted Typst entry. Called inside <code>CV.qmd</code> — you will not normally call this directly.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#| results: asis</span></span>
-<span><span class="fu"><a href="reference/cv_render_section.html">cv_render_section</a></span><span class="op">(</span></span>
-<span>  <span class="va">cv</span><span class="op">$</span><span class="va">experience</span>,</span>
-<span>  title_col  <span class="op">=</span> <span class="st">"title"</span>,</span>
-<span>  org_col    <span class="op">=</span> <span class="st">"unit"</span>,</span>
-<span>  detail_col <span class="op">=</span> <span class="st">"detail"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<p>Iterates over a CV data frame and writes each row as a formatted Typst entry. Called inside <code>CV.qmd</code> — you will not normally call this directly.</p>
+</div>
+<div class="section level3">
+<h3 id="typst_escape">
+<code>typst_escape()</code><a class="anchor" aria-label="anchor" href="#typst_escape"></a>
+</h3>
+<p>Escapes Typst-sensitive characters in a string. Useful when building custom Quarto templates.</p>
+</div>
+<div class="section level3">
+<h3 id="cv_section">
+<code>cv_section()</code><a class="anchor" aria-label="anchor" href="#cv_section"></a>
+</h3>
+<p>Returns a raw Typst string for a section heading. Useful when building custom Quarto templates.</p>
+</div>
+<div class="section level3">
+<h3 id="resolve_date_fun">
+<code>resolve_date_fun()</code><a class="anchor" aria-label="anchor" href="#resolve_date_fun"></a>
+</h3>
+<p>Maps a <code>date_fun</code> token string to an R date formatting function. Useful when building custom rendering logic outside the standard template.</p>
+<hr>
 </div>
 </div>
 <div class="section level2">
@@ -192,7 +343,7 @@
 </h2>
 <p>Every section sheet shares a common column spine:</p>
 <pre><code><span><span class="va">title</span> <span class="op">|</span> <span class="va">unit</span> <span class="op">|</span> <span class="va">startMonth</span> <span class="op">|</span> <span class="va">startYear</span> <span class="op">|</span> <span class="va">endMonth</span> <span class="op">|</span> <span class="va">endYear</span> <span class="op">|</span> <span class="va">where</span> <span class="op">|</span> <span class="va">detail</span></span></code></pre>
-<p><code>title</code> is always the primary entry label. <code>unit</code> is the secondary line: employer, institution, publisher, or venue. Leave cells blank rather than typing <code>NA</code>.</p>
+<p><code>title</code> is always the primary entry label. <code>unit</code> is the secondary line. Leave cells blank rather than typing <code>NA</code>.</p>
 <div class="section level3">
 <h3 id="date-conventions">Date conventions<a class="anchor" aria-label="anchor" href="#date-conventions"></a>
 </h3>
@@ -235,17 +386,14 @@
 </tr>
 </tbody>
 </table>
+<hr>
 </div>
 </div>
 <div class="section level2">
 <h2 id="roadmap">Roadmap<a class="anchor" aria-label="anchor" href="#roadmap"></a>
 </h2>
-<p>The <code>CV.qmd</code> template includes YAML params for future variant support:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">params</span><span class="kw">:</span></span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="at">  </span><span class="fu">resume</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span></span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="at">  </span><span class="fu">years</span><span class="kw">:</span><span class="at"> </span><span class="dv">5</span></span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="at">  </span><span class="fu">npresentations</span><span class="kw">:</span><span class="at"> </span><span class="dv">10</span></span></code></pre></div>
-<p>Planned for v0.2.0: filtering logic for short resume variants, rolling year windows, and section-level inclusion flags in the workbook.</p>
+<p>Planned for v0.3.0: CV variant support (short resume, year filtering), HTML output, integration tests, and <code>inst/CITATION</code>.</p>
+<hr>
 </div>
 <div class="section level2">
 <h2 id="related-packages">Related packages<a class="anchor" aria-label="anchor" href="#related-packages"></a>
@@ -253,21 +401,13 @@
 <p>curriculr is one of three sibling packages:</p>
 <ul>
 <li>
-<a href="https://github.com/erwinlares/toolero" class="external-link">toolero</a> — a toolkit for research workflows: project initialization, Quarto templates, data reading, and execution context detection.</li>
+<a href="https://github.com/erwinlares/toolero" class="external-link">toolero</a> — research workflow toolkit</li>
 <li>
-<a href="https://github.com/erwinlares/containr" class="external-link">containr</a> — tools for containerizing R projects with Docker and HTCondor.</li>
+<a href="https://github.com/erwinlares/containr" class="external-link">containr</a> — Docker containerization</li>
 <li>
-<strong>curriculr</strong> — data-driven CV generation with Quarto and Typst.</li>
+<strong>curriculr</strong> — data-driven CV generation with Quarto and Typst</li>
 </ul>
-</div>
-<div class="section level2">
-<h2 id="known-limitations">Known limitations<a class="anchor" aria-label="anchor" href="#known-limitations"></a>
-</h2>
-<ul>
-<li>Font rendering may differ across operating systems if Lato is not installed locally.</li>
-<li>Page breaks may need manual tuning for longer CVs.</li>
-<li>The Typst color palette and font sizes are not yet user-configurable without editing <code>CV.qmd</code> directly.</li>
-</ul>
+<hr>
 </div>
 <div class="section level2">
 <h2 id="acknowledgements">Acknowledgements<a class="anchor" aria-label="anchor" href="#acknowledgements"></a>
@@ -275,15 +415,16 @@
 <p>curriculr was inspired by two prior projects:</p>
 <ul>
 <li>
-<a href="https://pkg.mitchelloharawild.com/vitae/" class="external-link">vitae</a> by Mitchell O’Hara-Wild, Rob Hyndman, and contributors — an R package for producing CV documents from R Markdown templates.</li>
+<a href="https://pkg.mitchelloharawild.com/vitae/" class="external-link">vitae</a> by Mitchell O’Hara-Wild, Rob Hyndman, and contributors</li>
 <li>
-<a href="https://github.com/posquit0/Awesome-CV" class="external-link">Awesome CV</a> by Byungjin Park (posquit0) — the LaTeX CV template that shaped the visual design curriculr attempts to preserve in Typst.</li>
+<a href="https://github.com/posquit0/Awesome-CV" class="external-link">Awesome CV</a> by Byungjin Park (posquit0)</li>
 </ul>
+<hr>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
-<p>MIT © Erwin Lares</p>
+<p>MIT (c) Erwin Lares</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

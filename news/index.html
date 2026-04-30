@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">curriculr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -16,6 +16,10 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/curriculr-why.html">Why curriculr: The Case for a Data-Driven CV</a></li>
+  </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -33,6 +37,37 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.0" id="curriculr-020">curriculr 0.2.0<a class="anchor" aria-label="anchor" href="#curriculr-020"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-0-2-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-2-0"></a></h3>
+<ul><li>
+<code><a href="../reference/create_cv.html">create_cv()</a></code> has been redesigned. The old scaffolding behavior is replaced by two distinct modes triggered by whether <code>data</code> is supplied or not.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features-0-2-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-2-0"></a></h3>
+<ul><li>
+<code><a href="../reference/create_cv.html">create_cv()</a></code> <strong>scaffold mode</strong> (no arguments) copies the template workbook and placeholder image to the current working directory and prints step-by-step instructions. Does not render.</li>
+<li>
+<code><a href="../reference/create_cv.html">create_cv()</a></code> <strong>render mode</strong> (with <code>data</code> and <code>photo</code>) reads the workbook, writes <code>CV.qmd</code>, and renders <code>CV.pdf</code> into the same directory as the workbook.</li>
+<li>Added <code>sections</code> sheet support. The workbook now controls which sections are rendered and in what order. Row order is render order. Deleting a row excludes a section. Adding a row for any sheet that follows the standard column schema renders it automatically.</li>
+<li>Added <code><a href="../reference/resolve_date_fun.html">resolve_date_fun()</a></code> which maps <code>date_fun</code> token strings (<code>"date"</code>, <code>"year"</code>, <code>"month_year"</code>, <code>"year_only"</code>, <code>"none"</code>) to R date formatting functions.</li>
+<li>
+<code><a href="../reference/typst_escape.html">typst_escape()</a></code>, <code><a href="../reference/cv_section.html">cv_section()</a></code>, and <code><a href="../reference/resolve_date_fun.html">resolve_date_fun()</a></code> are now exported.</li>
+<li>
+<code>inst/templates/CV.qmd</code> simplified – section rendering is now driven by iterating over <code>cv$sections</code>. The template uses sentinel strings that <code><a href="../reference/create_cv.html">create_cv()</a></code> replaces with resolved paths at render time.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="improvements-0-2-0">Improvements<a class="anchor" aria-label="anchor" href="#improvements-0-2-0"></a></h3>
+<ul><li>
+<code><a href="../reference/read_cv_data.html">read_cv_data()</a></code> skips the <code>readme</code> sheet entirely.</li>
+<li>
+<code><a href="../reference/read_cv_data.html">read_cv_data()</a></code> validates the <code>sections</code> sheet column names on read.</li>
+<li>
+<code><a href="../reference/read_cv_data.html">read_cv_data()</a></code> returns the <code>sections</code> sheet in row order without sorting.</li>
+<li>Non-ASCII characters in cli messages replaced with Unicode escapes for CRAN portability.</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="curriculr-010">curriculr 0.1.0<a class="anchor" aria-label="anchor" href="#curriculr-010"></a></h2>
 <ul><li>Initial release.</li>
 <li>
@@ -40,9 +75,10 @@
 <li>
 <code><a href="../reference/cv_render_section.html">cv_render_section()</a></code> renders a CV section from a data frame into raw Typst output inside a Quarto document.</li>
 <li>
-<code><a href="../reference/create_cv.html">create_cv()</a></code> scaffolds a new CV project with a template workbook, placeholder image, and ready-to-render Quarto document.</li>
+<code><a href="../reference/create_cv.html">create_cv()</a></code> scaffolded a new CV project with a template workbook, placeholder image, and ready-to-render Quarto document.</li>
 </ul></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

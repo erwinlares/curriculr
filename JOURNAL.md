@@ -44,9 +44,11 @@ The R helper scripts provided:
 
 - [`read_cv_data()`](https://erwinlares.github.io/curriculr/reference/read_cv_data.md)
   — read all sheets into a named list of data frames
-- A family of Typst-building functions: `typst_escape()`, `cv_value()`,
-  `cv_date_range()`, `cv_year_range()`, `cv_section()`, `cv_entry()`,
-  `emit_entries()`, and `emit_simple_entries()`
+- A family of Typst-building functions:
+  [`typst_escape()`](https://erwinlares.github.io/curriculr/reference/typst_escape.md),
+  `cv_value()`, `cv_date_range()`, `cv_year_range()`,
+  [`cv_section()`](https://erwinlares.github.io/curriculr/reference/cv_section.md),
+  `cv_entry()`, `emit_entries()`, and `emit_simple_entries()`
 
 The code was well-written and well-documented, but it had two problems
 that needed solving before it could become a package: it contained
@@ -234,8 +236,8 @@ functions do not.
 
 | Visibility | Example |
 |----|----|
-| Internal | [`.cv_value()`](https://erwinlares.github.io/curriculr/reference/dot-cv_value.md), [`.typst_escape()`](https://erwinlares.github.io/curriculr/reference/dot-typst_escape.md), [`.cv_date_range()`](https://erwinlares.github.io/curriculr/reference/dot-cv_date_range.md) |
-| Internal | [`.cv_year_range()`](https://erwinlares.github.io/curriculr/reference/dot-cv_year_range.md), [`.cv_section()`](https://erwinlares.github.io/curriculr/reference/dot-cv_section.md), [`.cv_entry()`](https://erwinlares.github.io/curriculr/reference/dot-cv_entry.md) |
+| Internal | [`.cv_value()`](https://erwinlares.github.io/curriculr/reference/dot-cv_value.md), `.typst_escape()`, [`.cv_date_range()`](https://erwinlares.github.io/curriculr/reference/dot-cv_date_range.md) |
+| Internal | [`.cv_year_range()`](https://erwinlares.github.io/curriculr/reference/dot-cv_year_range.md), `.cv_section()`, [`.cv_entry()`](https://erwinlares.github.io/curriculr/reference/dot-cv_entry.md) |
 | Internal | [`.build_section_blocks()`](https://erwinlares.github.io/curriculr/reference/dot-build_section_blocks.md) |
 | Exported | [`cv_render_section()`](https://erwinlares.github.io/curriculr/reference/cv_render_section.md), [`read_cv_data()`](https://erwinlares.github.io/curriculr/reference/read_cv_data.md) |
 
@@ -365,12 +367,10 @@ header block was converted into an R chunk with `results: asis`. The
 chunk reads each profile field from the named character vector returned
 by
 [`read_cv_data()`](https://erwinlares.github.io/curriculr/reference/read_cv_data.md),
-escapes every value with
-[`.typst_escape()`](https://erwinlares.github.io/curriculr/reference/dot-typst_escape.md),
-assembles the contact line dynamically — omitting blank fields
-automatically — and writes the Typst block via
-[`sprintf()`](https://rdrr.io/r/base/sprintf.html). No personal data
-appears anywhere in the template file itself.
+escapes every value with `.typst_escape()`, assembles the contact line
+dynamically — omitting blank fields automatically — and writes the Typst
+block via [`sprintf()`](https://rdrr.io/r/base/sprintf.html). No
+personal data appears anywhere in the template file itself.
 
 **Helper scripts** are gone. The template now loads curriculr with
 [`library(curriculr)`](https://github.com/erwinlares/curriculr) and
@@ -491,8 +491,7 @@ conventions, roadmap, related packages, known limitations, and license.
 
 Key change from the first draft: the
 [`cv_render_section()`](https://erwinlares.github.io/curriculr/reference/cv_render_section.md)
-example no longer shows internal functions
-([`.cv_section()`](https://erwinlares.github.io/curriculr/reference/dot-cv_section.md),
+example no longer shows internal functions (`.cv_section()`,
 [`.cv_date_range()`](https://erwinlares.github.io/curriculr/reference/dot-cv_date_range.md))
 directly. Users interact with `CV.qmd` rather than calling these
 functions themselves, so the README example shows only what a user would
@@ -610,3 +609,185 @@ curriculr/
   actually exist Checking that the workbook was copied correctly
   Checking that the placeholder image is in the right place Checking
   that CV.qmd was created with the right name Cleaning up afterward
+
+## Session 3 – 2026-04-30
+
+### What we set out to do
+
+Session 3 built v0.2.0 from the ground up. The core insight driving the
+entire session was that v0.1.0 had two fundamental design problems: the
+user had no control over what got rendered in their CV, and create_cv()
+was the wrong kind of function. We fixed both.
+
+------------------------------------------------------------------------
+
+### Decision: sections sheet drives rendering
+
+In v0.1.0, the section structure of the CV was entirely hardcoded in
+CV.qmd. Eleven section blocks in a fixed order, each with column
+arguments hardcoded as strings. A user who wanted to remove a section,
+reorder sections, or add a custom section had to edit CV.qmd directly –
+which required knowing Quarto and Typst and meant the package was doing
+less than it should.
+
+The fix was to add a sections sheet to the workbook. Each row in the
+sheet corresponds to one CV section. The columns encode every argument
+that cv_render_section() needs: title_col, org_col, detail_col,
+date_fun, and where_col. Row order is render order. Deleting a row
+excludes the section. Adding a row for any sheet that follows the
+standard column schema renders it automatically – no R code changes
+required.
+
+This design means the answer to “how do I add a new section?” is “add a
+row to the sections sheet and create a matching workbook sheet.” Nothing
+else.
+
+------------------------------------------------------------------------
+
+### Decision: date_fun tokens
+
+The sections sheet needed a way to encode the date_fun argument – an R
+function – as a spreadsheet value. The solution was a small vocabulary
+of string tokens:
+
+| token      | produces              |
+|------------|-----------------------|
+| date       | full month/year range |
+| year       | year range only       |
+| month_year | single point in time  |
+| year_only  | single year           |
+| none       | no date               |
+
+A new exported function, resolve_date_fun(), maps these tokens to the
+corresponding R functions. Unknown tokens produce a cli warning and fall
+back to NULL rather than crashing. This makes the system forgiving of
+typos while still giving clear feedback.
+
+------------------------------------------------------------------------
+
+### Decision: create_cv() scaffold/render mode split
+
+v0.1.0’s create_cv() was a project scaffolding function – it created
+directories, copied files, and set up a folder structure. That’s a
+one-time operation and not what most users need most of the time.
+
+The right mental model for a CV tool is a render function, not a
+scaffold function. You run it repeatedly as you update your data. It
+takes your workbook and produces a PDF.
+
+The redesign gives create_cv() two modes triggered by whether data is
+NULL:
+
+Scaffold mode (no arguments): copies the template workbook and
+placeholder image to getwd() and prints instructions. Does not render.
+Designed for the first-run experience – a new user calls create_cv(),
+gets the files, edits the workbook, and then calls create_cv() again in
+render mode.
+
+Render mode (with data and photo): reads the workbook, validates the
+sections sheet, writes CV.qmd by injecting resolved paths into the
+template, and calls quarto::quarto_render() to produce the PDF. Both
+CV.qmd and CV.pdf land next to the workbook.
+
+------------------------------------------------------------------------
+
+### The sentinel substitution pattern
+
+CV.qmd cannot have hardcoded paths because the workbook and photo live
+in different places on different users’ machines. The solution was to
+put two placeholder strings in the template:
+
+**CURRICULR_DATA_PATH** **CURRICULR_PHOTO_PATH**
+
+When create_cv() writes CV.qmd it calls gsub() to replace these
+sentinels with the actual resolved paths. The photo path is computed
+relative to the output directory using fs::path_rel() so that Quarto can
+find it when rendering from that location.
+
+------------------------------------------------------------------------
+
+### Exported functions: typst_escape(), cv_section(), resolve_date_fun()
+
+v0.1.0 kept all layout functions internal with the dot prefix. That
+worked for CV.qmd when it sourced R scripts directly, but when Quarto
+renders CV.qmd it starts a fresh R session that can only see exported
+functions. Calling .typst_escape() in a fresh session fails with “could
+not find function”.
+
+The fix was to export the three functions called directly in CV.qmd:
+typst_escape(), cv_section(), and resolve_date_fun(). These are also
+genuinely useful to anyone building a custom Quarto template, so
+exporting them is honest rather than just a workaround.
+
+.cv_entry() stays internal – it is only ever called by
+.build_section_blocks() inside the package.
+
+------------------------------------------------------------------------
+
+### Bug: unexpected img/ folder creation
+
+The first version of render mode copied the photo into an img/ subfolder
+of the output directory. This was wrong – the photo stays where the user
+put it. The fix was to remove the copy entirely and instead compute the
+photo path relative to the output directory using fs::path_rel(). The
+file is not moved or copied; only the path written into CV.qmd changes.
+
+------------------------------------------------------------------------
+
+### Bug: fresh R session cannot find curriculr
+
+When Quarto renders CV.qmd it starts a fresh R session. That session
+calls library(curriculr) and fails if the package is only loaded via
+devtools::load_all() rather than properly installed. The fix for local
+development is devtools::install() before testing. The fix for end users
+is that they install the package properly via pak or install.packages().
+
+The check run during R CMD check passes because the check environment
+installs the package before running examples.
+
+------------------------------------------------------------------------
+
+### R CMD check issues resolved
+
+Non-ASCII em dash in cli messages. The em dash character used in two
+“Skipping – already exists” messages was flagged as non-ASCII by R CMD
+check. Replaced with 014 Unicode escape.
+
+CV.qmd and img/ in check directory. The check run of create_cv() leaves
+CV.qmd, CV.pdf, and img/ in the check directory. Added CV.qmd, CV.pdf,
+and img/ to .gitignore. The note is cosmetic and does not affect CRAN
+submission.
+
+------------------------------------------------------------------------
+
+### Files changed in v0.2.0
+
+    R/typst-helpers.R       -- typst_escape() and resolve_date_fun() exported
+    R/typst-layout.R        -- cv_section() exported
+    R/read-cv-data.R        -- sections validation, readme skip, sections no-sort
+    R/create-cv.R           -- full rewrite: scaffold/render mode split
+    inst/templates/CV.qmd   -- sections loop replaces hardcoded blocks, sentinels
+
+------------------------------------------------------------------------
+
+### Package structure at end of Session 3
+
+Same as Session 2 with these additions:
+
+- sections sheet in both workbooks
+- readme sheet updated to document sections schema
+- .gitignore updated to exclude CV.qmd, CV.pdf, img/
+- Version bumped to 0.2.0
+
+------------------------------------------------------------------------
+
+### What remains for v0.3.0
+
+- Integration tests for create_cv()
+- inst/CITATION
+- Frank Palmer workbook updated with sections sheet
+- CV variant support (resume: true, years, npresentations)
+- HTML output
+- Theming support
+- sections include column
+- add support for awesomefont icons

@@ -1,28 +1,33 @@
-# Scaffold a new curriculr CV project
+# Generate a CV document from a curriculr workbook
 
-Creates a new CV project at the given path with a standard folder
-structure, a pre-populated Excel workbook, a placeholder profile image,
-and a ready-to-render Quarto document.
+Called with no arguments, `create_cv()` runs in **scaffold mode**: it
+copies the template Excel workbook and placeholder profile image to the
+current working directory and prints instructions for the next step. No
+rendering takes place.
 
 ## Usage
 
 ``` r
-create_cv(path, filename = "CV.qmd", overwrite = FALSE)
+create_cv(data = NULL, photo = NULL, output_file = "CV.pdf", overwrite = FALSE)
 ```
 
 ## Arguments
 
-- path:
+- data:
 
-  A character string. Path to the directory where the CV project will be
-  created. The directory must already exist. Use
-  [`base::tempdir()`](https://rdrr.io/r/base/tempfile.html) for
-  temporary output during testing or exploration.
+  A character string or `NULL`. Path to the Excel workbook. Defaults to
+  `NULL`, which triggers scaffold mode.
 
-- filename:
+- photo:
 
-  A character string. Name of the generated `.qmd` file. Defaults to
-  `"CV.qmd"`.
+  A character string or `NULL`. Path to the profile image. Defaults to
+  `NULL`. In render mode, if `photo` is `NULL` the bundled placeholder
+  image is used.
+
+- output_file:
+
+  A character string. Name of the output PDF file. Defaults to
+  `"CV.pdf"`. Ignored in scaffold mode.
 
 - overwrite:
 
@@ -30,45 +35,68 @@ create_cv(path, filename = "CV.qmd", overwrite = FALSE)
 
 ## Value
 
-Invisibly returns `path`. Called primarily for its side effects.
+In scaffold mode, invisibly returns the path to the directory where
+files were copied. In render mode, invisibly returns the path to the
+rendered PDF.
 
 ## Details
 
-`create_cv()` performs the following steps:
+Called with `data` and `photo` arguments, `create_cv()` runs in **render
+mode**: it reads the workbook, generates `CV.qmd`, and renders it to PDF
+using Quarto's Typst engine. Both `CV.qmd` and `CV.pdf` are written to
+the same directory as the workbook.
 
-1.  Validates that `path` exists.
+**Scaffold mode** (no arguments):
 
-2.  Creates a `data/` folder and copies the template Excel workbook
-    (`cv-data-template.xlsx`) there.
+1.  Copies `cv-data-template.xlsx` to
+    [`getwd()`](https://rdrr.io/r/base/getwd.html).
 
-3.  Creates an `img/` folder and copies the placeholder profile image
-    (`placeholder.png`) there.
+2.  Copies `placeholder.png` to
+    [`getwd()`](https://rdrr.io/r/base/getwd.html).
 
-4.  Copies the CV Quarto template into `path/filename`.
+3.  Prints instructions for editing the workbook and rendering the CV.
 
-After scaffolding, open the Excel workbook and fill in the `profile`
-sheet with your personal information. Then render the CV with:
+**Render mode** (`data` supplied):
 
-    quarto render CV.qmd
+1.  Resolves the workbook and photo paths.
+
+2.  Reads the workbook with
+    [`read_cv_data()`](https://erwinlares.github.io/curriculr/reference/read_cv_data.md).
+
+3.  Validates that a `sections` sheet is present.
+
+4.  Computes the photo path relative to the output directory.
+
+5.  Writes `CV.qmd` by injecting resolved paths into the package
+    template.
+
+6.  Calls
+    [`quarto::quarto_render()`](https://quarto-dev.github.io/quarto-r/reference/quarto_render.html)
+    to produce the PDF.
+
+The `sections` sheet in the workbook controls which CV sections are
+rendered and in what order. Each row corresponds to one section. To
+exclude a section, delete its row. To reorder sections, reorder the
+rows.
 
 ## Examples
 
 ``` r
-# \donttest{
-# Scaffold a CV project in a temp directory
-create_cv(path = tempdir())
-#> ✔ Created /tmp/RtmpeURcK6/data/cv-data-template.xlsx
-#> ✔ Created /tmp/RtmpeURcK6/img/placeholder.png
-#> ✔ Created /tmp/RtmpeURcK6/CV.qmd
-#> ✔ CV project scaffolded at /tmp/RtmpeURcK6
-#> ℹ Next step: open /tmp/RtmpeURcK6/data/cv-data-template.xlsx and fill in the "profile" sheet.
+if (FALSE) { # \dontrun{
+# Scaffold mode — copy template files to current directory
+create_cv()
 
-# Use a custom filename
-create_cv(path = tempdir(), filename = "my-cv.qmd", overwrite = TRUE)
-#> ✔ Created /tmp/RtmpeURcK6/data/cv-data-template.xlsx
-#> ✔ Created /tmp/RtmpeURcK6/img/placeholder.png
-#> ✔ Created /tmp/RtmpeURcK6/my-cv.qmd
-#> ✔ CV project scaffolded at /tmp/RtmpeURcK6
-#> ℹ Next step: open /tmp/RtmpeURcK6/data/cv-data-template.xlsx and fill in the "profile" sheet.
-# }
+# Render mode — use your own workbook and photo
+create_cv(
+  data  = "~/my_cv/cv-data.xlsx",
+  photo = "~/my_cv/me.jpeg"
+)
+
+# Render mode — custom output filename
+create_cv(
+  data        = "~/my_cv/cv-data.xlsx",
+  photo       = "~/my_cv/me.jpeg",
+  output_file = "erwin-lares-cv.pdf"
+)
+} # }
 ```
