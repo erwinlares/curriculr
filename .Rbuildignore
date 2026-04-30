@@ -14,3 +14,4 @@
 ^docs$
 ^pkgdown$
 ^CV\.qmd$
+^codecov\.yml$
