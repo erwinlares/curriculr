@@ -3,7 +3,7 @@ pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   curriculr-why: curriculr-why.html
-last_built: 2026-04-30T20:50Z
+last_built: 2026-04-30T20:54Z
 urls:
   reference: https://erwinlares.github.io/curriculr/reference
   article: https://erwinlares.github.io/curriculr/articles
