@@ -1,4 +1,5 @@
 url: https://erwinlares.github.io/curriculr/
 template:
   bootstrap: 5
+  favicon: man/figures/favicon.ico
 
