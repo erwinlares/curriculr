@@ -31,7 +31,7 @@
 }
 
 
-# .typst_escape() -------------------------------------------------------
+# typst_escape() --------------------------------------------------------
 
 #' Escape text for safe use in Typst markup
 #'
@@ -48,8 +48,8 @@
 #'
 #' @return A character vector with Typst-sensitive characters escaped.
 #'
-#' @keywords internal
-.typst_escape <- function(x) {
+#' @export
+typst_escape <- function(x) {
     x <- as.character(x %||% "")
     x[is.na(x)] <- ""
     x <- gsub("<br\\s*/?>", " ", x, ignore.case = TRUE)
@@ -57,4 +57,49 @@
     x <- gsub("\\\\", "\\\\\\\\", x)
     x <- gsub("([#$%&~_^{}\\[\\]@])", "\\\\\\1", x, perl = TRUE)
     trimws(x)
+}
+
+
+# .resolve_date_fun() ---------------------------------------------------
+
+#' Resolve a date_fun token to a function
+#'
+#' Maps a string token from the `sections` sheet to the corresponding date
+#' formatting function used by `cv_render_section()`. This allows date
+#' formatting behaviour to be controlled from the Excel workbook rather than
+#' hardcoded in the Quarto template.
+#'
+#' @param token A character string. One of `"date"`, `"year"`,
+#'   `"month_year"`, `"year_only"`, or `"none"`.
+#'
+#' @return A function suitable for passing to the `date_fun` argument of
+#'   `cv_render_section()`, or `NULL` when `token` is `"none"`.
+#'
+#' @export
+resolve_date_fun <- function(token) {
+    token <- trimws(tolower(as.character(token %||% "none")))
+
+    switch(token,
+           date = .cv_date_range,
+
+           year = .cv_year_range,
+
+           month_year = function(row) {
+               trimws(paste(.cv_value(row, "startMonth"),
+                            .cv_value(row, "startYear")))
+           },
+
+           year_only = function(row) {
+               .cv_value(row, "startYear")
+           },
+
+           none = NULL,
+
+           {
+               cli::cli_warn(
+                   "Unknown date_fun token {.val {token}}. Defaulting to {.val none}."
+               )
+               NULL
+           }
+    )
 }

@@ -1,6 +1,6 @@
 Package: curriculr
 Title: Data-Driven CVs with Quarto and Typst
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: 
     person("Erwin", "Lares", , "erwin.lares@wisc.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-3284-828X"))
@@ -30,6 +30,8 @@ Depends: R (>= 4.2.0)
 Imports:
     cli,
     fs,
+    quarto,
+    readr,
     readxl
 Suggests:
     spelling,

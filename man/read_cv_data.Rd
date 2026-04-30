@@ -14,22 +14,26 @@ read_cv_data(path = "data/cv-data.xlsx")
 A named list with one element per sheet in the workbook. The
 \code{profile} element is a named character vector; all other elements are
 data frames. Access sections as \code{cv$education}, \code{cv$experience}, etc.
-Access profile fields as \code{cv$profile[["first_name"]]}.
+Access profile fields as \code{cv$profile[["first_name"]]}. Access the
+sections control sheet as \code{cv$sections}.
 }
 \description{
 Reads all sheets from a curriculr-formatted Excel workbook and returns them
 as a named list of data frames. Each sheet becomes one list element, named
 after the sheet. The \code{profile} sheet is returned as a named character vector
-for convenient scalar access.
+for convenient scalar access. The \code{sections} sheet is returned as a data
+frame in the order the rows appear in the workbook — row order controls
+section render order and must not be sorted.
 }
 \details{
 Sheets containing a \code{startYear} column are sorted in descending order by
-\code{startYear} so that the most recent entries appear first. Missing or
-non-numeric values in \code{startYear} are placed last.
+\code{startYear} so that the most recent entries appear first. The \code{profile} and
+\code{sections} sheets are exempt from sorting.
 
 The workbook must follow the curriculr schema. Every section sheet should
 contain a \code{title} column as the primary entry label. The \code{profile} sheet
-must contain \code{field} and \code{value} columns.
+must contain \code{field} and \code{value} columns. The \code{sections} sheet must contain
+at minimum \code{section} and \code{label} columns.
 
 This function requires the \code{readxl} package. It is listed as a dependency
 of curriculr and will be installed automatically.
@@ -41,6 +45,9 @@ cv <- read_cv_data("data/cv-data.xlsx")
 # Access a section
 cv$education
 cv$experience
+
+# Access the sections control sheet
+cv$sections
 
 # Access profile fields
 cv$profile[["first_name"]]

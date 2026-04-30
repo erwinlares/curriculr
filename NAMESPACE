@@ -2,4 +2,7 @@
 
 export(create_cv)
 export(cv_render_section)
+export(cv_section)
 export(read_cv_data)
+export(resolve_date_fun)
+export(typst_escape)

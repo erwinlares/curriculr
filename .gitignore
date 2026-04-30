@@ -12,3 +12,6 @@ renv/library/
 renv/staging/
 inst/extdata/erwinlares-cv-data.xlsx
 docs
+CV.qmd
+CV.pdf
+img/

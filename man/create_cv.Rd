@@ -2,52 +2,78 @@
 % Please edit documentation in R/create-cv.R
 \name{create_cv}
 \alias{create_cv}
-\title{Scaffold a new curriculr CV project}
+\title{Generate a CV document from a curriculr workbook}
 \usage{
-create_cv(path, filename = "CV.qmd", overwrite = FALSE)
+create_cv(data = NULL, photo = NULL, output_file = "CV.pdf", overwrite = FALSE)
 }
 \arguments{
-\item{path}{A character string. Path to the directory where the CV project
-will be created. The directory must already exist. Use \code{\link[base:tempfile]{base::tempdir()}}
-for temporary output during testing or exploration.}
+\item{data}{A character string or \code{NULL}. Path to the Excel workbook.
+Defaults to \code{NULL}, which triggers scaffold mode.}
 
-\item{filename}{A character string. Name of the generated \code{.qmd} file.
-Defaults to \code{"CV.qmd"}.}
+\item{photo}{A character string or \code{NULL}. Path to the profile image.
+Defaults to \code{NULL}. In render mode, if \code{photo} is \code{NULL} the bundled
+placeholder image is used.}
+
+\item{output_file}{A character string. Name of the output PDF file.
+Defaults to \code{"CV.pdf"}. Ignored in scaffold mode.}
 
 \item{overwrite}{A logical. Whether to overwrite existing files. Defaults
 to \code{FALSE}.}
 }
 \value{
-Invisibly returns \code{path}. Called primarily for its side effects.
+In scaffold mode, invisibly returns the path to the directory
+where files were copied. In render mode, invisibly returns the path to
+the rendered PDF.
 }
 \description{
-Creates a new CV project at the given path with a standard folder
-structure, a pre-populated Excel workbook, a placeholder profile image,
-and a ready-to-render Quarto document.
+Called with no arguments, \code{create_cv()} runs in \strong{scaffold mode}: it
+copies the template Excel workbook and placeholder profile image to the
+current working directory and prints instructions for the next step. No
+rendering takes place.
 }
 \details{
-\code{create_cv()} performs the following steps:
+Called with \code{data} and \code{photo} arguments, \code{create_cv()} runs in \strong{render
+mode}: it reads the workbook, generates \code{CV.qmd}, and renders it to PDF
+using Quarto's Typst engine. Both \code{CV.qmd} and \code{CV.pdf} are written to
+the same directory as the workbook.
+
+\strong{Scaffold mode} (no arguments):
 \enumerate{
-\item Validates that \code{path} exists.
-\item Creates a \verb{data/} folder and copies the template Excel workbook
-(\code{cv-data-template.xlsx}) there.
-\item Creates an \verb{img/} folder and copies the placeholder profile image
-(\code{placeholder.png}) there.
-\item Copies the CV Quarto template into \code{path/filename}.
+\item Copies \code{cv-data-template.xlsx} to \code{getwd()}.
+\item Copies \code{placeholder.png} to \code{getwd()}.
+\item Prints instructions for editing the workbook and rendering the CV.
 }
 
-After scaffolding, open the Excel workbook and fill in the \code{profile} sheet
-with your personal information. Then render the CV with:
+\strong{Render mode} (\code{data} supplied):
+\enumerate{
+\item Resolves the workbook and photo paths.
+\item Reads the workbook with \code{\link[=read_cv_data]{read_cv_data()}}.
+\item Validates that a \code{sections} sheet is present.
+\item Computes the photo path relative to the output directory.
+\item Writes \code{CV.qmd} by injecting resolved paths into the package template.
+\item Calls \code{quarto::quarto_render()} to produce the PDF.
+}
 
-\if{html}{\out{<div class="sourceCode bash">}}\preformatted{quarto render CV.qmd
-}\if{html}{\out{</div>}}
+The \code{sections} sheet in the workbook controls which CV sections are
+rendered and in what order. Each row corresponds to one section. To
+exclude a section, delete its row. To reorder sections, reorder the rows.
 }
 \examples{
-\donttest{
-# Scaffold a CV project in a temp directory
-create_cv(path = tempdir())
+\dontrun{
+# Scaffold mode — copy template files to current directory
+create_cv()
 
-# Use a custom filename
-create_cv(path = tempdir(), filename = "my-cv.qmd", overwrite = TRUE)
+# Render mode — use your own workbook and photo
+create_cv(
+  data  = "~/my_cv/cv-data.xlsx",
+  photo = "~/my_cv/me.jpeg"
+)
+
+# Render mode — custom output filename
+create_cv(
+  data        = "~/my_cv/cv-data.xlsx",
+  photo       = "~/my_cv/me.jpeg",
+  output_file = "erwin-lares-cv.pdf"
+)
 }
 }

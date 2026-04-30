@@ -41,40 +41,40 @@ test_that(".cv_value() coerces numeric values to character", {
     expect_equal(.cv_value(row, "startYear"), "2020")
 })
 
-# .typst_escape() ---------------------------------------------------------
+# typst_escape() ---------------------------------------------------------
 
-test_that(".typst_escape() escapes Typst special characters", {
-    expect_equal(.typst_escape("#"),  "\\#")
-    expect_equal(.typst_escape("$"),  "\\$")
-    expect_equal(.typst_escape("@"),  "\\@")
-    expect_equal(.typst_escape("_"),  "\\_")
-    expect_equal(.typst_escape("&"),  "\\&")
+test_that("typst_escape() escapes Typst special characters", {
+    expect_equal(typst_escape("#"),  "\\#")
+    expect_equal(typst_escape("$"),  "\\$")
+    expect_equal(typst_escape("@"),  "\\@")
+    expect_equal(typst_escape("_"),  "\\_")
+    expect_equal(typst_escape("&"),  "\\&")
 })
 
-test_that(".typst_escape() escapes email addresses", {
-    result <- .typst_escape("erwin.lares@wisc.edu")
+test_that("typst_escape() escapes email addresses", {
+    result <- typst_escape("erwin.lares@wisc.edu")
     expect_true(grepl("\\\\@", result))
     expect_false(grepl("[^\\]@", result))
 })
 
-test_that(".typst_escape() handles NULL and NA gracefully", {
-    expect_equal(.typst_escape(NULL), "")
-    expect_equal(.typst_escape(NA),   "")
+test_that("typst_escape() handles NULL and NA gracefully", {
+    expect_equal(typst_escape(NULL), "")
+    expect_equal(typst_escape(NA),   "")
 })
 
-test_that(".typst_escape() strips HTML line break tags", {
-    expect_equal(.typst_escape("line one<br>line two"), "line one line two")
-    expect_equal(.typst_escape("line one<br/>line two"), "line one line two")
+test_that("typst_escape() strips HTML line break tags", {
+    expect_equal(typst_escape("line one<br>line two"), "line one line two")
+    expect_equal(typst_escape("line one<br/>line two"), "line one line two")
 })
 
-test_that(".typst_escape() collapses repeated whitespace", {
-    expect_equal(.typst_escape("too   many   spaces"), "too many spaces")
+test_that("typst_escape() collapses repeated whitespace", {
+    expect_equal(typst_escape("too   many   spaces"), "too many spaces")
 })
 
-test_that(".typst_escape() trims leading and trailing whitespace", {
-    expect_equal(.typst_escape("  padded  "), "padded")
+test_that("typst_escape() trims leading and trailing whitespace", {
+    expect_equal(typst_escape("  padded  "), "padded")
 })
 
-test_that(".typst_escape() passes plain text through unchanged", {
-    expect_equal(.typst_escape("plain text"), "plain text")
+test_that("typst_escape() passes plain text through unchanged", {
+    expect_equal(typst_escape("plain text"), "plain text")
 })

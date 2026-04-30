@@ -1,0 +1,190 @@
+---
+title: "Why curriculr: The Case for a Data-Driven CV"
+author: "Erwin Lares"
+date: "Created 2026-04-30 | Last updated `r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Why curriculr: The Case for a Data-Driven CV}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## The problem with maintaining a CV
+
+Most people maintain their CV the same way: open a Word document or a PDF,
+find the right section, type a new line, fix the formatting that broke, adjust
+the spacing, export, and hope it looks right. Then do it again six months later
+when they need a different version for a different audience.
+
+This approach has a name in software development: it is called manual data
+entry into a presentation layer, and it is exactly the kind of work that
+software exists to eliminate.
+
+The fundamental problem is that a CV mixes two things that should be kept
+separate: *content* (what you have done, where you have been, what you have
+published) and *presentation* (fonts, margins, section order, color). When
+these are bundled together in a single Word document, changing one risks
+breaking the other. Updating your job title can knock a section onto the
+wrong page. Changing the font size to fit more content can cascade through
+the entire document.
+
+curriculr separates them.
+
+---
+
+## The curriculr model
+
+In curriculr, content lives in an Excel workbook. Each sheet corresponds to
+one section of the CV. When you get a new publication, you add a row to the
+`publications` sheet. When you give a talk, you add a row to `presentations`.
+You never touch the layout.
+
+Presentation lives in `CV.qmd` -- a Quarto document that reads the workbook
+and renders a PDF using Typst. The document handles fonts, margins, colors,
+section headings, date formatting, and the two-column entry layout. You do
+not touch it unless you want to change the visual design.
+
+The pipeline is:
+
+```
+Excel workbook  ->  R (curriculr)  ->  Quarto + Typst  ->  CV.pdf
+```
+
+When you want an updated PDF, you call:
+
+```r
+create_cv(
+  data  = "cv-data.xlsx",
+  photo = "me.jpeg"
+)
+```
+
+That is the entire workflow.
+
+---
+
+## How curriculr compares to other approaches
+
+### Word or Pages documents
+
+The most common approach. The content and formatting are inseparable, which
+makes consistent updates difficult. Producing multiple versions for different
+audiences -- a full CV, a short resume, a teaching-focused version -- means
+maintaining multiple documents that quickly drift out of sync.
+
+curriculr keeps one source of truth. Different versions will be supported in
+a future release via parameters that filter sections and entries at render
+time.
+
+### LaTeX CVs
+
+LaTeX separates content from presentation better than Word, and produces
+beautiful PDFs. The barrier is real: LaTeX requires a working installation,
+knowledge of the language, and tolerance for cryptic error messages. Custom
+CV templates like Awesome CV add their own layer of complexity through `.cls`
+files and `.sty` dependencies.
+
+curriculr uses Typst instead of LaTeX. Typst is faster, has cleaner error
+messages, and requires no installation beyond Quarto. The Typst layout in
+`CV.qmd` is transparent R-adjacent code rather than a black-box class file.
+
+### vitae
+
+The `vitae` R package is the closest prior art to curriculr and deserves
+direct acknowledgment -- curriculr was inspired by it. vitae provides a
+family of CV templates built on R Markdown, including an Awesome CV template
+and several others. It handles the rendering pipeline and provides helper
+functions like `detailed_entries()` that map data frames to CV entries.
+
+Where curriculr differs:
+
+- curriculr uses Quarto and Typst rather than R Markdown and LaTeX. This
+  removes the LaTeX dependency entirely and produces faster renders with
+  cleaner error messages.
+- curriculr uses Excel as the data source rather than R data frames or CSV
+  files. For many researchers, a spreadsheet is a more natural editing
+  environment than code.
+- curriculr puts section control in the workbook. Adding, removing, or
+  reordering sections requires no R code changes -- only editing the
+  `sections` sheet.
+- curriculr is a single-function workflow. `create_cv()` handles scaffolding,
+  template injection, and rendering in one call.
+
+### datadrivencv
+
+Nick Strayer's `datadrivencv` package shares curriculr's philosophy of
+treating the CV as structured data. It uses Google Sheets as the data source
+and `pagedown` for rendering. It remains an influential design and is worth
+examining for anyone interested in the data-driven CV space.
+
+curriculr's differences: local Excel instead of Google Sheets (no
+authentication required, works offline), Typst instead of pagedown (PDF-first
+rather than HTML-first), and active maintenance.
+
+---
+
+## The Excel advantage
+
+Using Excel as the data source is a deliberate choice that some R users will
+find surprising. A few reasons it works well in practice:
+
+**It is already where the data lives.** Most academics and professionals
+already track their accomplishments in some kind of spreadsheet. Asking them
+to maintain their CV data in the same tool they already use lowers the
+barrier to keeping it current.
+
+**It is accessible to collaborators.** A department administrator helping
+maintain a faculty member's CV can edit an Excel file without knowing R. The
+schema is documented in the workbook's own `readme` sheet.
+
+**It supports structured data naturally.** Each sheet is a table. Dates are
+dates. Text is text. The schema is explicit and consistent. Compared to
+editing a Word document, adding a new publication to a spreadsheet row is
+a precise, reversible, auditable operation.
+
+**The workbook is the documentation.** The `readme` sheet explains the column
+schema, the date conventions, and the sections control system. A new user
+can open the workbook and understand what to do without reading the package
+documentation.
+
+---
+
+## A note on reproducibility
+
+A curriculr CV is reproducible in the same sense that an R analysis script is
+reproducible: given the same workbook and the same version of the package,
+the same PDF is produced every time. The workbook can be version-controlled
+alongside the rendered output. Changes to CV content are visible in the
+workbook's edit history. The entire history of a career can be preserved in
+a single Excel file and rendered on demand.
+
+This matters for researchers who care about reproducibility in their own work.
+It is consistent to apply the same principles to a CV.
+
+---
+
+## Getting started
+
+```r
+# Install
+pak::pak("erwinlares/curriculr")
+
+# Scaffold -- copies template workbook and placeholder photo to getwd()
+library(curriculr)
+create_cv()
+
+# Edit cv-data-template.xlsx, then render
+create_cv(
+  data  = "cv-data-template.xlsx",
+  photo = "your-photo.png"
+)
+```
+
+The result is `CV.pdf` in the same directory as your workbook.

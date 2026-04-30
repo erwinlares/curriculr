@@ -1,26 +1,26 @@
 # tests/testthat/test-typst-layout.R
 
-# .cv_section() -----------------------------------------------------------
+# cv_section() -----------------------------------------------------------
 
-test_that(".cv_section() returns a character string", {
-    result <- .cv_section("Education")
+test_that("cv_section() returns a character string", {
+    result <- cv_section("Education")
     expect_type(result, "character")
     expect_length(result, 1L)
 })
 
-test_that(".cv_section() contains the section title", {
-    result <- .cv_section("Education")
+test_that("cv_section() contains the section title", {
+    result <- cv_section("Education")
     expect_true(grepl("ducation", result))  # first letter split off for accent
 })
 
-test_that(".cv_section() contains Typst code fence markers", {
-    result <- .cv_section("Education")
+test_that("cv_section() contains Typst code fence markers", {
+    result <- cv_section("Education")
     expect_true(grepl("```\\{=typst\\}", result))
     expect_true(grepl("```", result))
 })
 
-test_that(".cv_section() splits first letter from rest of title", {
-    result <- .cv_section("Grants and Awards")
+test_that("cv_section() splits first letter from rest of title", {
+    result <- cv_section("Grants and Awards")
     expect_true(grepl("G", result))
     expect_true(grepl("rants and Awards", result))
 })

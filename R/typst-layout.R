@@ -1,7 +1,7 @@
 # R/typst-layout.R
 
 
-# .cv_section() ---------------------------------------------------------
+# cv_section() ----------------------------------------------------------
 
 #' Create a Typst CV section heading
 #'
@@ -9,15 +9,20 @@
 #' the section title is styled with the CV accent color. The heading is
 #' followed by a horizontal rule that fills the remaining line width.
 #'
+#' This function is called inside `CV.qmd` to emit section headings. It is
+#' exported so that users building custom Quarto templates can call it
+#' directly without using `:::`.
+#'
 #' @param title A character string. The section title to display, e.g.
 #'   `"Education"` or `"Publications"`.
 #'
 #' @return A character string of raw Typst markup.
 #'
-#' @keywords internal
-.cv_section <- function(title) {
+#' @export
+cv_section <- function(title) {
     first <- substr(title, 1, 1)
     rest  <- substr(title, 2, nchar(title))
+
     sprintf(
         paste0(
             '\n```{=typst}\n',
@@ -33,8 +38,8 @@
             '#v(0.20em)\n',
             '```\n'
         ),
-        .typst_escape(first),
-        .typst_escape(rest)
+        typst_escape(first),
+        typst_escape(rest)
     )
 }
 
@@ -70,16 +75,19 @@
                       detail       = "",
                       when         = "",
                       where        = "") {
-    title        <- .typst_escape(title)
-    organization <- .typst_escape(organization)
-    detail       <- .typst_escape(detail)
-    when         <- .typst_escape(when)
-    where        <- .typst_escape(where)
+    title        <- typst_escape(title)
+    organization <- typst_escape(organization)
+    detail       <- typst_escape(detail)
+    when         <- typst_escape(when)
+    where        <- typst_escape(where)
+
     meta_parts <- c(organization, detail)
     meta_parts <- meta_parts[nzchar(meta_parts)]
     meta       <- paste(meta_parts, collapse = " \u2014 ")
+
     right_parts <- c(when, where)
     right       <- paste(right_parts[nzchar(right_parts)], collapse = "\\\n")
+
     sprintf(
         paste0(
             '\n```{=typst}\n',
