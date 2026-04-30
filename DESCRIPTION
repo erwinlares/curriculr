@@ -15,7 +15,10 @@ Description: Provides tools for producing data-driven curriculum vitae
     spreadsheet, rendering configuration lives in Quarto, and transformation
     logic lives in small composable R functions. See Lauritzen (2023)
     <https://typst.app> for the Typst typesetting system and Allaire et al.
-    (2024) <https://quarto.org> for the Quarto publishing system.
+    (2024) <https://quarto.org> for the Quarto publishing system. Inspired
+    by the vitae package (O'Hara-Wild et al., 2024,
+    <https://CRAN.R-project.org/package=vitae>) and the Awesome CV LaTeX
+    template (Park, 2015, <https://github.com/posquit0/Awesome-CV>).
 License: MIT + file LICENSE
 Encoding: UTF-8
 Language: en-US

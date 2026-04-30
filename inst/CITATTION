@@ -1,0 +1,9 @@
+bibentry(
+  bibtype  = "Manual",
+  title    = "curriculr: Data-Driven CVs with Quarto and Typst",
+  author   = person("Erwin", "Lares"),
+  year     = "2026",
+  note     = paste("R package version", meta$Version,
+                   ". Inspired by vitae (O'Hara-Wild et al.) and Awesome CV (posquit0)."),
+  url      = "https://github.com/erwinlares/curriculr"
+)
