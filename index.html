@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">curriculr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -140,6 +140,10 @@ i Next steps:
 <td>profile_statement</td>
 <td>One or two sentence professional summary</td>
 </tr>
+<tr>
+<td>photo</td>
+<td>Relative path to your profile image</td>
+</tr>
 </tbody>
 </table>
 <p>Then fill in the remaining sheets with your CV content. The <code>readme</code> sheet inside the workbook explains the column schema and date entry conventions in detail.</p>
@@ -153,8 +157,21 @@ i Next steps:
 <span>  photo <span class="op">=</span> <span class="st">"your-photo.png"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>This writes <code>CV.qmd</code> and <code>CV.pdf</code> next to your workbook. Open <code>CV.pdf</code> to review the output. To update your CV, edit the workbook and call <code><a href="reference/create_cv.html">create_cv()</a></code> again with <code>overwrite = TRUE</code>.</p>
+<p>To render without a profile photo, omit the <code>photo</code> argument. The header will use a single-column layout with your name, contact line, and profile statement centered on the page:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span>data <span class="op">=</span> <span class="st">"cv-data-template.xlsx"</span><span class="op">)</span></span></code></pre></div>
 <hr>
 </div>
+</div>
+<div class="section level2">
+<h2 id="for-existing-users-updating-from-v020">For existing users updating from v0.2.0<a class="anchor" aria-label="anchor" href="#for-existing-users-updating-from-v020"></a>
+</h2>
+<p>v0.3.0 introduces several workbook schema changes and new arguments. Here is what you need to know.</p>
+<p><strong><code>photo = NULL</code> now means no photo.</strong> Previously, omitting <code>photo</code> in render mode fell back to a bundled placeholder image. It now produces a single-column header layout with no image. Supply a path explicitly to restore the two-column layout.</p>
+<p><strong>Your workbook needs an <code>include_in_resume</code> column on every section sheet.</strong> This is a boolean column (checked/unchecked) that controls which rows appear when rendering in resume variant mode. Add a column named <code>include_in_resume</code> to each section sheet and check the rows you want to include in a focused resume. Rows without this column are always included.</p>
+<p><strong>Your workbook can have an optional <code>theme</code> sheet.</strong> This sheet controls fonts, colors, and page layout. If absent, built-in defaults are used. Copy the <code>theme</code> sheet from the updated template workbook to gain full control over the visual appearance without editing <code>CV.qmd</code> directly.</p>
+<p><strong><code>readxl</code> is no longer required.</strong> curriculr now uses <code>openxlsx2</code> for all workbook reading. If you have <code>readxl</code> in your own explicit dependencies for curriculr-related code, you can remove it.</p>
+<hr>
 </div>
 <div class="section level2">
 <h2 id="for-existing-users-updating-from-v010">For existing users updating from v0.1.0<a class="anchor" aria-label="anchor" href="#for-existing-users-updating-from-v010"></a>
@@ -241,43 +258,85 @@ i Next steps:
 <hr>
 </div>
 <div class="section level2">
+<h2 id="rendering-a-resume">Rendering a resume<a class="anchor" aria-label="anchor" href="#rendering-a-resume"></a>
+</h2>
+<p>When you want a shorter, focused version of your CV, use <code>variant = "resume"</code>. curriculr will include only the rows you have checked in the <code>include_in_resume</code> column of each section sheet:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span></span>
+<span>  data        <span class="op">=</span> <span class="st">"cv-data-template.xlsx"</span>,</span>
+<span>  photo       <span class="op">=</span> <span class="st">"your-photo.png"</span>,</span>
+<span>  variant     <span class="op">=</span> <span class="st">"resume"</span>,</span>
+<span>  output_file <span class="op">=</span> <span class="st">"resume.pdf"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Check and uncheck rows directly in the workbook. No R code changes are needed to switch between CV and resume variants.</p>
+<hr>
+</div>
+<div class="section level2">
 <h2 id="customizing-the-rendered-pdf">Customizing the rendered PDF<a class="anchor" aria-label="anchor" href="#customizing-the-rendered-pdf"></a>
 </h2>
 <div class="section level3">
+<h3 id="changing-colors-fonts-and-page-layout">Changing colors, fonts, and page layout<a class="anchor" aria-label="anchor" href="#changing-colors-fonts-and-page-layout"></a>
+</h3>
+<p>Open your workbook and edit the <code>theme</code> sheet. Each key maps to a visual setting:</p>
+<table class="table">
+<thead><tr>
+<th>key</th>
+<th>what it controls</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>font_family</code></td>
+<td>Body font (e.g. <code>Lato</code>, <code>Arial</code>)</td>
+</tr>
+<tr>
+<td><code>font_size</code></td>
+<td>Base font size (e.g. <code>8.8pt</code>)</td>
+</tr>
+<tr>
+<td><code>body_color</code></td>
+<td>Main text color (hex code)</td>
+</tr>
+<tr>
+<td><code>accent_color</code></td>
+<td>Section headings, dates, and rules (hex code)</td>
+</tr>
+<tr>
+<td><code>dark_color</code></td>
+<td>Entry titles and name in the header (hex code)</td>
+</tr>
+<tr>
+<td><code>papersize</code></td>
+<td>Page size (<code>us-letter</code> or <code>a4</code>)</td>
+</tr>
+<tr>
+<td><code>margin_x</code></td>
+<td>Left and right margins (e.g. <code>0.62in</code>)</td>
+</tr>
+<tr>
+<td><code>margin_y</code></td>
+<td>Top and bottom margins (e.g. <code>0.58in</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>Re-render after editing the <code>theme</code> sheet with <code>overwrite = TRUE</code> to see the changes.</p>
+</div>
+<div class="section level3">
 <h3 id="changing-section-order-or-content">Changing section order or content<a class="anchor" aria-label="anchor" href="#changing-section-order-or-content"></a>
 </h3>
-<p>Edit the <code>sections</code> sheet in your workbook. Reorder rows to reorder sections. Delete a row to remove a section. Add a row for a new section.</p>
+<p>Edit the <code>sections</code> sheet in your workbook. Reorder rows to reorder sections. Delete a row to remove a section.</p>
 </div>
 <div class="section level3">
-<h3 id="changing-colors-and-fonts">Changing colors and fonts<a class="anchor" aria-label="anchor" href="#changing-colors-and-fonts"></a>
+<h3 id="adding-a-new-section">Adding a new section<a class="anchor" aria-label="anchor" href="#adding-a-new-section"></a>
 </h3>
-<p>Open <code>CV.qmd</code> and find the <code>{=typst}</code> style block near the top:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode typst"><code class="sourceCode typst"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="kw">#set</span> <span class="va">text</span><span class="op">(</span>font<span class="op">:</span> <span class="st">"Lato"</span><span class="op">,</span> size<span class="op">:</span> <span class="fl">8.8pt</span><span class="op">,</span> fill<span class="op">:</span> rgb<span class="op">(</span><span class="st">"#3f3f3f"</span><span class="op">))</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="kw">#let</span> <span class="va">accent</span>   <span class="op">=</span> rgb<span class="op">(</span><span class="st">"#c5050c"</span><span class="op">)</span></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="kw">#let</span> <span class="va">dark</span>     <span class="op">=</span> rgb<span class="op">(</span><span class="st">"#303030"</span><span class="op">)</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="kw">#let</span> <span class="va">bodygray</span> <span class="op">=</span> rgb<span class="op">(</span><span class="st">"#555555"</span><span class="op">)</span></span></code></pre></div>
-<p>Change <code>accent</code> to change the section heading and date color. Change <code>font</code> to use a different typeface. Change <code>size</code> to adjust the base text size.</p>
-</div>
-<div class="section level3">
-<h3 id="changing-page-margins">Changing page margins<a class="anchor" aria-label="anchor" href="#changing-page-margins"></a>
-</h3>
-<p>In the YAML front matter of <code>CV.qmd</code>:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">format</span><span class="kw">:</span></span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="at">  </span><span class="fu">typst</span><span class="kw">:</span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="at">    </span><span class="fu">papersize</span><span class="kw">:</span><span class="at"> us-letter</span></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="at">    </span><span class="fu">margin</span><span class="kw">:</span></span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="at">      </span><span class="fu">x</span><span class="kw">:</span><span class="at"> 0.62in</span></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="at">      </span><span class="fu">y</span><span class="kw">:</span><span class="at"> 0.58in</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="regenerating-cvqmd-after-changes">Regenerating CV.qmd after changes<a class="anchor" aria-label="anchor" href="#regenerating-cvqmd-after-changes"></a>
-</h3>
+<p>Use <code><a href="reference/add_section.html">add_section()</a></code> to add a new sheet and register it in the <code>sections</code> control sheet in one step:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span></span>
-<span>  data      <span class="op">=</span> <span class="st">"cv-data-template.xlsx"</span>,</span>
-<span>  photo     <span class="op">=</span> <span class="st">"your-photo.png"</span>,</span>
-<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/add_section.html">add_section</a></span><span class="op">(</span></span>
+<span>  <span class="st">"cv-data-template.xlsx"</span>,</span>
+<span>  section  <span class="op">=</span> <span class="st">"patents"</span>,</span>
+<span>  label    <span class="op">=</span> <span class="st">"Patents"</span>,</span>
+<span>  date_fun <span class="op">=</span> <span class="st">"year_only"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<p>The new sheet is pre-populated with the standard column spine. Open the workbook, add your data, and re-render.</p>
 <hr>
 </div>
 </div>
@@ -288,29 +347,78 @@ i Next steps:
 <h3 id="create_cv">
 <code>create_cv()</code><a class="anchor" aria-label="anchor" href="#create_cv"></a>
 </h3>
-<p>The main entry point. No arguments triggers scaffold mode. With <code>data</code> and <code>photo</code> triggers render mode.</p>
+<p>The main entry point. No arguments triggers scaffold mode. With <code>data</code> triggers render mode.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Scaffold mode</span></span>
 <span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Render mode</span></span>
+<span><span class="co"># Render mode — full CV with Font Awesome icons in the contact line</span></span>
 <span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span></span>
 <span>  data        <span class="op">=</span> <span class="st">"~/my_cv/cv-data.xlsx"</span>,</span>
 <span>  photo       <span class="op">=</span> <span class="st">"~/my_cv/me.jpeg"</span>,</span>
 <span>  output_file <span class="op">=</span> <span class="st">"erwin-lares-cv.pdf"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Render mode — resume variant, plain text contact line</span></span>
+<span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span></span>
+<span>  data        <span class="op">=</span> <span class="st">"~/my_cv/cv-data.xlsx"</span>,</span>
+<span>  photo       <span class="op">=</span> <span class="st">"~/my_cv/me.jpeg"</span>,</span>
+<span>  variant     <span class="op">=</span> <span class="st">"resume"</span>,</span>
+<span>  use_icons   <span class="op">=</span> <span class="st">"none"</span>,</span>
+<span>  output_file <span class="op">=</span> <span class="st">"erwin-lares-resume.pdf"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><strong>Arguments:</strong></p>
+<ul>
+<li>
+<code>data</code> — path to the workbook. <code>NULL</code> triggers scaffold mode.</li>
+<li>
+<code>photo</code> — path to the profile image. <code>NULL</code> renders without a photo.</li>
+<li>
+<code>output_file</code> — PDF filename. Defaults to <code>"CV.pdf"</code>.</li>
+<li>
+<code>overwrite</code> — whether to overwrite existing files. Defaults to <code>FALSE</code>.</li>
+<li>
+<code>variant</code> — <code>"cv"</code> (all rows) or <code>"resume"</code> (checked rows only).</li>
+<li>
+<code>use_icons</code> — <code>"fontawesome"</code> (default) or <code>"none"</code>.</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="add_section">
+<code>add_section()</code><a class="anchor" aria-label="anchor" href="#add_section"></a>
+</h3>
+<p>Adds a new sheet to an existing workbook and registers it in the <code>sections</code> control sheet.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/add_section.html">add_section</a></span><span class="op">(</span></span>
+<span>  <span class="st">"cv-data-template.xlsx"</span>,</span>
+<span>  section   <span class="op">=</span> <span class="st">"invited_talks"</span>,</span>
+<span>  label     <span class="op">=</span> <span class="st">"Invited Talks"</span>,</span>
+<span>  date_fun  <span class="op">=</span> <span class="st">"month_year"</span>,</span>
+<span>  where_col <span class="op">=</span> <span class="st">"where"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="read_cv_data">
 <code>read_cv_data()</code><a class="anchor" aria-label="anchor" href="#read_cv_data"></a>
 </h3>
-<p>Reads all sheets from the workbook into a named list. The <code>profile</code> sheet becomes a named character vector; section sheets become data frames; the <code>sections</code> sheet is returned in row order.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<p>Reads all sheets from the workbook into a named list. The <code>profile</code> and <code>theme</code> sheets become named character vectors; section sheets become data frames; the <code>sections</code> sheet is returned in row order.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_cv_data.html">read_cv_data</a></span><span class="op">(</span><span class="st">"cv-data-template.xlsx"</span><span class="op">)</span></span>
+<span><span class="va">cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_cv_data.html">read_cv_data</a></span><span class="op">(</span><span class="st">"cv-data-template.xlsx"</span>, variant <span class="op">=</span> <span class="st">"resume"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">cv</span><span class="op">$</span><span class="va">experience</span>           <span class="co"># a data frame</span></span>
 <span><span class="va">cv</span><span class="op">$</span><span class="va">sections</span>             <span class="co"># the sections control sheet</span></span>
-<span><span class="va">cv</span><span class="op">$</span><span class="va">profile</span><span class="op">[[</span><span class="st">"email"</span><span class="op">]</span><span class="op">]</span>  <span class="co"># a scalar string</span></span></code></pre></div>
+<span><span class="va">cv</span><span class="op">$</span><span class="va">profile</span><span class="op">[[</span><span class="st">"email"</span><span class="op">]</span><span class="op">]</span>  <span class="co"># a scalar string</span></span>
+<span><span class="va">cv</span><span class="op">$</span><span class="va">theme</span><span class="op">[[</span><span class="st">"accent_color"</span><span class="op">]</span><span class="op">]</span>  <span class="co"># a scalar string</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="cv_contact_line">
+<code>cv_contact_line()</code><a class="anchor" aria-label="anchor" href="#cv_contact_line"></a>
+</h3>
+<p>Assembles the contact line from a profile vector. Useful when building custom Quarto templates.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/cv_contact_line.html">cv_contact_line</a></span><span class="op">(</span><span class="va">cv</span><span class="op">$</span><span class="va">profile</span>, use_icons <span class="op">=</span> <span class="st">"fontawesome"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/cv_contact_line.html">cv_contact_line</a></span><span class="op">(</span><span class="va">cv</span><span class="op">$</span><span class="va">profile</span>, use_icons <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="cv_render_section">
@@ -342,8 +450,8 @@ i Next steps:
 <h2 id="workbook-schema">Workbook schema<a class="anchor" aria-label="anchor" href="#workbook-schema"></a>
 </h2>
 <p>Every section sheet shares a common column spine:</p>
-<pre><code><span><span class="va">title</span> <span class="op">|</span> <span class="va">unit</span> <span class="op">|</span> <span class="va">startMonth</span> <span class="op">|</span> <span class="va">startYear</span> <span class="op">|</span> <span class="va">endMonth</span> <span class="op">|</span> <span class="va">endYear</span> <span class="op">|</span> <span class="va">where</span> <span class="op">|</span> <span class="va">detail</span></span></code></pre>
-<p><code>title</code> is always the primary entry label. <code>unit</code> is the secondary line. Leave cells blank rather than typing <code>NA</code>.</p>
+<pre><code><span><span class="va">title</span> <span class="op">|</span> <span class="va">unit</span> <span class="op">|</span> <span class="va">startMonth</span> <span class="op">|</span> <span class="va">startYear</span> <span class="op">|</span> <span class="va">endMonth</span> <span class="op">|</span> <span class="va">endYear</span> <span class="op">|</span> <span class="va">where</span> <span class="op">|</span> <span class="va">detail</span> <span class="op">|</span> <span class="va">include_in_resume</span></span></code></pre>
+<p><code>title</code> is always the primary entry label. <code>unit</code> is the secondary line. <code>include_in_resume</code> is a boolean checkbox column — check a row to include it when rendering with <code>variant = "resume"</code>. Leave cells blank rather than typing <code>NA</code>.</p>
 <div class="section level3">
 <h3 id="date-conventions">Date conventions<a class="anchor" aria-label="anchor" href="#date-conventions"></a>
 </h3>
@@ -388,12 +496,6 @@ i Next steps:
 </table>
 <hr>
 </div>
-</div>
-<div class="section level2">
-<h2 id="roadmap">Roadmap<a class="anchor" aria-label="anchor" href="#roadmap"></a>
-</h2>
-<p>Planned for v0.3.0: CV variant support (short resume, year filtering), HTML output, integration tests, and AwesomeFont support.</p>
-<hr>
 </div>
 <div class="section level2">
 <h2 id="related-packages">Related packages<a class="anchor" aria-label="anchor" href="#related-packages"></a>

@@ -2,8 +2,12 @@
 
 ## All functions
 
+- [`add_section()`](https://erwinlares.github.io/curriculr/reference/add_section.md)
+  : Add a new section to a curriculr workbook
 - [`create_cv()`](https://erwinlares.github.io/curriculr/reference/create_cv.md)
   : Generate a CV document from a curriculr workbook
+- [`cv_contact_line()`](https://erwinlares.github.io/curriculr/reference/cv_contact_line.md)
+  : Build the contact line for the CV header
 - [`cv_render_section()`](https://erwinlares.github.io/curriculr/reference/cv_render_section.md)
   : Render a CV section from a data frame
 - [`cv_section()`](https://erwinlares.github.io/curriculr/reference/cv_section.md)

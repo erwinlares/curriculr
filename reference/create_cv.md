@@ -8,7 +8,14 @@ rendering takes place.
 ## Usage
 
 ``` r
-create_cv(data = NULL, photo = NULL, output_file = "CV.pdf", overwrite = FALSE)
+create_cv(
+  data = NULL,
+  photo = NULL,
+  output_file = "CV.pdf",
+  overwrite = FALSE,
+  variant = "cv",
+  use_icons = "fontawesome"
+)
 ```
 
 ## Arguments
@@ -21,8 +28,9 @@ create_cv(data = NULL, photo = NULL, output_file = "CV.pdf", overwrite = FALSE)
 - photo:
 
   A character string or `NULL`. Path to the profile image. Defaults to
-  `NULL`. In render mode, if `photo` is `NULL` the bundled placeholder
-  image is used.
+  `NULL`, which renders the CV without a profile photo using a
+  single-column header layout. Supply a path to use a photo with the
+  two-column header layout.
 
 - output_file:
 
@@ -32,6 +40,18 @@ create_cv(data = NULL, photo = NULL, output_file = "CV.pdf", overwrite = FALSE)
 - overwrite:
 
   A logical. Whether to overwrite existing files. Defaults to `FALSE`.
+
+- variant:
+
+  A character string. Controls content scope. `"cv"` (the default)
+  renders all rows from every section. `"resume"` renders only rows
+  where `include_in_resume` is checked in the workbook.
+
+- use_icons:
+
+  A character string. `"fontawesome"` (the default) renders contact
+  fields in the CV header with Font Awesome icons via the Typst
+  `@preview/fontawesome` package. `"none"` renders plain text.
 
 ## Value
 
@@ -58,26 +78,34 @@ the same directory as the workbook.
 
 **Render mode** (`data` supplied):
 
-1.  Resolves the workbook and photo paths.
+1.  Resolves and validates the workbook and photo paths.
 
 2.  Reads the workbook with
-    [`read_cv_data()`](https://erwinlares.github.io/curriculr/reference/read_cv_data.md).
+    [`read_cv_data()`](https://erwinlares.github.io/curriculr/reference/read_cv_data.md),
+    applying `variant` filtering.
 
-3.  Validates that a `sections` sheet is present.
+3.  Resolves theme values from the workbook or built-in defaults.
 
-4.  Computes the photo path relative to the output directory.
+4.  Writes `CV.qmd` by injecting all resolved values into the package
+    template via sentinel substitution.
 
-5.  Writes `CV.qmd` by injecting resolved paths into the package
-    template.
-
-6.  Calls
+5.  Calls
     [`quarto::quarto_render()`](https://quarto-dev.github.io/quarto-r/reference/quarto_render.html)
     to produce the PDF.
 
-The `sections` sheet in the workbook controls which CV sections are
-rendered and in what order. Each row corresponds to one section. To
-exclude a section, delete its row. To reorder sections, reorder the
-rows.
+When `photo = NULL`, the CV header renders as a single full-width column
+containing the name, contact line, address, and profile statement. When
+a photo path is supplied, the header uses a two-column layout with the
+photo on the left.
+
+When `variant = "resume"`, row-level filtering is controlled entirely by
+the `include_in_resume` column in each section sheet. Check the rows you
+want included in the resume and leave the rest unchecked.
+
+Theme values (fonts, colors, page layout) are read from the `theme`
+sheet in the workbook. If the `theme` sheet is absent, built-in defaults
+are used. Individual keys missing from a partial `theme` sheet are
+filled from defaults.
 
 ## Examples
 
@@ -86,16 +114,30 @@ if (FALSE) { # \dontrun{
 # Scaffold mode — copy template files to current directory
 create_cv()
 
-# Render mode — use your own workbook and photo
+# Render mode — full CV with photo and Font Awesome icons
 create_cv(
   data  = "~/my_cv/cv-data.xlsx",
   photo = "~/my_cv/me.jpeg"
 )
 
-# Render mode — custom output filename
+# Render mode — no photo, single-column header
+create_cv(
+  data = "~/my_cv/cv-data.xlsx"
+)
+
+# Render mode — resume variant
 create_cv(
   data        = "~/my_cv/cv-data.xlsx",
   photo       = "~/my_cv/me.jpeg",
+  variant     = "resume",
+  output_file = "resume.pdf"
+)
+
+# Render mode — plain text contact line, custom output filename
+create_cv(
+  data        = "~/my_cv/cv-data.xlsx",
+  photo       = "~/my_cv/me.jpeg",
+  use_icons   = "none",
   output_file = "erwin-lares-cv.pdf"
 )
 } # }

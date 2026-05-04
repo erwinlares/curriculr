@@ -794,86 +794,71 @@ Same as Session 2 with these additions:
 
 ## Session 4
 
-------------------------------------------------------------------------
-
-### Package structure at end of Session 4
-
-## Session 4 — 2026-04-30
+## Session 4 – 2026-04-30
 
 ### What we set out to do
 
 Session 4 was a documentation and polish pass following the v0.2.0 code
 work in Session 3. The goals were: restructure the README for new and
 existing users, add a vignette, configure the favicon, add a CITATION
-file, and commit everything cleanly.
+file, integrate the Zenodo DOI, set up Codecov coverage tracking, add a
+lifecycle badge, and commit everything cleanly.
 
 ------------------------------------------------------------------------
 
 ### README restructured
 
-The v0.1.0 README described the package in the third person and assumed
-the reader already understood the workflow. The v0.2.0 README is
-addressed directly to two distinct audiences:
+The v0.1.0 README described the package and workflow generically. The
+v0.2.0 README is addressed directly to two distinct audiences.
 
-**New users** get a three-step onboarding path: call
-[`create_cv()`](https://erwinlares.github.io/curriculr/reference/create_cv.md)
-with no arguments to scaffold, fill in the workbook, call
-[`create_cv()`](https://erwinlares.github.io/curriculr/reference/create_cv.md)
-again with `data` and `photo` to render. The scaffold mode output and
-the step-by-step instructions are shown verbatim so the user knows
-exactly what to expect.
+New users get a three-step onboarding path: call create_cv() with no
+arguments to scaffold, fill in the workbook, call create_cv() again with
+data and photo to render. The scaffold mode output and the step-by-step
+instructions are shown verbatim so the user knows exactly what to
+expect.
 
-**Existing users migrating from v0.1.0** get a concise explanation of
-what changed:
-[`create_cv()`](https://erwinlares.github.io/curriculr/reference/create_cv.md)
-has two modes now, the workbook needs a `sections` sheet, and the
-`date_fun` token vocabulary is documented in a quick-reference table.
+Existing users migrating from v0.1.0 get a concise explanation of what
+changed: create_cv() has two modes, the workbook needs a sections sheet,
+and the date_fun token vocabulary is documented in a quick-reference
+table.
 
-A third section covers customization — changing section order, colors,
-fonts, and margins — with concrete examples of what to edit and where.
-This replaces the vague “Known limitations” language from v0.1.0 with
-actionable instructions.
+A customization section covers changing section order, colors, fonts,
+and margins with concrete examples of what to edit and where.
 
 ------------------------------------------------------------------------
 
 ### Vignette: Why curriculr
 
-A new vignette was added at `vignettes/curriculr-why.Rmd` making the
-case for the data-driven CV approach. The vignette is structured as an
+A new vignette was added at vignettes/curriculr-why.Rmd making the case
+for the data-driven CV approach. The vignette is structured as an
 argument rather than a tutorial: it identifies the problem (content and
-presentation bundled together in Word or LaTeX), explains the curriculr
-model, and positions curriculr honestly against the closest prior art.
+presentation bundled together), explains the curriculr model, and
+positions curriculr honestly against the closest prior art.
 
-The comparisons cover:
-
-- **Word and Pages** — the most common approach, and its limitations for
-  maintaining multiple versions
-- **LaTeX CVs** — better separation of concerns but a high barrier to
-  entry
-- **vitae** — the closest R-based prior art, directly acknowledged as an
-  inspiration. curriculr differs in using Quarto/Typst instead of R
-  Markdown/LaTeX, Excel instead of R data frames, and a sections-driven
-  render model instead of hardcoded template blocks
-- **datadrivencv** — Nick Strayer’s package, acknowledged for sharing
-  the same philosophy
-
+The comparisons cover Word/Pages, LaTeX CVs, vitae, and datadrivencv.
 The vignette closes with the reproducibility argument: a curriculr CV is
 reproducible in the same sense that an R analysis script is
 reproducible.
 
-**On the vignette engine:** the question of whether to use R Markdown or
-Quarto for the vignette was considered. The decision was to keep R
-Markdown (`VignetteEngine: knitr::rmarkdown`) for the initial release.
-Quarto vignettes are supported as of Quarto 1.4 and knitr 1.43 but
-require Quarto to be present in the check environment, which is not yet
-universal on CRAN check machines. Since the package already requires
-Quarto at runtime for
-[`create_cv()`](https://erwinlares.github.io/curriculr/reference/create_cv.md),
-this adds no new burden for users — but it does add risk for CRAN
-infrastructure. R Markdown is the safer choice until Quarto vignettes
-are more broadly established.
+The vignette YAML uses a creation date hardcoded alongside a dynamic
+last-updated date:
 
-**DESCRIPTION additions for vignette support:**
+``` yaml
+date: "Created 2026-04-30 | Last updated `r Sys.Date()`"
+```
+
+There is no built-in mechanism to track document creation dates
+automatically – git creation timestamps reset on clone and are
+unreliable in a CRAN build environment. Hardcoding the creation date
+once is the pragmatic solution.
+
+On the vignette engine: R Markdown was chosen over Quarto for the
+vignette despite the package being Quarto-native. Quarto vignettes are
+supported as of Quarto 1.4 but require Quarto in the check environment,
+which is not yet universal on CRAN machines. R Markdown is the safer
+choice for now.
+
+DESCRIPTION additions:
 
 ``` dcf
 Suggests:
@@ -887,8 +872,8 @@ VignetteBuilder: knitr
 
 ### Favicon configured in pkgdown
 
-The favicon was already in `man/figures/favicon.ico` from Session 1 but
-was not wired into the pkgdown site. Added to `_pkgdown.yml`:
+The favicon was already in man/figures/favicon.ico from Session 1 but
+was not wired into the pkgdown site. Added to \_pkgdown.yml:
 
 ``` yaml
 template:
@@ -900,59 +885,110 @@ template:
 
 ### inst/CITATION added
 
-A `CITATION` file was added to `inst/` so that `citation("curriculr")`
-returns a properly formatted citation. The file uses `meta$Version` to
-pull the installed version number automatically from `DESCRIPTION`, and
-`format(Sys.Date(), "%Y")` for the year so neither field needs manual
-updating on future releases.
+A CITATION file was added to inst/ so that citation(“curriculr”) returns
+a properly formatted citation. The file uses meta\$Version to pull the
+installed version number automatically from DESCRIPTION, and
+format(Sys.Date(), “%Y”) for the year.
 
-The initial attempt produced a `????` year and a warning: could not
-determine year for ‘curriculr’ from package DESCRIPTION file
+The initial attempt produced a ???? year and a warning:
 
-The fix was to add a `Date` field to `DESCRIPTION`:
+    could not determine year for 'curriculr' from package DESCRIPTION file
+
+The fix was to add a Date field to DESCRIPTION:
 
 ``` dcf
 Date: 2026-04-30
 ```
 
-R uses this field to populate the year in
-[`citation()`](https://rdrr.io/r/utils/citation.html). After adding it,
-`citation("curriculr")` returns a clean formatted citation with no
-warnings.
+A typo in the filename (inst/CITATTION with double T) was caught during
+the git status review before committing and corrected with mv.
 
 ------------------------------------------------------------------------
 
-### PLAN.md updated
+### Zenodo DOI integrated
 
-The PLAN.md was substantially revised:
+A Zenodo DOI was obtained for the package: 10.5281/zenodo.19930400
 
-- Completed work marked clearly for v0.1.0 and v0.2.0
-- v0.3.0 roadmap expanded with prioritized items: integration tests,
-  CITATION, Frank Palmer workbook update, CV variant support, HTML
-  output, theming, toolero delegation, `add_section()` helper, and an
-  `include` column for the sections sheet
-- Three open design questions added covering `overwrite` behavior,
-  scaffold mode writing `CV.qmd`, and the `include` column
+It was integrated in three places:
 
-------------------------------------------------------------------------
+CITATION – doi field in bibentry and URL in textVersion DESCRIPTION –
+added to the URL field alongside the GitHub and pkgdown URLs README –
+DOI badge added as the first badge in the badges block
 
-### NEWS.md updated
-
-The v0.2.0 entry was expanded to explicitly call out breaking changes at
-the top, since the
-[`create_cv()`](https://erwinlares.github.io/curriculr/reference/create_cv.md)
-redesign is a significant behavior change for anyone upgrading from
-v0.1.0.
+The DOI badge uses the standard Zenodo badge format matching the pattern
+already used in toolero’s README.
 
 ------------------------------------------------------------------------
 
-### Commit structure
+### Codecov coverage tracking
 
-Changes were committed in two logical groups to keep the history
-readable: v0.2.0: sections-driven rendering, scaffold/render mode split,
-exported typst_escape/cv_section/resolve_date_fun, why-curriculr
-vignette v0.2.0 docs: README restructured, NEWS updated, JOURNAL session
-3, pkgdown favicon, CITATION added, Date field in DESCRIPTION
+usethis::use_coverage() added: - codecov.yml configuration file -
+Codecov badge to README - .Rbuildignore entry
+
+usethis::use_github_action(“test-coverage”) added: -
+.github/workflows/test-coverage.yaml
+
+The CODECOV_TOKEN was retrieved from app.codecov.io and added as a
+GitHub repository secret. Codecov does not list R as a language option
+in its setup wizard – the wizard was ignored entirely since the GitHub
+Actions workflow generated by usethis handles everything correctly.
+
+------------------------------------------------------------------------
+
+### Lifecycle badge
+
+usethis::use_lifecycle() added the four lifecycle SVGs to
+man/figures/: - lifecycle-experimental.svg - lifecycle-stable.svg -
+lifecycle-deprecated.svg - lifecycle-superseded.svg
+
+The experimental badge was added to README.md using the shields.io URL
+rather than the local SVG, which is the correct approach for the README.
+The local SVGs are used when lifecycle::badge() is called inside roxygen
+documentation blocks – that step is deferred to v0.3.0 when we add
+lifecycle badges to individual exported function docs.
+
+------------------------------------------------------------------------
+
+### v0.3.0 roadmap additions
+
+Font Awesome icon support was added to the roadmap. The plan is to use
+Typst’s @preview/fontawesome package to replace plain text contact
+labels with icons for email, website, GitHub, and LinkedIn in the CV
+header.
+
+Full v0.3.0 priority list: 1. Update Frank Palmer workbook with sections
+sheet 2. Integration tests for create_cv() 3. CV variant support
+(resume, years, npresentations params) 4. Font Awesome icon support in
+the contact line 5. Theming support 6. HTML output 7. add_section()
+convenience function \>\>This is a good place to pick up. Before
+drafting, let me make sure I understand the intended behavior clearly.
+add_section() would take an existing cv-data.xlsx workbook and add a new
+sheet to it with the correct column headers pre-populated — the standard
+section spine: title \| unit \| startMonth \| startYear \| endMonth \|
+endYear \| where \| detail And it would also add a corresponding row to
+the sections sheet so the new section is registered for rendering. A few
+questions before drafting: What does the user pass in? At minimum the
+workbook path and a name for the new section. Anything else — a label
+for the sections sheet, a date_fun token, column overrides? Should it
+open the workbook after adding the section? Some users might want to
+immediately start filling it in. What happens if the section already
+exists? Error, warning, or skip silently? Does it write back to the same
+file or produce a new one? Writing back to the same file is the natural
+behavior but worth confirming since it is a destructive operation. What
+package would handle the Excel read/write? curriculr already uses readxl
+for reading — for writing back you would need openxlsx or writexl. Do
+you have a preference?
+
+8.  sections sheet include boolean column
+
+------------------------------------------------------------------------
+
+### Deployment
+
+All changes deployed to GitHub without errors. Three Actions ran
+successfully on push: - R-CMD-check: clean (0 errors, 0 warnings, 1
+irrelevant note) - pkgdown: site rebuilt and deployed - test-coverage:
+coverage uploaded to Codecov, badge activated
 
 ------------------------------------------------------------------------
 
@@ -961,9 +997,15 @@ vignette v0.2.0 docs: README restructured, NEWS updated, JOURNAL session
 New files added since Session 3:
 
 ``` text
+.github/workflows/test-coverage.yaml
+codecov.yml
 inst/CITATION
+man/figures/lifecycle-deprecated.svg
+man/figures/lifecycle-experimental.svg
+man/figures/lifecycle-stable.svg
+man/figures/lifecycle-superseded.svg
 vignettes/
-└── curriculr-why.Rmd
++-- curriculr-why.Rmd
 ```
 
 Fields added to DESCRIPTION:
@@ -973,17 +1015,6 @@ Date: 2026-04-30
 VignetteBuilder: knitr
 ```
 
-------------------------------------------------------------------------
-
-### What remains for v0.3.0
-
-- Integration tests for
-  [`create_cv()`](https://erwinlares.github.io/curriculr/reference/create_cv.md)
-  scaffold and render modes
-- Frank Palmer workbook updated with `sections` sheet
-- CV variant support wired into `CV.qmd` params
-- HTML output alongside PDF
-- Theming support – color palette and font configurable from workbook
-- `add_section()` convenience function
-- `sections` sheet `include` boolean column
-- `toolero` delegation once `create_qmd()` accepts a `template` argument
+Active badges: - DOI (Zenodo) - R-CMD-check (GitHub Actions) - CRAN
+status (not yet on CRAN – badge pending) - Lifecycle: experimental -
+Codecov test coverage

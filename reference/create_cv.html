@@ -13,7 +13,7 @@ rendering takes place."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">curriculr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,7 +52,14 @@ rendering takes place.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">create_cv</span><span class="op">(</span>data <span class="op">=</span> <span class="cn">NULL</span>, photo <span class="op">=</span> <span class="cn">NULL</span>, output_file <span class="op">=</span> <span class="st">"CV.pdf"</span>, overwrite <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">create_cv</span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  photo <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  output_file <span class="op">=</span> <span class="st">"CV.pdf"</span>,</span>
+<span>  overwrite <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  variant <span class="op">=</span> <span class="st">"cv"</span>,</span>
+<span>  use_icons <span class="op">=</span> <span class="st">"fontawesome"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -66,8 +73,9 @@ Defaults to <code>NULL</code>, which triggers scaffold mode.</p></dd>
 
 <dt id="arg-photo">photo<a class="anchor" aria-label="anchor" href="#arg-photo"></a></dt>
 <dd><p>A character string or <code>NULL</code>. Path to the profile image.
-Defaults to <code>NULL</code>. In render mode, if <code>photo</code> is <code>NULL</code> the bundled
-placeholder image is used.</p></dd>
+Defaults to <code>NULL</code>, which renders the CV without a profile photo using
+a single-column header layout. Supply a path to use a photo with the
+two-column header layout.</p></dd>
 
 
 <dt id="arg-output-file">output_file<a class="anchor" aria-label="anchor" href="#arg-output-file"></a></dt>
@@ -78,6 +86,18 @@ Defaults to <code>"CV.pdf"</code>. Ignored in scaffold mode.</p></dd>
 <dt id="arg-overwrite">overwrite<a class="anchor" aria-label="anchor" href="#arg-overwrite"></a></dt>
 <dd><p>A logical. Whether to overwrite existing files. Defaults
 to <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-variant">variant<a class="anchor" aria-label="anchor" href="#arg-variant"></a></dt>
+<dd><p>A character string. Controls content scope. <code>"cv"</code> (the
+default) renders all rows from every section. <code>"resume"</code> renders only
+rows where <code>include_in_resume</code> is checked in the workbook.</p></dd>
+
+
+<dt id="arg-use-icons">use_icons<a class="anchor" aria-label="anchor" href="#arg-use-icons"></a></dt>
+<dd><p>A character string. <code>"fontawesome"</code> (the default) renders
+contact fields in the CV header with Font Awesome icons via the Typst
+<code>@preview/fontawesome</code> package. <code>"none"</code> renders plain text.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -95,15 +115,23 @@ the same directory as the workbook.</p>
 <p><strong>Scaffold mode</strong> (no arguments):</p><ol><li><p>Copies <code>cv-data-template.xlsx</code> to <code><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd()</a></code>.</p></li>
 <li><p>Copies <code>placeholder.png</code> to <code><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd()</a></code>.</p></li>
 <li><p>Prints instructions for editing the workbook and rendering the CV.</p></li>
-</ol><p><strong>Render mode</strong> (<code>data</code> supplied):</p><ol><li><p>Resolves the workbook and photo paths.</p></li>
-<li><p>Reads the workbook with <code><a href="read_cv_data.html">read_cv_data()</a></code>.</p></li>
-<li><p>Validates that a <code>sections</code> sheet is present.</p></li>
-<li><p>Computes the photo path relative to the output directory.</p></li>
-<li><p>Writes <code>CV.qmd</code> by injecting resolved paths into the package template.</p></li>
+</ol><p><strong>Render mode</strong> (<code>data</code> supplied):</p><ol><li><p>Resolves and validates the workbook and photo paths.</p></li>
+<li><p>Reads the workbook with <code><a href="read_cv_data.html">read_cv_data()</a></code>, applying <code>variant</code> filtering.</p></li>
+<li><p>Resolves theme values from the workbook or built-in defaults.</p></li>
+<li><p>Writes <code>CV.qmd</code> by injecting all resolved values into the package
+template via sentinel substitution.</p></li>
 <li><p>Calls <code><a href="https://quarto-dev.github.io/quarto-r/reference/quarto_render.html" class="external-link">quarto::quarto_render()</a></code> to produce the PDF.</p></li>
-</ol><p>The <code>sections</code> sheet in the workbook controls which CV sections are
-rendered and in what order. Each row corresponds to one section. To
-exclude a section, delete its row. To reorder sections, reorder the rows.</p>
+</ol><p>When <code>photo = NULL</code>, the CV header renders as a single full-width column
+containing the name, contact line, address, and profile statement. When
+a photo path is supplied, the header uses a two-column layout with the
+photo on the left.</p>
+<p>When <code>variant = "resume"</code>, row-level filtering is controlled entirely by
+the <code>include_in_resume</code> column in each section sheet. Check the rows you
+want included in the resume and leave the rest unchecked.</p>
+<p>Theme values (fonts, colors, page layout) are read from the <code>theme</code> sheet
+in the workbook. If the <code>theme</code> sheet is absent, built-in defaults are
+used. Individual keys missing from a partial <code>theme</code> sheet are filled from
+defaults.</p>
     </div>
 
     <div class="section level2">
@@ -112,16 +140,30 @@ exclude a section, delete its row. To reorder sections, reorder the rows.</p>
 <span class="r-in"><span><span class="co"># Scaffold mode — copy template files to current directory</span></span></span>
 <span class="r-in"><span><span class="fu">create_cv</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Render mode — use your own workbook and photo</span></span></span>
+<span class="r-in"><span><span class="co"># Render mode — full CV with photo and Font Awesome icons</span></span></span>
 <span class="r-in"><span><span class="fu">create_cv</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  data  <span class="op">=</span> <span class="st">"~/my_cv/cv-data.xlsx"</span>,</span></span>
 <span class="r-in"><span>  photo <span class="op">=</span> <span class="st">"~/my_cv/me.jpeg"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Render mode — custom output filename</span></span></span>
+<span class="r-in"><span><span class="co"># Render mode — no photo, single-column header</span></span></span>
+<span class="r-in"><span><span class="fu">create_cv</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  data <span class="op">=</span> <span class="st">"~/my_cv/cv-data.xlsx"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Render mode — resume variant</span></span></span>
 <span class="r-in"><span><span class="fu">create_cv</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  data        <span class="op">=</span> <span class="st">"~/my_cv/cv-data.xlsx"</span>,</span></span>
 <span class="r-in"><span>  photo       <span class="op">=</span> <span class="st">"~/my_cv/me.jpeg"</span>,</span></span>
+<span class="r-in"><span>  variant     <span class="op">=</span> <span class="st">"resume"</span>,</span></span>
+<span class="r-in"><span>  output_file <span class="op">=</span> <span class="st">"resume.pdf"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Render mode — plain text contact line, custom output filename</span></span></span>
+<span class="r-in"><span><span class="fu">create_cv</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  data        <span class="op">=</span> <span class="st">"~/my_cv/cv-data.xlsx"</span>,</span></span>
+<span class="r-in"><span>  photo       <span class="op">=</span> <span class="st">"~/my_cv/me.jpeg"</span>,</span></span>
+<span class="r-in"><span>  use_icons   <span class="op">=</span> <span class="st">"none"</span>,</span></span>
 <span class="r-in"><span>  output_file <span class="op">=</span> <span class="st">"erwin-lares-cv.pdf"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">curriculr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,6 +36,42 @@
       <small>Source: <a href="https://github.com/erwinlares/curriculr/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="curriculr-030">curriculr 0.3.0<a class="anchor" aria-label="anchor" href="#curriculr-030"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-0-3-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-3-0"></a></h3>
+<ul><li><p><code><a href="../reference/read_cv_data.html">read_cv_data()</a></code> now requires the <code>openxlsx2</code> package instead of <code>readxl</code>. Remove <code>readxl</code> and add <code>openxlsx2</code> to any explicit dependencies in your own projects that call <code><a href="../reference/read_cv_data.html">read_cv_data()</a></code> directly.</p></li>
+<li><p><code><a href="../reference/create_cv.html">create_cv()</a></code> no longer falls back to a bundled placeholder image when <code>photo = NULL</code> in render mode. Omitting <code>photo</code> now produces a single-column header layout with no image. Supply a path explicitly to restore the two-column layout with a profile photo.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features-0-3-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-3-0"></a></h3>
+<ul><li><p><strong>Resume variant.</strong> <code><a href="../reference/create_cv.html">create_cv()</a></code> and <code><a href="../reference/read_cv_data.html">read_cv_data()</a></code> gain a <code>variant</code> argument (<code>"cv"</code> or <code>"resume"</code>). When <code>variant = "resume"</code>, only rows where <code>include_in_resume</code> is checked in the workbook are included in the rendered output. Every section sheet now carries an <code>include_in_resume</code> column for row-level control.</p></li>
+<li><p><strong>Font Awesome icons.</strong> <code><a href="../reference/create_cv.html">create_cv()</a></code> gains a <code>use_icons</code> argument (<code>"fontawesome"</code> or <code>"none"</code>). When <code>"fontawesome"</code> (the default), contact fields in the CV header are rendered with Font Awesome icons via the Typst <code>@preview/fontawesome</code> package. Fields with no icon equivalent fall back to plain text with a warning. The new exported function <code><a href="../reference/cv_contact_line.html">cv_contact_line()</a></code> assembles the contact line and can be called directly in custom templates.</p></li>
+<li><p><strong>Workbook-controlled theming.</strong> A new <code>theme</code> sheet in the workbook controls fonts, colors, and page layout. Keys map directly to the Typst style block and the Quarto <code>format: typst:</code> YAML block, both of which are now injected by <code><a href="../reference/create_cv.html">create_cv()</a></code> via sentinel substitution. If the <code>theme</code> sheet is absent, built-in defaults are used and individual missing keys are filled from defaults, so partial theme sheets are supported.</p></li>
+<li><p><strong><code><a href="../reference/add_section.html">add_section()</a></code>.</strong> New exported function that adds a new sheet to an existing curriculr workbook and registers it in the <code>sections</code> control sheet. The new sheet is pre-populated with the standard column spine including <code>include_in_resume</code>. The <code>sections</code> row is appended or updated in place without touching the sheet’s formatting.</p></li>
+<li><p><strong>No-photo header layout.</strong> When <code>photo = NULL</code>, <code>CV.qmd</code> now emits a single full-width centered header block instead of a two-column grid with an empty left column.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="improvements-0-3-0">Improvements<a class="anchor" aria-label="anchor" href="#improvements-0-3-0"></a></h3>
+<ul><li>
+<code><a href="../reference/read_cv_data.html">read_cv_data()</a></code> reads the <code>theme</code> sheet as a named character vector keyed by the <code>key</code> column, parallel to the <code>profile</code> sheet. Returns <code>NULL</code> if the sheet is absent.</li>
+<li>
+<code><a href="../reference/read_cv_data.html">read_cv_data()</a></code> coerces all section columns to character after import, including numeric year columns and logical boolean columns, giving the rendering pipeline a uniform contract.</li>
+<li>
+<code><a href="../reference/read_cv_data.html">read_cv_data()</a></code> gains a <code>.coerce_col()</code> internal helper that normalizes <code>NA</code> strings produced by <code>as.character(NA)</code> back to <code>NA_character_</code>.</li>
+<li>
+<code><a href="../reference/create_cv.html">create_cv()</a></code> injects <code>variant</code> and <code>use_icons</code> into <code>CV.qmd</code> as Quarto params so the Quarto subprocess applies the same filtering and icon settings as the calling R session.</li>
+<li>The <code>cv-data-template.xlsx</code> template workbook gains a <code>theme</code> sheet with all twelve default theming keys and a <code>description</code> column for in-workbook documentation. The <code>readme</code> sheet is updated to document the <code>theme</code> sheet and to reflect that <code>include_in_resume</code> is now present on all section sheets.</li>
+<li>Internal helpers <code><a href="../reference/dot-cv_theme_defaults.html">.cv_theme_defaults()</a></code>, <code><a href="../reference/dot-resolve_theme.html">.resolve_theme()</a></code>, <code><a href="../reference/dot-build_format_block.html">.build_format_block()</a></code>, <code><a href="../reference/dot-build_typst_theme_block.html">.build_typst_theme_block()</a></code>, and <code><a href="../reference/dot-fa_icon_map.html">.fa_icon_map()</a></code> are added to support theming and icon assembly.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="dependency-changes-0-3-0">Dependency changes<a class="anchor" aria-label="anchor" href="#dependency-changes-0-3-0"></a></h3>
+<ul><li>
+<code>openxlsx2</code> added to <code>Imports</code>.</li>
+<li>
+<code>readxl</code> removed from <code>Imports</code>.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="curriculr-020">curriculr 0.2.0<a class="anchor" aria-label="anchor" href="#curriculr-020"></a></h2>
 <div class="section level3">
