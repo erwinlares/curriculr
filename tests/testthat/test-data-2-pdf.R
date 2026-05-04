@@ -29,8 +29,13 @@ palmer_copy <- function(env = parent.frame()) {
 }
 
 # ---------------------------------------------------------------------------
-# Guard — all tests in this file require Quarto
+# Guards — all tests in this file require Quarto and a local environment
 # ---------------------------------------------------------------------------
+
+# Skip the entire file on CI. Integration tests that invoke quarto_render()
+# are sensitive to cli/quarto version interactions on remote runners and are
+# intended to be run locally as part of the pre-submission checklist.
+skip_on_ci()
 
 skip_if_no_quarto <- function() {
     skip_if_not(
@@ -62,7 +67,7 @@ test_that("create_cv() PDF is written to the workbook directory", {
     skip_if_no_quarto()
     path   <- palmer_copy()
     result <- create_cv(data = path, overwrite = TRUE)
-    expect_equal(normalizePath(dirname(result)), normalizePath(dirname(path)))
+    expect_equal(dirname(result), dirname(path))
 })
 
 test_that("create_cv() respects custom output_file name", {
@@ -117,6 +122,21 @@ test_that("create_cv() renders successfully with use_icons = none", {
     path   <- palmer_copy()
     result <- create_cv(data      = path,
                         use_icons = "none",
+                        overwrite = TRUE)
+    expect_true(file.exists(result))
+    expect_gt(file.info(result)$size, 0L)
+})
+
+# ---------------------------------------------------------------------------
+# cap argument
+# ---------------------------------------------------------------------------
+
+test_that("create_cv() renders successfully with cap applied", {
+    skip_if_no_quarto()
+    path   <- palmer_copy()
+    result <- create_cv(data      = path,
+                        variant   = "resume",
+                        cap       = list(presentations = 2, publications = 1),
                         overwrite = TRUE)
     expect_true(file.exists(result))
     expect_gt(file.info(result)$size, 0L)
