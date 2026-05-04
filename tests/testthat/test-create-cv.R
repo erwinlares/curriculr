@@ -63,7 +63,7 @@ test_that("create_cv() scaffold mode overwrites when overwrite = TRUE", {
     withr::with_tempdir({
         create_cv()
         mtime1 <- file.info("cv-data-template.xlsx")$mtime
-        Sys.sleep(0.05)
+        Sys.sleep(2)  # Windows mtime resolution can be up to 2 seconds
         create_cv(overwrite = TRUE)
         mtime2 <- file.info("cv-data-template.xlsx")$mtime
         expect_true(mtime2 > mtime1)
@@ -131,7 +131,7 @@ test_that("create_cv() injects data path sentinel into CV.qmd", {
     )
     create_cv(data = path, overwrite = TRUE)
     lines <- qmd_lines(path)
-    expect_true(any(grepl(basename(path), lines, fixed = TRUE)))
+    expect_true(any(grepl(path, lines, fixed = TRUE)))
     expect_false(any(grepl("__CURRICULR_DATA_PATH__", lines, fixed = TRUE)))
 })
 

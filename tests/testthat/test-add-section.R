@@ -151,7 +151,7 @@ test_that("add_section() invisibly returns the workbook path", {
 test_that("add_section() writes back to the same file path", {
     path         <- palmer_copy()
     mtime_before <- file.info(path)$mtime
-    Sys.sleep(0.05)
+    Sys.sleep(2)  # Windows mtime resolution can be up to 2 seconds
     add_section(path, section = "patents")
     mtime_after <- file.info(path)$mtime
     expect_true(mtime_after > mtime_before)
