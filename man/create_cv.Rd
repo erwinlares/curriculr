@@ -4,21 +4,37 @@
 \alias{create_cv}
 \title{Generate a CV document from a curriculr workbook}
 \usage{
-create_cv(data = NULL, photo = NULL, output_file = "CV.pdf", overwrite = FALSE)
+create_cv(
+  data = NULL,
+  photo = NULL,
+  output_file = "CV.pdf",
+  overwrite = FALSE,
+  variant = "cv",
+  use_icons = "fontawesome"
+)
 }
 \arguments{
 \item{data}{A character string or \code{NULL}. Path to the Excel workbook.
 Defaults to \code{NULL}, which triggers scaffold mode.}
 
 \item{photo}{A character string or \code{NULL}. Path to the profile image.
-Defaults to \code{NULL}. In render mode, if \code{photo} is \code{NULL} the bundled
-placeholder image is used.}
+Defaults to \code{NULL}, which renders the CV without a profile photo using
+a single-column header layout. Supply a path to use a photo with the
+two-column header layout.}
 
 \item{output_file}{A character string. Name of the output PDF file.
 Defaults to \code{"CV.pdf"}. Ignored in scaffold mode.}
 
 \item{overwrite}{A logical. Whether to overwrite existing files. Defaults
 to \code{FALSE}.}
+
+\item{variant}{A character string. Controls content scope. \code{"cv"} (the
+default) renders all rows from every section. \code{"resume"} renders only
+rows where \code{include_in_resume} is checked in the workbook.}
+
+\item{use_icons}{A character string. \code{"fontawesome"} (the default) renders
+contact fields in the CV header with Font Awesome icons via the Typst
+\verb{@preview/fontawesome} package. \code{"none"} renders plain text.}
 }
 \value{
 In scaffold mode, invisibly returns the path to the directory
@@ -46,33 +62,57 @@ the same directory as the workbook.
 
 \strong{Render mode} (\code{data} supplied):
 \enumerate{
-\item Resolves the workbook and photo paths.
-\item Reads the workbook with \code{\link[=read_cv_data]{read_cv_data()}}.
-\item Validates that a \code{sections} sheet is present.
-\item Computes the photo path relative to the output directory.
-\item Writes \code{CV.qmd} by injecting resolved paths into the package template.
+\item Resolves and validates the workbook and photo paths.
+\item Reads the workbook with \code{\link[=read_cv_data]{read_cv_data()}}, applying \code{variant} filtering.
+\item Resolves theme values from the workbook or built-in defaults.
+\item Writes \code{CV.qmd} by injecting all resolved values into the package
+template via sentinel substitution.
 \item Calls \code{quarto::quarto_render()} to produce the PDF.
 }
 
-The \code{sections} sheet in the workbook controls which CV sections are
-rendered and in what order. Each row corresponds to one section. To
-exclude a section, delete its row. To reorder sections, reorder the rows.
+When \code{photo = NULL}, the CV header renders as a single full-width column
+containing the name, contact line, address, and profile statement. When
+a photo path is supplied, the header uses a two-column layout with the
+photo on the left.
+
+When \code{variant = "resume"}, row-level filtering is controlled entirely by
+the \code{include_in_resume} column in each section sheet. Check the rows you
+want included in the resume and leave the rest unchecked.
+
+Theme values (fonts, colors, page layout) are read from the \code{theme} sheet
+in the workbook. If the \code{theme} sheet is absent, built-in defaults are
+used. Individual keys missing from a partial \code{theme} sheet are filled from
+defaults.
 }
 \examples{
 \dontrun{
 # Scaffold mode — copy template files to current directory
 create_cv()
 
-# Render mode — use your own workbook and photo
+# Render mode — full CV with photo and Font Awesome icons
 create_cv(
   data  = "~/my_cv/cv-data.xlsx",
   photo = "~/my_cv/me.jpeg"
 )
 
-# Render mode — custom output filename
+# Render mode — no photo, single-column header
+create_cv(
+  data = "~/my_cv/cv-data.xlsx"
+)
+
+# Render mode — resume variant
 create_cv(
   data        = "~/my_cv/cv-data.xlsx",
   photo       = "~/my_cv/me.jpeg",
+  variant     = "resume",
+  output_file = "resume.pdf"
+)
+
+# Render mode — plain text contact line, custom output filename
+create_cv(
+  data        = "~/my_cv/cv-data.xlsx",
+  photo       = "~/my_cv/me.jpeg",
+  use_icons   = "none",
   output_file = "erwin-lares-cv.pdf"
 )
 }

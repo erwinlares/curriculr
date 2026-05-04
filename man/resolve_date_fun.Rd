@@ -17,6 +17,6 @@ A function suitable for passing to the \code{date_fun} argument of
 \description{
 Maps a string token from the \code{sections} sheet to the corresponding date
 formatting function used by \code{cv_render_section()}. This allows date
-formatting behaviour to be controlled from the Excel workbook rather than
+formatting behavior to be controlled from the Excel workbook rather than
 hardcoded in the Quarto template.
 }

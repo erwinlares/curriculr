@@ -4,43 +4,69 @@
 \alias{read_cv_data}
 \title{Read CV data from an Excel workbook}
 \usage{
-read_cv_data(path = "data/cv-data.xlsx")
+read_cv_data(path = "data/cv-data.xlsx", variant = "cv")
 }
 \arguments{
 \item{path}{A character string. Path to the Excel workbook. Defaults to
 \code{"data/cv-data.xlsx"}.}
+
+\item{variant}{A character string. Controls which rows are included from
+each section sheet. \code{"cv"} (the default) returns all rows. \code{"resume"}
+returns only rows where \code{include_in_resume} is \code{TRUE}. Sections that
+lack an \code{include_in_resume} column are included in full regardless of
+\code{variant}.}
 }
 \value{
 A named list with one element per sheet in the workbook. The
-\code{profile} element is a named character vector; all other elements are
-data frames. Access sections as \code{cv$education}, \code{cv$experience}, etc.
-Access profile fields as \code{cv$profile[["first_name"]]}. Access the
-sections control sheet as \code{cv$sections}.
+\code{profile} element is a named character vector; the \code{theme} element is a
+named character vector (or \code{NULL} if the \code{theme} sheet is absent); all
+other elements are data frames. The \code{include_in_resume} column is dropped
+from returned data frames — it is used for filtering only and is not
+passed to the rendering pipeline. Access sections as \code{cv$education},
+\code{cv$experience}, etc. Access profile fields as
+\code{cv$profile[["first_name"]]}. Access theme values as
+\code{cv$theme[["accent_color"]]}. Access the sections control sheet as
+\code{cv$sections}.
 }
 \description{
 Reads all sheets from a curriculr-formatted Excel workbook and returns them
 as a named list of data frames. Each sheet becomes one list element, named
 after the sheet. The \code{profile} sheet is returned as a named character vector
-for convenient scalar access. The \code{sections} sheet is returned as a data
-frame in the order the rows appear in the workbook — row order controls
-section render order and must not be sorted.
+for convenient scalar access. The \code{theme} sheet is returned as a named
+character vector keyed by the \code{key} column. The \code{sections} sheet is returned
+as a data frame in the order the rows appear in the workbook — row order
+controls section render order and must not be sorted.
 }
 \details{
 Sheets containing a \code{startYear} column are sorted in descending order by
-\code{startYear} so that the most recent entries appear first. The \code{profile} and
-\code{sections} sheets are exempt from sorting.
+\code{startYear} so that the most recent entries appear first. The \code{profile},
+\code{theme}, and \code{sections} sheets are exempt from sorting.
 
 The workbook must follow the curriculr schema. Every section sheet should
 contain a \code{title} column as the primary entry label. The \code{profile} sheet
 must contain \code{field} and \code{value} columns. The \code{sections} sheet must contain
-at minimum \code{section} and \code{label} columns.
+at minimum \code{section} and \code{label} columns. The \code{theme} sheet, if present,
+must contain \code{key} and \code{value} columns.
 
-This function requires the \code{readxl} package. It is listed as a dependency
-of curriculr and will be installed automatically.
+All cell values are read as character strings after import. Numeric columns
+such as \code{startYear} and \code{endYear} are coerced to character so that
+downstream rendering treats them uniformly. The \code{include_in_resume} column
+is read as a logical before coercion and used for row filtering when
+\code{variant = "resume"}.
+
+Empty cells and cells containing the literal string \code{"NA"} are both
+converted to \code{NA}.
+
+If the \code{theme} sheet is absent, \code{cv$theme} is \code{NULL} and \code{create_cv()}
+will fall back to built-in defaults.
 }
 \examples{
 \dontrun{
+# Full CV — all rows from every section
 cv <- read_cv_data("data/cv-data.xlsx")
+
+# Resume variant — only rows marked include_in_resume
+cv <- read_cv_data("data/cv-data.xlsx", variant = "resume")
 
 # Access a section
 cv$education
@@ -52,5 +78,9 @@ cv$sections
 # Access profile fields
 cv$profile[["first_name"]]
 cv$profile[["email"]]
+
+# Access theme values
+cv$theme[["accent_color"]]
+cv$theme[["papersize"]]
 }
 }

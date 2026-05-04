@@ -6,18 +6,11 @@
 # print an unwanted heading before the profile image and header block.
 # title: "Your Name CV"
 
-format:
-  typst:
-    toc: false
-    papersize: us-letter
-    margin:
-      x: 0.62in
-      y: 0.58in
+%%CURRICULR_FORMAT%%
 
 params:
-  resume: false
-  years: 5
-  npresentations: 10
+  use_icons: "__CURRICULR_USE_ICONS__"
+  variant: "__CURRICULR_VARIANT__"
 
 execute:
   echo: false
@@ -30,25 +23,12 @@ execute:
 
 library(curriculr)
 
-# Path to the Excel workbook. Injected by create_cv() at render time.
-# Do not edit this line manually — run create_cv() again to regenerate.
-cv <- read_cv_data("__CURRICULR_DATA_PATH__")
+# Path to the Excel workbook and variant are injected by create_cv() at render
+# time. Do not edit these lines manually — run create_cv() again to regenerate.
+cv <- read_cv_data("__CURRICULR_DATA_PATH__", variant = params$variant)
 ```
 
-```{=typst}
-// -----------------------------------------------------------------------------
-// Document style settings
-// -----------------------------------------------------------------------------
-
-#set text(font: "Lato", size: 8.8pt, fill: rgb("#3f3f3f"))
-#set par(justify: false, leading: 0.48em)
-
-#let accent    = rgb("#c5050c")
-#let dark      = rgb("#303030")
-#let bodygray  = rgb("#555555")
-#let lightgray = rgb("#777777")
-#let rulegray  = rgb("#d9d9d9")
-```
+%%CURRICULR_THEME%%
 
 ```{r}
 #| label: header
@@ -60,61 +40,74 @@ cv <- read_cv_data("__CURRICULR_DATA_PATH__")
 first_name        <- cv$profile[["first_name"]]
 last_name         <- cv$profile[["last_name"]]
 address           <- cv$profile[["address"]]
-email             <- cv$profile[["email"]]
-website           <- cv$profile[["website"]]
-github            <- cv$profile[["github"]]
-linkedin          <- cv$profile[["linkedin"]]
 profile_statement <- cv$profile[["profile_statement"]]
 
 # Photo path injected by create_cv() at render time.
+# An empty string means no photo was supplied — single-column layout is used.
 # Do not edit this line manually — run create_cv() again to regenerate.
 photo <- "__CURRICULR_PHOTO_PATH__"
 
-# Escape all profile values for safe use in Typst.
+# Escape profile values for safe use in Typst
 first_name        <- typst_escape(first_name)
 last_name         <- typst_escape(last_name)
 address           <- typst_escape(address)
-email             <- typst_escape(email)
-website           <- typst_escape(website)
-github            <- typst_escape(github)
-linkedin          <- typst_escape(linkedin)
 profile_statement <- typst_escape(profile_statement)
 
-# Assemble the contact line — blank fields are omitted automatically.
-contact_parts <- c(
-  website,
-  email,
-  if (nzchar(github))   paste0("github.com/", github),
-  if (nzchar(linkedin)) paste0("linkedin.com/", linkedin)
-)
-contact_parts <- contact_parts[nzchar(contact_parts)]
-contact_line  <- paste(contact_parts, collapse = " \u00b7 ")
+# Build the contact line. cv_contact_line() handles icon lookup, plain text
+# fallback, and separator style based on use_icons.
+contact_line <- cv_contact_line(cv$profile, use_icons = params$use_icons)
 
-cat(sprintf(
-  paste0(
-    '\n```{=typst}\n',
-    '#grid(columns: (1.36in, 1fr), gutter: 0.42in,\n',
-    '  [#image("%s", width: 1.27in)],\n',
-    '  [\n',
-    '    #align(center)[\n',
-    '      #text(size: 27pt, weight: "light",  fill: rgb("#777777"))[%s]',
-    '#h(0.16em)',
-    '#text(size: 27pt, weight: "bold", fill: dark)[%s]\n',
-    '      #v(0.16em)\n',
-    '      #text(size: 8.2pt, fill: lightgray)[%s]\n',
-    '      #v(0.18em)\n',
-    '      #text(size: 8.3pt, fill: lightgray)[%s]\n',
-    '      #v(0.46em)\n',
-    '      #text(size: 9pt, style: "italic", fill: bodygray)[%s]\n',
-    '    ]\n',
-    '  ]\n',
-    ')\n',
-    '#v(0.85em)\n',
-    '```\n'
-  ),
-  photo, first_name, last_name,
-  address, contact_line, profile_statement
-))
+# Emit the header block. When a photo path is present, use a two-column grid
+# with the image on the left. When photo is empty, use a single full-width
+# column so the layout doesn't leave a blank gap on the left.
+if (nzchar(photo)) {
+  cat(sprintf(
+    paste0(
+      '\n```{=typst}\n',
+      '#grid(columns: (1.36in, 1fr), gutter: 0.42in,\n',
+      '  [#image("%s", width: 1.27in)],\n',
+      '  [\n',
+      '    #align(center)[\n',
+      '      #text(size: 27pt, weight: "light",  fill: rgb("#777777"))[%s]',
+      '#h(0.16em)',
+      '#text(size: 27pt, weight: "bold", fill: dark)[%s]\n',
+      '      #v(0.16em)\n',
+      '      #text(size: 8.2pt, fill: lightgray)[%s]\n',
+      '      #v(0.18em)\n',
+      '      #text(size: 8.3pt, fill: lightgray)[%s]\n',
+      '      #v(0.46em)\n',
+      '      #text(size: 9pt, style: "italic", fill: bodygray)[%s]\n',
+      '    ]\n',
+      '  ]\n',
+      ')\n',
+      '#v(0.85em)\n',
+      '```\n'
+    ),
+    photo, first_name, last_name,
+    address, contact_line, profile_statement
+  ))
+} else {
+  cat(sprintf(
+    paste0(
+      '\n```{=typst}\n',
+      '#align(center)[\n',
+      '  #text(size: 27pt, weight: "light",  fill: rgb("#777777"))[%s]',
+      '#h(0.16em)',
+      '#text(size: 27pt, weight: "bold", fill: dark)[%s]\n',
+      '  #v(0.16em)\n',
+      '  #text(size: 8.2pt, fill: lightgray)[%s]\n',
+      '  #v(0.18em)\n',
+      '  #text(size: 8.3pt, fill: lightgray)[%s]\n',
+      '  #v(0.46em)\n',
+      '  #text(size: 9pt, style: "italic", fill: bodygray)[%s]\n',
+      ']\n',
+      '#v(0.85em)\n',
+      '```\n'
+    ),
+    first_name, last_name,
+    address, contact_line, profile_statement
+  ))
+}
 ```
 
 ```{r}
