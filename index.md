@@ -8,6 +8,13 @@ files.
 
 ## Installation
 
+You can install curriculr from CRAN:
+
+``` r
+
+install.packages("toolero")
+```
+
 Install the development version from GitHub:
 
 ``` r

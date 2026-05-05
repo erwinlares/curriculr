@@ -61,8 +61,11 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>Install the development version from GitHub:</p>
+<p>You can install curriculr from CRAN:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"toolero"</span><span class="op">)</span></span></code></pre></div>
+<p>Install the development version from GitHub:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"erwinlares/curriculr"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -83,7 +86,7 @@
 <h3 id="step-1--scaffold-your-project">Step 1 — scaffold your project<a class="anchor" aria-label="anchor" href="#step-1--scaffold-your-project"></a>
 </h3>
 <p>Call <code><a href="reference/create_cv.html">create_cv()</a></code> with no arguments. This copies the template workbook and a placeholder profile image into your current working directory:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/erwinlares/curriculr" class="external-link">curriculr</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>You will see:</p>
@@ -151,14 +154,14 @@ i Next steps:
 <div class="section level3">
 <h3 id="step-3--render">Step 3 — render<a class="anchor" aria-label="anchor" href="#step-3--render"></a>
 </h3>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span></span>
 <span>  data  <span class="op">=</span> <span class="st">"cv-data-template.xlsx"</span>,</span>
 <span>  photo <span class="op">=</span> <span class="st">"your-photo.png"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>This writes <code>CV.qmd</code> and <code>CV.pdf</code> next to your workbook. Open <code>CV.pdf</code> to review the output. To update your CV, edit the workbook and call <code><a href="reference/create_cv.html">create_cv()</a></code> again with <code>overwrite = TRUE</code>.</p>
 <p>To render without a profile photo, omit the <code>photo</code> argument. The header will use a single-column layout with your name, contact line, and profile statement centered on the page:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span>data <span class="op">=</span> <span class="st">"cv-data-template.xlsx"</span><span class="op">)</span></span></code></pre></div>
 <hr>
 </div>
@@ -261,7 +264,7 @@ i Next steps:
 <h2 id="rendering-a-resume">Rendering a resume<a class="anchor" aria-label="anchor" href="#rendering-a-resume"></a>
 </h2>
 <p>When you want a shorter, focused version of your CV, use <code>variant = "resume"</code>. curriculr will include only the rows you have checked in the <code>include_in_resume</code> column of each section sheet:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span></span>
 <span>  data        <span class="op">=</span> <span class="st">"cv-data-template.xlsx"</span>,</span>
 <span>  photo       <span class="op">=</span> <span class="st">"your-photo.png"</span>,</span>
@@ -329,7 +332,7 @@ i Next steps:
 <h3 id="adding-a-new-section">Adding a new section<a class="anchor" aria-label="anchor" href="#adding-a-new-section"></a>
 </h3>
 <p>Use <code><a href="reference/add_section.html">add_section()</a></code> to add a new sheet and register it in the <code>sections</code> control sheet in one step:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/add_section.html">add_section</a></span><span class="op">(</span></span>
 <span>  <span class="st">"cv-data-template.xlsx"</span>,</span>
 <span>  section  <span class="op">=</span> <span class="st">"patents"</span>,</span>
@@ -348,7 +351,7 @@ i Next steps:
 <code>create_cv()</code><a class="anchor" aria-label="anchor" href="#create_cv"></a>
 </h3>
 <p>The main entry point. No arguments triggers scaffold mode. With <code>data</code> triggers render mode.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Scaffold mode</span></span>
 <span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -388,7 +391,7 @@ i Next steps:
 <code>add_section()</code><a class="anchor" aria-label="anchor" href="#add_section"></a>
 </h3>
 <p>Adds a new sheet to an existing workbook and registers it in the <code>sections</code> control sheet.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/add_section.html">add_section</a></span><span class="op">(</span></span>
 <span>  <span class="st">"cv-data-template.xlsx"</span>,</span>
 <span>  section   <span class="op">=</span> <span class="st">"invited_talks"</span>,</span>
@@ -402,7 +405,7 @@ i Next steps:
 <code>read_cv_data()</code><a class="anchor" aria-label="anchor" href="#read_cv_data"></a>
 </h3>
 <p>Reads all sheets from the workbook into a named list. The <code>profile</code> and <code>theme</code> sheets become named character vectors; section sheets become data frames; the <code>sections</code> sheet is returned in row order.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_cv_data.html">read_cv_data</a></span><span class="op">(</span><span class="st">"cv-data-template.xlsx"</span><span class="op">)</span></span>
 <span><span class="va">cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_cv_data.html">read_cv_data</a></span><span class="op">(</span><span class="st">"cv-data-template.xlsx"</span>, variant <span class="op">=</span> <span class="st">"resume"</span><span class="op">)</span></span>
 <span></span>
@@ -416,7 +419,7 @@ i Next steps:
 <code>cv_contact_line()</code><a class="anchor" aria-label="anchor" href="#cv_contact_line"></a>
 </h3>
 <p>Assembles the contact line from a profile vector. Useful when building custom Quarto templates.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/cv_contact_line.html">cv_contact_line</a></span><span class="op">(</span><span class="va">cv</span><span class="op">$</span><span class="va">profile</span>, use_icons <span class="op">=</span> <span class="st">"fontawesome"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/cv_contact_line.html">cv_contact_line</a></span><span class="op">(</span><span class="va">cv</span><span class="op">$</span><span class="va">profile</span>, use_icons <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -556,7 +559,7 @@ i Next steps:
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Erwin Lares <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-3284-828X" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
+<li>Erwin Lares <br><small class="roles"> Author, maintainer, copyright holder </small> <a href="https://orcid.org/0000-0002-3284-828X" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 </ul>
 </div>
 

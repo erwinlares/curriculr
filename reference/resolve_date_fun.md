@@ -3,7 +3,7 @@
 Maps a string token from the `sections` sheet to the corresponding date
 formatting function used by
 [`cv_render_section()`](https://erwinlares.github.io/curriculr/reference/cv_render_section.md).
-This allows date formatting behavior to be controlled from the Excel
+This allows date formatting behaviour to be controlled from the Excel
 workbook rather than hardcoded in the Quarto template.
 
 ## Usage
