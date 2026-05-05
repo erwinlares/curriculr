@@ -18,7 +18,7 @@ Quarto's Typst engine. No LaTeX. No vitae. No custom `.cls` files.
 You can install curriculr from CRAN:
 
 ```r
-install.packages("toolero")
+install.packages("curriculr")
 ```
 
 Install the development version from GitHub:
