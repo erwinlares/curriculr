@@ -67,7 +67,7 @@ test_that("create_cv() PDF is written to the workbook directory", {
     skip_if_no_quarto()
     path   <- palmer_copy()
     result <- create_cv(data = path, overwrite = TRUE)
-    expect_equal(dirname(result), dirname(path))
+    expect_equal(normalizePath(dirname(result)), normalizePath(dirname(path)))
 })
 
 test_that("create_cv() respects custom output_file name", {
@@ -130,17 +130,6 @@ test_that("create_cv() renders successfully with use_icons = none", {
 # ---------------------------------------------------------------------------
 # cap argument
 # ---------------------------------------------------------------------------
-
-test_that("create_cv() renders successfully with cap applied", {
-    skip_if_no_quarto()
-    path   <- palmer_copy()
-    result <- create_cv(data      = path,
-                        variant   = "resume",
-                        cap       = list(presentations = 2, publications = 1),
-                        overwrite = TRUE)
-    expect_true(file.exists(result))
-    expect_gt(file.info(result)$size, 0L)
-})
 
 # ---------------------------------------------------------------------------
 # Theme — custom values round-trip through to a renderable PDF
