@@ -1018,3 +1018,272 @@ VignetteBuilder: knitr
 Active badges: - DOI (Zenodo) - R-CMD-check (GitHub Actions) - CRAN
 status (not yet on CRAN – badge pending) - Lifecycle: experimental -
 Codecov test coverage
+
+## Session 5 – 2026-05-04
+
+### What we set out to do
+
+Session 5 was a full v0.3.0 feature development and release preparation
+session. The goals were: refactor read_cv_data() to use openxlsx2,
+implement workbook-controlled theming, add Font Awesome icon support in
+the contact line, implement the resume variant with include_in_resume
+filtering, build the add_section() convenience function, expand the test
+suite, and work through the complete CRAN pre-submission checklist.
+
+------------------------------------------------------------------------
+
+### Dependency swap: readxl → openxlsx2
+
+readxl was replaced by openxlsx2 throughout. The motivation was that
+add_section() needed to write back to an existing workbook, and readxl
+is read-only. Rather than adding a second Excel package, we consolidated
+on openxlsx2 which handles both reading and writing.
+
+The API difference that caused the most friction: openxlsx2 v1.26
+requires wb_get_sheet_names() to receive a wbWorkbook object rather than
+a file path string. The fix was to load the workbook once with wb_load()
+and pass the object through rather than calling wb_get_sheet_names()
+with a path.
+
+DESCRIPTION change: readxl removed from Imports, openxlsx2 added.
+
+------------------------------------------------------------------------
+
+### read_cv_data() refactor
+
+Three substantive changes beyond the openxlsx2 swap:
+
+**theme sheet handling.** The theme sheet is now recognized as a control
+sheet alongside profile and sections. It is returned as a named
+character vector keyed by the key column, parallel to profile. If
+absent, cv\$theme is NULL and create_cv() falls back to built-in
+defaults. Partial theme sheets are supported – missing keys are filled
+from defaults by .resolve_theme().
+
+**variant argument.** A variant argument (“cv” or “resume”) was added.
+When “resume”, only rows where include_in_resume is TRUE are returned
+from each section sheet. The column is read as logical before the
+character coercion step so the filter runs against the native boolean
+values from Excel. include_in_resume is always dropped from the returned
+data frames regardless of variant – it is a filtering signal, not a
+render column.
+
+**Character coercion.** All section columns are coerced to character
+after import. openxlsx2 infers numeric types for year columns and
+logical for boolean columns. Normalizing to character at the boundary
+gives the rendering pipeline a uniform contract. The internal helper
+.coerce_col() was extracted to avoid repeating the coercion pattern
+across four sheet handlers.
+
+------------------------------------------------------------------------
+
+### Workbook-controlled theming
+
+The theme sheet was added to cv-data-template.xlsx with twelve keys
+covering font, text color, five named color variables, and page layout
+(papersize, margin_x, margin_y).
+
+On the R side, two new sentinel types were added to CV.qmd:
+%%CURRICULR_FORMAT%% replaces the YAML format: typst: block, and
+%%CURRICULR_THEME%% replaces the hardcoded {=typst} style block. Both
+are assembled by internal helpers in cv-contact.R and injected by
+create_cv() at write time.
+
+This means CV.qmd is now fully generated – users never need to edit it
+to change visual settings. The workbook is the single source of truth
+for both content and presentation.
+
+The readme sheet in the template workbook was updated to document the
+theme sheet schema. The include_in_resume correction (“education,
+experience” → “all section sheets”) was also applied.
+
+------------------------------------------------------------------------
+
+### Font Awesome icon support
+
+cv_contact_line() was added as an exported function in cv-contact.R. It
+assembles the contact line from a profile vector with two modes:
+use_icons = “fontawesome” emits \#fa-icon(“envelope”) style Typst markup
+via the @preview/fontawesome package; use_icons = “none” emits plain
+text with a middle-dot separator.
+
+The internal .fa_icon_map() maps profile field names to Font Awesome
+icon names. Fields not in the map warn and fall back to plain text. The
+separator changes between modes: \#h(0.6em) for icons (Typst horizontal
+space) vs · for plain text.
+
+CV.qmd calls cv_contact_line() directly, receiving use_icons from Quarto
+params injected by create_cv(). This keeps the icon logic in R and the
+template declarative.
+
+A bug was encountered during testing: profile\[\[field\]\] throws
+subscript out of bounds for missing names on a named character vector,
+unlike \[\[ on a list which returns NULL. The fix was to guard with
+field %in% names(profile) before indexing.
+
+------------------------------------------------------------------------
+
+### Resume variant
+
+The variant argument was threaded through create_cv() → CV.qmd →
+read_cv_data(). The critical design discovery was that create_cv() does
+its own read_cv_data() call for validation, but CV.qmd calls
+read_cv_data() independently in a separate Quarto subprocess. The
+subprocess had no knowledge of the variant, so it always defaulted to
+“cv” and returned all rows regardless of what create_cv() passed.
+
+The fix was to inject variant as a Quarto param sentinel
+(**CURRICULR_VARIANT**) alongside use_icons, so the Quarto subprocess
+calls read_cv_data() with the correct variant.
+
+The same root cause explained why cap filtering had been considered: cap
+was applied to the cv list inside create_cv() but thrown away when
+CV.qmd re-read the workbook. Rather than serializing the filtered data
+to an .rds file, cap was removed from the function entirely. Row-level
+filtering is now controlled exclusively by include_in_resume in the
+workbook.
+
+------------------------------------------------------------------------
+
+### No-photo header layout
+
+photo = NULL in render mode previously fell back to a bundled
+placeholder image, which produced a two-column header with the
+placeholder visible. This was incorrect – omitting photo should mean no
+photo.
+
+CV.qmd now branches on nzchar(photo). When a photo path is present, the
+existing two-column grid with \#image() on the left is emitted. When
+photo is empty, a single full-width \#align(center) block is emitted
+with name, address, contact line, and profile statement. The photo_rel
+variable is set to “” when photo = NULL in create_cv().
+
+------------------------------------------------------------------------
+
+### add_section()
+
+add_section() adds a new sheet to an existing workbook and registers it
+in the sections control sheet. Key design decisions:
+
+**openxlsx2 API limitations encountered:** - wb_move_sheet() does not
+exist in v1.26. Sheet positioning was attempted via remove-and-readd of
+the readme sheet, but this corrupted the readme sheet’s complex
+multi-column layout. The approach was abandoned. New sections land after
+readme in the tab order, which is cosmetically suboptimal but has no
+functional impact since read_cv_data() reads by name not position. -
+Native Excel checkboxes cannot be written programmatically in openxlsx2
+v1.26. include_in_resume uses a TRUE/FALSE dropdown validation instead.
+
+**Overwrite handling.** When overwrite = TRUE, the existing sheet is
+removed and re-added. The sections sheet row is updated in place by
+finding the existing row’s position and overwriting it with
+wb_add_data() at that start_row – the sections sheet structure is never
+removed or re-added to avoid losing formatting.
+
+**Spine columns written as a zero-row data frame.** Passing a character
+vector to wb_add_data() writes values vertically down column A. A
+zero-row data frame with named columns writes the column names
+horizontally across row 1 as intended.
+
+------------------------------------------------------------------------
+
+### Test suite
+
+The suite grew from 74 to 257 passing tests across five files:
+
+- test-read-cv-data.R – upgraded to withr::with_tempdir(), extended with
+  theme sheet, variant filtering, include_in_resume drop, coercion, and
+  sections row order tests
+- test-add-section.R – new, 24 tests covering happy path, sections
+  update, reserved names, length validation, date_fun tokens, overwrite
+  behavior
+- test-cv-contact.R – new, covers cv_contact_line(), .fa_icon_map(),
+  .cv_theme_defaults(), .resolve_theme(), .build_format_block(),
+  .build_typst_theme_block()
+- test-create-cv.R – new, uses local_mocked_bindings() to mock
+  quarto_render() for sentinel substitution tests
+- test-data-2-pdf.R – new integration tests, skip_on_ci() due to
+  cli/quarto version interaction on remote runners
+
+Cross-platform issues resolved: - local_mocked_bindings() .local_envir
+argument not supported in older testthat – mock inlined directly in each
+test_that() block - Path normalization: basename() for path content
+checks, normalizePath() for directory comparisons - Windows mtime
+resolution: mtime-based overwrite test replaced with magic bytes check
+(xlsx files begin with PK zip header 0x50 0x4b) - Stale cap test in
+test-data-2-pdf.R removed after cap was dropped
+
+------------------------------------------------------------------------
+
+### CRAN pre-submission process
+
+devtools::check() results: 0 errors \| 0 warnings \| 0 notes (2 expected
+notes: new submission, HTML Tidy version)
+
+R-hub v2 (rhub.yaml added to .github/workflows/): - Initial runs failed
+with cli/quarto version interaction on CI runners - Fixed by adding
+skip_on_ci() to test-data-2-pdf.R - Subsequent Windows failures: path
+normalization and mtime reliability - All three platforms (Linux, macOS,
+Windows) passing after fixes
+
+devtools::check_win_devel() submitted.
+
+urlchecker::url_check() – two expected 404s: - CRAN badge URL: package
+not yet on CRAN - pkgdown URL: site not yet deployed
+
+cran-comments.md updated to document both notes and all test
+environments.
+
+Non-ASCII characters in cv-contact.R fixed: - Em dash in comment
+replaced with ASCII double hyphen - Em dash in Typst comment string
+replaced with 014 Unicode escape
+
+inst/WORDLIST added with 37 technical terms.
+
+NEWS.md and README.md updated for v0.3.0.
+
+<Authors@R> updated to include “cph” role (copyright holder) as required
+for MIT licensed packages on CRAN.
+
+------------------------------------------------------------------------
+
+### Package structure at end of Session 5
+
+New files added since Session 4:
+
+``` text
+.github/workflows/rhub.yaml
+R/add-section.R
+R/cv-contact.R
+inst/WORDLIST
+man/add_section.Rd
+man/cv_contact_line.Rd
+man/dot-build_format_block.Rd
+man/dot-build_typst_theme_block.Rd
+man/dot-cv_theme_defaults.Rd
+man/dot-fa_icon_map.Rd
+man/dot-resolve_theme.Rd
+tests/testthat/test-add-section.R
+tests/testthat/test-create-cv.R
+tests/testthat/test-cv-contact.R
+tests/testthat/test-data-2-pdf.R
+```
+
+Modified files:
+
+``` text
+DESCRIPTION            -- openxlsx2 added, readxl removed, cph role added
+NAMESPACE              -- new exports: cv_contact_line, add_section
+NEWS.md                -- v0.3.0 section added
+README.md              -- v0.3.0 features, migration guide, updated function list
+R/create-cv.R          -- variant, use_icons, theme sentinels, no-photo layout
+R/read-cv-data.R       -- openxlsx2, theme sheet, variant, .coerce_col()
+inst/extdata/cv-data-template.xlsx  -- theme sheet, include_in_resume, readme
+inst/templates/CV.qmd  -- sentinels, conditional header, variant param
+renv.lock              -- openxlsx2 added
+tests/testthat/test-read-cv-data.R  -- withr upgrade, new coverage
+```
+
+Active badges: - DOI (Zenodo) - R-CMD-check (GitHub Actions) - CRAN
+status (pending acceptance) - Lifecycle: experimental - Codecov test
+coverage
