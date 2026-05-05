@@ -3,7 +3,7 @@ Title: Data-Driven CVs with Quarto and Typst
 Version: 0.3.0
 Date: 2026-05-04
 Authors@R: 
-    person("Erwin", "Lares", , "erwin.lares@wisc.edu", role = c("aut", "cre"),
+    person("Erwin", "Lares", , "erwin.lares@wisc.edu", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0002-3284-828X"))
 Description: Provides tools for producing data-driven curriculum vitae
     documents from structured data stored in an Excel workbook. The core
