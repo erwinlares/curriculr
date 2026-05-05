@@ -131,7 +131,8 @@ test_that("create_cv() injects data path sentinel into CV.qmd", {
     )
     create_cv(data = path, overwrite = TRUE)
     lines <- qmd_lines(path)
-    expect_true(any(grepl(path, lines, fixed = TRUE)))
+    # Use basename to avoid path normalization differences across platforms
+    expect_true(any(grepl(basename(path), lines, fixed = TRUE)))
     expect_false(any(grepl("__CURRICULR_DATA_PATH__", lines, fixed = TRUE)))
 })
 
