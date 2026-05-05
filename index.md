@@ -12,7 +12,7 @@ You can install curriculr from CRAN:
 
 ``` r
 
-install.packages("toolero")
+install.packages("curriculr")
 ```
 
 Install the development version from GitHub:
