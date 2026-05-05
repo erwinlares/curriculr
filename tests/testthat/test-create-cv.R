@@ -62,11 +62,14 @@ test_that("create_cv() scaffold mode does not overwrite existing files by defaul
 test_that("create_cv() scaffold mode overwrites when overwrite = TRUE", {
     withr::with_tempdir({
         create_cv()
-        mtime1 <- file.info("cv-data-template.xlsx")$mtime
-        Sys.sleep(2)  # Windows mtime resolution can be up to 2 seconds
+        # Write a sentinel string into the workbook file so we can confirm
+        # it was replaced — mtime comparison is unreliable on Windows CI.
+        writeLines("sentinel", "cv-data-template.xlsx")
         create_cv(overwrite = TRUE)
-        mtime2 <- file.info("cv-data-template.xlsx")$mtime
-        expect_true(mtime2 > mtime1)
+        # If overwrite worked, the file is no longer our sentinel string —
+        # it should be a valid xlsx binary (starts with PK magic bytes)
+        raw_bytes <- readBin("cv-data-template.xlsx", "raw", n = 4)
+        expect_equal(as.integer(raw_bytes[1:2]), c(0x50, 0x4b))  # PK zip header
     })
 })
 
