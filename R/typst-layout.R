@@ -70,6 +70,7 @@ cv_section <- function(title) {
 #' @return A character string of raw Typst markup.
 #'
 #' @keywords internal
+#' @noRd
 .cv_entry <- function(title        = "",
                       organization = "",
                       detail       = "",

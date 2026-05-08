@@ -69,11 +69,13 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' # Scaffold mode — copy template files to current directory
-#' create_cv()
+#' \donttest{
+#' # Scaffold mode — copy template files to a temp directory
+#' withr::with_dir(tempdir(), create_cv())
+#' }
 #'
-#' # Render mode — full CV with photo and Font Awesome icons
+#' \dontrun{
+#' # Render mode — requires cv-data.xlsx, Quarto, and Typst
 #' create_cv(
 #'   data  = "~/my_cv/cv-data.xlsx",
 #'   photo = "~/my_cv/me.jpeg"

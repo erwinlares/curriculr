@@ -86,10 +86,17 @@ Control sheets (\code{profile}, \code{sections}, \code{theme}, \code{readme}) ca
 as section names.
 }
 \examples{
-\dontrun{
-# Add a section with defaults
-add_section("cv-data.xlsx", section = "patents")
+\donttest{
+# Copy the template to a temp directory and add a section
+tmp <- file.path(tempdir(), "cv-data.xlsx")
+file.copy(
+  system.file("extdata", "cv-data-template.xlsx", package = "curriculr"),
+  tmp
+)
+add_section(tmp, section = "patents")
+}
 
+\dontrun{
 # Add a section with a display label that differs from the sheet name
 add_section("cv-data.xlsx",
             section  = "invited_talks",

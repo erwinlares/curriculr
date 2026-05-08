@@ -23,6 +23,7 @@
 #' @return A character string.
 #'
 #' @keywords internal
+#' @noRd
 .cv_value <- function(row, name, default = "") {
     if (!name %in% names(row)) return(default)
     value <- row[[name]][[1]]

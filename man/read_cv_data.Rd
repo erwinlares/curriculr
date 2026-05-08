@@ -61,26 +61,20 @@ If the \code{theme} sheet is absent, \code{cv$theme} is \code{NULL} and \code{cr
 will fall back to built-in defaults.
 }
 \examples{
-\dontrun{
-# Full CV — all rows from every section
-cv <- read_cv_data("data/cv-data.xlsx")
-
-# Resume variant — only rows marked include_in_resume
-cv <- read_cv_data("data/cv-data.xlsx", variant = "resume")
-
-# Access a section
+\donttest{
+# Read the sample data shipped with the package
+cv <- read_cv_data(
+  system.file("extdata", "cv-data-template.xlsx", package = "curriculr")
+)
 cv$education
-cv$experience
-
-# Access the sections control sheet
-cv$sections
-
-# Access profile fields
 cv$profile[["first_name"]]
-cv$profile[["email"]]
+}
 
-# Access theme values
-cv$theme[["accent_color"]]
-cv$theme[["papersize"]]
+\dontrun{
+# Read a user-supplied file
+cv <- read_cv_data("~/my_cv/cv-data.xlsx")
+
+# Resume variant
+cv <- read_cv_data("~/my_cv/cv-data.xlsx", variant = "resume")
 }
 }

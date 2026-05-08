@@ -35,15 +35,20 @@
 #'   Typst blocks to the Quarto document output stream.
 #'
 #' @examples
-#' \dontrun{
-#' # Inside a Quarto chunk with results = 'asis':
-#'
-#' # Full entry with date range and location
-#' cat(.cv_section("Experience"))
+#' \donttest{
+#' # Load sample data and render the experience section
+#' cv <- read_cv_data(
+#'   system.file("extdata", "cv-data-template.xlsx", package = "curriculr")
+#' )
 #' cv_render_section(cv$experience,
 #'                   title_col  = "title",
 #'                   org_col    = "unit",
 #'                   detail_col = "detail")
+#' }
+#'
+#' \dontrun{
+#' # The following examples are intended to be called inside a Quarto chunk
+#' # with results = 'asis'. They require internal helpers and a loaded cv object.
 #'
 #' # Year-only dates
 #' cat(.cv_section("Education"))
@@ -110,6 +115,7 @@ cv_render_section <- function(data,
 #' @return A character vector of Typst blocks, one element per row in `data`.
 #'
 #' @keywords internal
+#' @noRd
 .build_section_blocks <- function(data,
                                   title_col,
                                   org_col    = NULL,

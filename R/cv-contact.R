@@ -87,6 +87,7 @@ cv_contact_line <- function(profile, use_icons = "fontawesome") {
 #' @return A named character vector.
 #'
 #' @keywords internal
+#' @noRd
 .fa_icon_map <- function() {
     c(
         email    = "envelope",
@@ -109,6 +110,7 @@ cv_contact_line <- function(profile, use_icons = "fontawesome") {
 #'   schema.
 #'
 #' @keywords internal
+#' @noRd
 .cv_theme_defaults <- function() {
     c(
         font_family     = "Lato",
@@ -140,6 +142,7 @@ cv_contact_line <- function(profile, use_icons = "fontawesome") {
 #' @return A named character vector with all twelve theme keys present.
 #'
 #' @keywords internal
+#' @noRd
 .resolve_theme <- function(theme) {
     defaults <- .cv_theme_defaults()
     if (is.null(theme)) return(defaults)
@@ -161,11 +164,12 @@ cv_contact_line <- function(profile, use_icons = "fontawesome") {
 #' `%%CURRICULR_FORMAT%%` sentinel in `CV.qmd`.
 #'
 #' @param theme A fully resolved named character vector as returned by
-#'   [.resolve_theme()].
+#'   `.resolve_theme()`.
 #'
 #' @return A character string of YAML.
 #'
 #' @keywords internal
+#' @noRd
 .build_format_block <- function(theme) {
     sprintf(
         paste0(
@@ -193,7 +197,7 @@ cv_contact_line <- function(profile, use_icons = "fontawesome") {
 #' Font Awesome package import when icons are in use.
 #'
 #' @param theme A fully resolved named character vector as returned by
-#'   [.resolve_theme()].
+#'   `.resolve_theme()`.
 #' @param use_icons A character string. `"fontawesome"` prepends the FA
 #'   import line. `"none"` omits it.
 #'
@@ -201,6 +205,7 @@ cv_contact_line <- function(profile, use_icons = "fontawesome") {
 #'   `{=typst}` code fence.
 #'
 #' @keywords internal
+#' @noRd
 .build_typst_theme_block <- function(theme, use_icons = "fontawesome") {
 
     fa_import <- if (use_icons == "fontawesome") {

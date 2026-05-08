@@ -15,6 +15,7 @@
 #' @return A character string containing a formatted date range.
 #'
 #' @keywords internal
+#' @noRd
 .cv_date_range <- function(row) {
     start_month <- .cv_value(row, "startMonth")
     start_year  <- .cv_value(row, "startYear")
@@ -49,6 +50,7 @@
 #' @return A character string containing a year or year range.
 #'
 #' @keywords internal
+#' @noRd
 .cv_year_range <- function(row) {
     start_year <- .cv_value(row, "startYear")
     end_year   <- .cv_value(row, "endYear")
