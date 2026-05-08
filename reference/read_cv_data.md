@@ -71,26 +71,30 @@ will fall back to built-in defaults.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-# Full CV — all rows from every section
-cv <- read_cv_data("data/cv-data.xlsx")
-
-# Resume variant — only rows marked include_in_resume
-cv <- read_cv_data("data/cv-data.xlsx", variant = "resume")
-
-# Access a section
+# \donttest{
+# Read the sample data shipped with the package
+cv <- read_cv_data(
+  system.file("extdata", "cv-data-template.xlsx", package = "curriculr")
+)
 cv$education
-cv$experience
-
-# Access the sections control sheet
-cv$sections
-
-# Access profile fields
+#>                                  title startYear endYear
+#> 1 Summer Intensive, Figurative Drawing      1993    1993
+#> 2  Bachelor of Fine Arts, Illustration      1990    1994
+#>                                  institution          where
+#> 1 Skowhegan School of Painting and Sculpture    Madison, ME
+#> 2              Rhode Island School of Design Providence, RI
+#>                                                                                           detail
+#> 1                        Competitive residency program. Studied under noted figurative painters.
+#> 2 Concentration in editorial and narrative illustration. Senior thesis exhibited at RISD Museum.
 cv$profile[["first_name"]]
-cv$profile[["email"]]
+#> [1] "Frank"
+# }
 
-# Access theme values
-cv$theme[["accent_color"]]
-cv$theme[["papersize"]]
+if (FALSE) { # \dontrun{
+# Read a user-supplied file
+cv <- read_cv_data("~/my_cv/cv-data.xlsx")
+
+# Resume variant
+cv <- read_cv_data("~/my_cv/cv-data.xlsx", variant = "resume")
 } # }
 ```

@@ -191,10 +191,9 @@ exist.
 Both were collapsed into a single function:
 [`cv_render_section()`](https://erwinlares.github.io/curriculr/reference/cv_render_section.md).
 Optional columns default to `NULL` and are simply omitted from the
-rendered output. `date_fun` defaults to
-[`.cv_date_range()`](https://erwinlares.github.io/curriculr/reference/dot-cv_date_range.md)
-for dated sections and is passed `NULL` for undated sections like skills
-and affiliations. The caller controls simplicity through arguments, not
+rendered output. `date_fun` defaults to `.cv_date_range()` for dated
+sections and is passed `NULL` for undated sections like skills and
+affiliations. The caller controls simplicity through arguments, not
 through which function they call.
 
 ------------------------------------------------------------------------
@@ -208,15 +207,13 @@ you could not check their output without capturing stdout.
 
 The package version separates these two responsibilities:
 
-- [`.build_section_blocks()`](https://erwinlares.github.io/curriculr/reference/dot-build_section_blocks.md)
-  — internal builder, iterates over rows, returns a character vector of
-  Typst blocks, one per row. Fully testable.
+- `.build_section_blocks()` — internal builder, iterates over rows,
+  returns a character vector of Typst blocks, one per row. Fully
+  testable.
 - [`cv_render_section()`](https://erwinlares.github.io/curriculr/reference/cv_render_section.md)
-  — thin public wrapper, calls
-  [`.build_section_blocks()`](https://erwinlares.github.io/curriculr/reference/dot-build_section_blocks.md)
-  then passes the result to [`cat()`](https://rdrr.io/r/base/cat.html).
-  This is the function that lives inside a Quarto chunk with
-  `results = 'asis'`.
+  — thin public wrapper, calls `.build_section_blocks()` then passes the
+  result to [`cat()`](https://rdrr.io/r/base/cat.html). This is the
+  function that lives inside a Quarto chunk with `results = 'asis'`.
 
 The `results = 'asis'` chunk option tells Quarto to pass R output
 through raw into the document without any formatting wrapper.
@@ -236,9 +233,9 @@ functions do not.
 
 | Visibility | Example |
 |----|----|
-| Internal | [`.cv_value()`](https://erwinlares.github.io/curriculr/reference/dot-cv_value.md), `.typst_escape()`, [`.cv_date_range()`](https://erwinlares.github.io/curriculr/reference/dot-cv_date_range.md) |
-| Internal | [`.cv_year_range()`](https://erwinlares.github.io/curriculr/reference/dot-cv_year_range.md), `.cv_section()`, [`.cv_entry()`](https://erwinlares.github.io/curriculr/reference/dot-cv_entry.md) |
-| Internal | [`.build_section_blocks()`](https://erwinlares.github.io/curriculr/reference/dot-build_section_blocks.md) |
+| Internal | `.cv_value()`, `.typst_escape()`, `.cv_date_range()` |
+| Internal | `.cv_year_range()`, `.cv_section()`, `.cv_entry()` |
+| Internal | `.build_section_blocks()` |
 | Exported | [`cv_render_section()`](https://erwinlares.github.io/curriculr/reference/cv_render_section.md), [`read_cv_data()`](https://erwinlares.github.io/curriculr/reference/read_cv_data.md) |
 
 **File names:** source files use `kebab-case.R`. Function names inside
@@ -405,10 +402,8 @@ tests/testthat/test-read-cv-data.R    — read_cv_data()
 ```
 
 The key testing insight was the builder/printer split established in
-Session 1.
-[`.build_section_blocks()`](https://erwinlares.github.io/curriculr/reference/dot-build_section_blocks.md)
-returns a character vector and is fully testable without capturing
-stdout.
+Session 1. `.build_section_blocks()` returns a character vector and is
+fully testable without capturing stdout.
 [`cv_render_section()`](https://erwinlares.github.io/curriculr/reference/cv_render_section.md)
 is tested only for its return value (`NULL` invisibly) — the output it
 writes to the stream is covered indirectly through the builder tests.
@@ -434,13 +429,12 @@ Running `devtools::check()` surfaced two errors and four notes:
 internal function documentation. Internal functions do not need runnable
 examples — the test suite covers them instead.
 
-**Error: stray markdown heading in
-[`.cv_entry()`](https://erwinlares.github.io/curriculr/reference/dot-cv_entry.md)
-roxygen block.** A comment line beginning with `#` inside the
-documentation was being interpreted by roxygen2 as a level-1 heading,
-which is not supported in `@return`. The orphaned example block that
-contained it was removed. All `@return` tags on internal functions were
-simplified to plain one-line descriptions.
+**Error: stray markdown heading in `.cv_entry()` roxygen block.** A
+comment line beginning with `#` inside the documentation was being
+interpreted by roxygen2 as a level-1 heading, which is not supported in
+`@return`. The orphaned example block that contained it was removed. All
+`@return` tags on internal functions were simplified to plain one-line
+descriptions.
 
 **Note: `setNames` has no visible global function definition.** Replaced
 the [`setNames()`](https://rdrr.io/r/stats/setNames.html) call in
@@ -492,10 +486,9 @@ conventions, roadmap, related packages, known limitations, and license.
 Key change from the first draft: the
 [`cv_render_section()`](https://erwinlares.github.io/curriculr/reference/cv_render_section.md)
 example no longer shows internal functions (`.cv_section()`,
-[`.cv_date_range()`](https://erwinlares.github.io/curriculr/reference/dot-cv_date_range.md))
-directly. Users interact with `CV.qmd` rather than calling these
-functions themselves, so the README example shows only what a user would
-actually write.
+`.cv_date_range()`) directly. Users interact with `CV.qmd` rather than
+calling these functions themselves, so the README example shows only
+what a user would actually write.
 
 The CRAN installation block was omitted — the package is not yet on CRAN
 and a non-working install command is worse than no command at all.

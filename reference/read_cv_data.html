@@ -117,27 +117,31 @@ will fall back to built-in defaults.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co"># Full CV — all rows from every section</span></span></span>
-<span class="r-in"><span><span class="va">cv</span> <span class="op">&lt;-</span> <span class="fu">read_cv_data</span><span class="op">(</span><span class="st">"data/cv-data.xlsx"</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Resume variant — only rows marked include_in_resume</span></span></span>
-<span class="r-in"><span><span class="va">cv</span> <span class="op">&lt;-</span> <span class="fu">read_cv_data</span><span class="op">(</span><span class="st">"data/cv-data.xlsx"</span>, variant <span class="op">=</span> <span class="st">"resume"</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Access a section</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Read the sample data shipped with the package</span></span></span>
+<span class="r-in"><span><span class="va">cv</span> <span class="op">&lt;-</span> <span class="fu">read_cv_data</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"cv-data-template.xlsx"</span>, package <span class="op">=</span> <span class="st">"curriculr"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">cv</span><span class="op">$</span><span class="va">education</span></span></span>
-<span class="r-in"><span><span class="va">cv</span><span class="op">$</span><span class="va">experience</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Access the sections control sheet</span></span></span>
-<span class="r-in"><span><span class="va">cv</span><span class="op">$</span><span class="va">sections</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Access profile fields</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                  title startYear endYear</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Summer Intensive, Figurative Drawing      1993    1993</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  Bachelor of Fine Arts, Illustration      1990    1994</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                  institution          where</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Skowhegan School of Painting and Sculpture    Madison, ME</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2              Rhode Island School of Design Providence, RI</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                           detail</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                        Competitive residency program. Studied under noted figurative painters.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 Concentration in editorial and narrative illustration. Senior thesis exhibited at RISD Museum.</span>
 <span class="r-in"><span><span class="va">cv</span><span class="op">$</span><span class="va">profile</span><span class="op">[[</span><span class="st">"first_name"</span><span class="op">]</span><span class="op">]</span></span></span>
-<span class="r-in"><span><span class="va">cv</span><span class="op">$</span><span class="va">profile</span><span class="op">[[</span><span class="st">"email"</span><span class="op">]</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Frank"</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Access theme values</span></span></span>
-<span class="r-in"><span><span class="va">cv</span><span class="op">$</span><span class="va">theme</span><span class="op">[[</span><span class="st">"accent_color"</span><span class="op">]</span><span class="op">]</span></span></span>
-<span class="r-in"><span><span class="va">cv</span><span class="op">$</span><span class="va">theme</span><span class="op">[[</span><span class="st">"papersize"</span><span class="op">]</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="co"># Read a user-supplied file</span></span></span>
+<span class="r-in"><span><span class="va">cv</span> <span class="op">&lt;-</span> <span class="fu">read_cv_data</span><span class="op">(</span><span class="st">"~/my_cv/cv-data.xlsx"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Resume variant</span></span></span>
+<span class="r-in"><span><span class="va">cv</span> <span class="op">&lt;-</span> <span class="fu">read_cv_data</span><span class="op">(</span><span class="st">"~/my_cv/cv-data.xlsx"</span>, variant <span class="op">=</span> <span class="st">"resume"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

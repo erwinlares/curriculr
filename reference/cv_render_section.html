@@ -41,7 +41,7 @@ calling .cv_entry() for each row and passing the result to base::cat()."></head>
 
     <div class="ref-description section level2">
     <p>Iterates over a CV data frame and writes each row as a Typst CV entry by
-calling <code><a href="dot-cv_entry.html">.cv_entry()</a></code> for each row and passing the result to <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">base::cat()</a></code>.</p>
+calling <code>.cv_entry()</code> for each row and passing the result to <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">base::cat()</a></code>.</p>
     </div>
 
     <div class="section level2">
@@ -82,7 +82,7 @@ additional detail. Defaults to <code>NULL</code>.</p></dd>
 
 <dt id="arg-date-fun">date_fun<a class="anchor" aria-label="anchor" href="#arg-date-fun"></a></dt>
 <dd><p>A function or <code>NULL</code>. Called with each row to produce the
-date string. Defaults to <code><a href="dot-cv_date_range.html">.cv_date_range()</a></code>. Pass <code>NULL</code> for sections
+date string. Defaults to <code>.cv_date_range()</code>. Pass <code>NULL</code> for sections
 without dates.</p></dd>
 
 
@@ -102,22 +102,69 @@ Typst blocks to the Quarto document output stream.</p>
 <code>results = 'asis'</code>. The <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat()</a></code> call writes raw Typst blocks directly into
 the document output stream. Nothing is returned — the function is called
 entirely for its side effect.</p>
-<p>For sections that use dates, pass one of <code><a href="dot-cv_date_range.html">.cv_date_range()</a></code> or
-<code><a href="dot-cv_year_range.html">.cv_year_range()</a></code> as <code>date_fun</code>. For sections where dates are not relevant
+<p>For sections that use dates, pass one of <code>.cv_date_range()</code> or
+<code>.cv_year_range()</code> as <code>date_fun</code>. For sections where dates are not relevant
 (skills, affiliations), pass <code>date_fun = NULL</code>.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co"># Inside a Quarto chunk with results = 'asis':</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Full entry with date range and location</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu">.cv_section</span><span class="op">(</span><span class="st">"Experience"</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="co"># Load sample data and render the experience section</span></span></span>
+<span class="r-in"><span><span class="va">cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="read_cv_data.html">read_cv_data</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"cv-data-template.xlsx"</span>, package <span class="op">=</span> <span class="st">"curriculr"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">cv_render_section</span><span class="op">(</span><span class="va">cv</span><span class="op">$</span><span class="va">experience</span>,</span></span>
 <span class="r-in"><span>                  title_col  <span class="op">=</span> <span class="st">"title"</span>,</span></span>
 <span class="r-in"><span>                  org_col    <span class="op">=</span> <span class="st">"unit"</span>,</span></span>
 <span class="r-in"><span>                  detail_col <span class="op">=</span> <span class="st">"detail"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ```{=typst}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #grid(</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   columns: (1fr, 1.68in),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   gutter: 0.65em,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     #text(size: 9.15pt, weight: "semibold", fill: dark)[Adjunct Instructor, Illustration]\</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     #text(size: 8.25pt, fill: bodygray)[Pacific Northwest College of Art — Taught Introduction to Editorial Illustration and Advanced Character Design. Mentored portfolio students seeking industry entry.]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [#align(right)[#text(size: 8.1pt, fill: accent)[Sep 2005 - May 2014\</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Portland, OR]]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> )</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #v(0.36em)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ```</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ```{=typst}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #grid(</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   columns: (1fr, 1.68in),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   gutter: 0.65em,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     #text(size: 9.15pt, weight: "semibold", fill: dark)[Principal Illustrator]\</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     #text(size: 8.25pt, fill: bodygray)[Frank Palmer Illustration (Self-Employed) — Independent studio practice serving editorial, publishing, and advertising clients. Clients include The New Yorker, Penguin Random House, Nike, and Wired.]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [#align(right)[#text(size: 8.1pt, fill: accent)[Jan 1997 - Present\</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Portland, OR]]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> )</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #v(0.36em)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ```</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ```{=typst}</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #grid(</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   columns: (1fr, 1.68in),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   gutter: 0.65em,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     #text(size: 9.15pt, weight: "semibold", fill: dark)[Staff Illustrator]\</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     #text(size: 8.25pt, fill: bodygray)[The Portland Tribune — Created editorial illustrations for weekly features, covers, and special sections. Produced 3–5 finished pieces per week under daily deadline pressure.]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ],</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [#align(right)[#text(size: 8.1pt, fill: accent)[Mar 1994 - Dec 1996\</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Portland, OR]]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> )</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> #v(0.36em)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ```</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="co"># The following examples are intended to be called inside a Quarto chunk</span></span></span>
+<span class="r-in"><span><span class="co"># with results = 'asis'. They require internal helpers and a loaded cv object.</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Year-only dates</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu">.cv_section</span><span class="op">(</span><span class="st">"Education"</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -141,8 +188,8 @@ entirely for its side effect.</p>
 <span class="r-in"><span>                  title_col <span class="op">=</span> <span class="st">"unit"</span>,</span></span>
 <span class="r-in"><span>                  org_col   <span class="op">=</span> <span class="st">"title"</span>,</span></span>
 <span class="r-in"><span>                  date_fun  <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">row</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>                    <span class="fu"><a href="https://rdrr.io/r/base/trimws.html" class="external-link">trimws</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="dot-cv_value.html">.cv_value</a></span><span class="op">(</span><span class="va">row</span>, <span class="st">"startMonth"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                                 <span class="fu"><a href="dot-cv_value.html">.cv_value</a></span><span class="op">(</span><span class="va">row</span>, <span class="st">"startYear"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                    <span class="fu"><a href="https://rdrr.io/r/base/trimws.html" class="external-link">trimws</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu">.cv_value</span><span class="op">(</span><span class="va">row</span>, <span class="st">"startMonth"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                                 <span class="fu">.cv_value</span><span class="op">(</span><span class="va">row</span>, <span class="st">"startYear"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>                  <span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

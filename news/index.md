@@ -81,14 +81,9 @@
   in-workbook documentation. The `readme` sheet is updated to document
   the `theme` sheet and to reflect that `include_in_resume` is now
   present on all section sheets.
-- Internal helpers
-  [`.cv_theme_defaults()`](https://erwinlares.github.io/curriculr/reference/dot-cv_theme_defaults.md),
-  [`.resolve_theme()`](https://erwinlares.github.io/curriculr/reference/dot-resolve_theme.md),
-  [`.build_format_block()`](https://erwinlares.github.io/curriculr/reference/dot-build_format_block.md),
-  [`.build_typst_theme_block()`](https://erwinlares.github.io/curriculr/reference/dot-build_typst_theme_block.md),
-  and
-  [`.fa_icon_map()`](https://erwinlares.github.io/curriculr/reference/dot-fa_icon_map.md)
-  are added to support theming and icon assembly.
+- Internal helpers `.cv_theme_defaults()`, `.resolve_theme()`,
+  `.build_format_block()`, `.build_typst_theme_block()`, and
+  `.fa_icon_map()` are added to support theming and icon assembly.
 
 ### Dependency changes
 

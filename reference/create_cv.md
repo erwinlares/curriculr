@@ -110,11 +110,21 @@ filled from defaults.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-# Scaffold mode — copy template files to current directory
-create_cv()
+# \donttest{
+# Scaffold mode — copy template files to a temp directory
+withr::with_dir(tempdir(), create_cv())
+#> ✔ Created /tmp/RtmpiCTcwj/cv-data-template.xlsx
+#> ✔ Created /tmp/RtmpiCTcwj/placeholder.png
+#> ℹ Next steps:
+#> Open /tmp/RtmpiCTcwj/cv-data-template.xlsx and fill in the "profile" sheet with
+#> your information.
+#> Replace /tmp/RtmpiCTcwj/placeholder.png with your own profile photo.
+#> Call `create_cv(data = 'cv-data-template.xlsx', photo = 'your-photo.png')` to
+#> render your CV.
+# }
 
-# Render mode — full CV with photo and Font Awesome icons
+if (FALSE) { # \dontrun{
+# Render mode — requires cv-data.xlsx, Quarto, and Typst
 create_cv(
   data  = "~/my_cv/cv-data.xlsx",
   photo = "~/my_cv/me.jpeg"

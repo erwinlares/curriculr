@@ -140,16 +140,16 @@
 <li>
 <code>emit_simple_entries()</code> — for sections without dates or locations</li>
 </ul><p>The distinction between them was false. A “simple” entry was just a regular entry with fewer fields populated — not a different kind of thing. Having two functions implied a meaningful difference that did not exist.</p>
-<p>Both were collapsed into a single function: <code><a href="reference/cv_render_section.html">cv_render_section()</a></code>. Optional columns default to <code>NULL</code> and are simply omitted from the rendered output. <code>date_fun</code> defaults to <code><a href="reference/dot-cv_date_range.html">.cv_date_range()</a></code> for dated sections and is passed <code>NULL</code> for undated sections like skills and affiliations. The caller controls simplicity through arguments, not through which function they call.</p>
+<p>Both were collapsed into a single function: <code><a href="reference/cv_render_section.html">cv_render_section()</a></code>. Optional columns default to <code>NULL</code> and are simply omitted from the rendered output. <code>date_fun</code> defaults to <code>.cv_date_range()</code> for dated sections and is passed <code>NULL</code> for undated sections like skills and affiliations. The caller controls simplicity through arguments, not through which function they call.</p>
 <hr></div>
 <div class="section level3">
 <h3 id="decision-separating-building-from-printing">Decision: separating building from printing<a class="anchor" aria-label="anchor" href="#decision-separating-building-from-printing"></a></h3>
 <p>In the original code, <code>emit_entries()</code> both constructed the Typst strings <em>and</em> called <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat()</a></code> to write them to the document. This made the functions untestable in isolation — you could not check their output without capturing stdout.</p>
 <p>The package version separates these two responsibilities:</p>
 <ul><li>
-<code><a href="reference/dot-build_section_blocks.html">.build_section_blocks()</a></code> — internal builder, iterates over rows, returns a character vector of Typst blocks, one per row. Fully testable.</li>
+<code>.build_section_blocks()</code> — internal builder, iterates over rows, returns a character vector of Typst blocks, one per row. Fully testable.</li>
 <li>
-<code><a href="reference/cv_render_section.html">cv_render_section()</a></code> — thin public wrapper, calls <code><a href="reference/dot-build_section_blocks.html">.build_section_blocks()</a></code> then passes the result to <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat()</a></code>. This is the function that lives inside a Quarto chunk with <code>results = 'asis'</code>.</li>
+<code><a href="reference/cv_render_section.html">cv_render_section()</a></code> — thin public wrapper, calls <code>.build_section_blocks()</code> then passes the result to <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat()</a></code>. This is the function that lives inside a Quarto chunk with <code>results = 'asis'</code>.</li>
 </ul><p>The <code>results = 'asis'</code> chunk option tells Quarto to pass R output through raw into the document without any formatting wrapper. <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat()</a></code> writes directly to that output stream. The builder knows nothing about <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat()</a></code> — it just returns strings.</p>
 <hr></div>
 <div class="section level3">
@@ -160,14 +160,14 @@
 <th>Example</th>
 </tr></thead><tbody><tr><td>Internal</td>
 <td>
-<code><a href="reference/dot-cv_value.html">.cv_value()</a></code>, <code>.typst_escape()</code>, <code><a href="reference/dot-cv_date_range.html">.cv_date_range()</a></code>
+<code>.cv_value()</code>, <code>.typst_escape()</code>, <code>.cv_date_range()</code>
 </td>
 </tr><tr><td>Internal</td>
 <td>
-<code><a href="reference/dot-cv_year_range.html">.cv_year_range()</a></code>, <code>.cv_section()</code>, <code><a href="reference/dot-cv_entry.html">.cv_entry()</a></code>
+<code>.cv_year_range()</code>, <code>.cv_section()</code>, <code>.cv_entry()</code>
 </td>
 </tr><tr><td>Internal</td>
-<td><code><a href="reference/dot-build_section_blocks.html">.build_section_blocks()</a></code></td>
+<td><code>.build_section_blocks()</code></td>
 </tr><tr><td>Exported</td>
 <td>
 <code><a href="reference/cv_render_section.html">cv_render_section()</a></code>, <code><a href="reference/read_cv_data.html">read_cv_data()</a></code>
@@ -251,7 +251,7 @@ tests/testthat/test-typst-dates.R     — .cv_date_range(), .cv_year_range()
 tests/testthat/test-typst-layout.R    — .cv_section(), .cv_entry()
 tests/testthat/test-typst-render.R    — .build_section_blocks(), cv_render_section()
 tests/testthat/test-read-cv-data.R    — read_cv_data()</code></pre>
-<p>The key testing insight was the builder/printer split established in Session 1. <code><a href="reference/dot-build_section_blocks.html">.build_section_blocks()</a></code> returns a character vector and is fully testable without capturing stdout. <code><a href="reference/cv_render_section.html">cv_render_section()</a></code> is tested only for its return value (<code>NULL</code> invisibly) — the output it writes to the stream is covered indirectly through the builder tests.</p>
+<p>The key testing insight was the builder/printer split established in Session 1. <code>.build_section_blocks()</code> returns a character vector and is fully testable without capturing stdout. <code><a href="reference/cv_render_section.html">cv_render_section()</a></code> is tested only for its return value (<code>NULL</code> invisibly) — the output it writes to the stream is covered indirectly through the builder tests.</p>
 <p><code><a href="reference/create_cv.html">create_cv()</a></code> and <code><a href="reference/cv_render_section.html">cv_render_section()</a></code>’s <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat()</a></code> side effect are not unit tested. Both require filesystem scaffolding or stdout capture that belongs in integration tests planned for a future session.</p>
 <p>Final result: 74 tests passing, 0 failures, 0 warnings, 0 skips.</p>
 <hr></div>
@@ -260,7 +260,7 @@ tests/testthat/test-read-cv-data.R    — read_cv_data()</code></pre>
 <code>R CMD check</code> issues resolved<a class="anchor" aria-label="anchor" href="#r-cmd-check-issues-resolved"></a></h3>
 <p>Running <code>devtools::check()</code> surfaced two errors and four notes:</p>
 <p><strong>Error: internal functions not found in examples.</strong> Functions with a <code>.</code> prefix are not exported and therefore not available when <code>R CMD check</code> runs examples. All <code>@examples</code> blocks were removed from internal function documentation. Internal functions do not need runnable examples — the test suite covers them instead.</p>
-<p><strong>Error: stray markdown heading in <code><a href="reference/dot-cv_entry.html">.cv_entry()</a></code> roxygen block.</strong> A comment line beginning with <code>#</code> inside the documentation was being interpreted by roxygen2 as a level-1 heading, which is not supported in <code>@return</code>. The orphaned example block that contained it was removed. All <code>@return</code> tags on internal functions were simplified to plain one-line descriptions.</p>
+<p><strong>Error: stray markdown heading in <code>.cv_entry()</code> roxygen block.</strong> A comment line beginning with <code>#</code> inside the documentation was being interpreted by roxygen2 as a level-1 heading, which is not supported in <code>@return</code>. The orphaned example block that contained it was removed. All <code>@return</code> tags on internal functions were simplified to plain one-line descriptions.</p>
 <p><strong>Note: <code>setNames</code> has no visible global function definition.</strong> Replaced the <code><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames()</a></code> call in <code><a href="reference/read_cv_data.html">read_cv_data()</a></code> with explicit assignment:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">vector</a></span><span class="op">(</span><span class="st">"list"</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">sheets</span><span class="op">)</span><span class="op">)</span></span>
@@ -283,7 +283,7 @@ template (Park, 2015, &lt;https://github.com/posquit0/Awesome-CV&gt;).</code></p
 <h3 id="readmemd-finalized">
 <code>README.md</code> finalized<a class="anchor" aria-label="anchor" href="#readmemd-finalized"></a></h3>
 <p>The README was restructured to match toolero’s pattern: hex sticker logo aligned right, badges, one-paragraph pitch, installation, requirements, getting started (three numbered steps), functions, workbook schema, date conventions, roadmap, related packages, known limitations, and license.</p>
-<p>Key change from the first draft: the <code><a href="reference/cv_render_section.html">cv_render_section()</a></code> example no longer shows internal functions (<code>.cv_section()</code>, <code><a href="reference/dot-cv_date_range.html">.cv_date_range()</a></code>) directly. Users interact with <code>CV.qmd</code> rather than calling these functions themselves, so the README example shows only what a user would actually write.</p>
+<p>Key change from the first draft: the <code><a href="reference/cv_render_section.html">cv_render_section()</a></code> example no longer shows internal functions (<code>.cv_section()</code>, <code>.cv_date_range()</code>) directly. Users interact with <code>CV.qmd</code> rather than calling these functions themselves, so the README example shows only what a user would actually write.</p>
 <p>The CRAN installation block was omitted — the package is not yet on CRAN and a non-working install command is worse than no command at all.</p>
 <p>An acknowledgements section was added crediting vitae and Awesome CV, and the <code>DESCRIPTION</code> field was updated to include formal citations for both.</p>
 <hr></div>
