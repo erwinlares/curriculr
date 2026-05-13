@@ -72,7 +72,7 @@
 <p>You can install curriculr from CRAN:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"curriculr"</span><span class="op">)</span></span></code></pre></div>
-<p>Install the development version from GitHub:</p>
+<p>For the latest development features, install from GitHub:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"erwinlares/curriculr"</span><span class="op">)</span></span></code></pre></div>
@@ -88,7 +88,7 @@
 <hr>
 </div>
 <div class="section level2">
-<h2 id="for-new-users">For new users<a class="anchor" aria-label="anchor" href="#for-new-users"></a>
+<h2 id="getting-started">Getting started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
 </h2>
 <div class="section level3">
 <h3 id="step-1--scaffold-your-project">Step 1 — scaffold your project<a class="anchor" aria-label="anchor" href="#step-1--scaffold-your-project"></a>
@@ -173,100 +173,6 @@ i Next steps:
 <code class="sourceCode R"><span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span>data <span class="op">=</span> <span class="st">"cv-data-template.xlsx"</span><span class="op">)</span></span></code></pre></div>
 <hr>
 </div>
-</div>
-<div class="section level2">
-<h2 id="for-existing-users-updating-from-v020">For existing users updating from v0.2.0<a class="anchor" aria-label="anchor" href="#for-existing-users-updating-from-v020"></a>
-</h2>
-<p>v0.3.0 introduces several workbook schema changes and new arguments. Here is what you need to know.</p>
-<p><strong><code>photo = NULL</code> now means no photo.</strong> Previously, omitting <code>photo</code> in render mode fell back to a bundled placeholder image. It now produces a single-column header layout with no image. Supply a path explicitly to restore the two-column layout.</p>
-<p><strong>Your workbook needs an <code>include_in_resume</code> column on every section sheet.</strong> This is a boolean column (checked/unchecked) that controls which rows appear when rendering in resume variant mode. Add a column named <code>include_in_resume</code> to each section sheet and check the rows you want to include in a focused resume. Rows without this column are always included.</p>
-<p><strong>Your workbook can have an optional <code>theme</code> sheet.</strong> This sheet controls fonts, colors, and page layout. If absent, built-in defaults are used. Copy the <code>theme</code> sheet from the updated template workbook to gain full control over the visual appearance without editing <code>CV.qmd</code> directly.</p>
-<p><strong><code>readxl</code> is no longer required.</strong> curriculr now uses <code>openxlsx2</code> for all workbook reading. If you have <code>readxl</code> in your own explicit dependencies for curriculr-related code, you can remove it.</p>
-<hr>
-</div>
-<div class="section level2">
-<h2 id="for-existing-users-updating-from-v010">For existing users updating from v0.1.0<a class="anchor" aria-label="anchor" href="#for-existing-users-updating-from-v010"></a>
-</h2>
-<p>v0.2.0 changes how <code><a href="reference/create_cv.html">create_cv()</a></code> works and adds a <code>sections</code> sheet to the workbook schema. Here is what you need to know.</p>
-<p><strong><code><a href="reference/create_cv.html">create_cv()</a></code> now has two modes:</strong></p>
-<ul>
-<li>
-<strong>Scaffold mode</strong> (no arguments) — copies template files to your current directory. Use this once to get started or to reset.</li>
-<li>
-<strong>Render mode</strong> (with arguments) — reads your workbook and renders the PDF. Use this every time you update your CV.</li>
-</ul>
-<p><strong>Your workbook needs a <code>sections</code> sheet.</strong> This sheet controls which sections appear in the rendered PDF and in what order. Add it manually or copy it from the updated template workbook. The schema is:</p>
-<table style="width:100%;" class="table">
-<colgroup>
-<col width="14%">
-<col width="14%">
-<col width="14%">
-<col width="14%">
-<col width="14%">
-<col width="14%">
-<col width="14%">
-</colgroup>
-<thead><tr>
-<th>section</th>
-<th>label</th>
-<th>title_col</th>
-<th>org_col</th>
-<th>detail_col</th>
-<th>date_fun</th>
-<th>where_col</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>education</td>
-<td>Education</td>
-<td>title</td>
-<td>institution</td>
-<td>detail</td>
-<td>year</td>
-<td>where</td>
-</tr>
-<tr>
-<td>experience</td>
-<td>Experience</td>
-<td>title</td>
-<td>unit</td>
-<td>detail</td>
-<td>date</td>
-<td>where</td>
-</tr>
-</tbody>
-</table>
-<p>Row order is render order. Delete a row to exclude a section. Add a row for any sheet that follows the standard column schema and it will render automatically without any R code changes.</p>
-<p>The <code>date_fun</code> column accepts five tokens:</p>
-<table class="table">
-<thead><tr>
-<th>token</th>
-<th>produces</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>date</code></td>
-<td>Jan 2018 - Dec 2022</td>
-</tr>
-<tr>
-<td><code>year</code></td>
-<td>2018 - 2022</td>
-</tr>
-<tr>
-<td><code>month_year</code></td>
-<td>Jan 2018</td>
-</tr>
-<tr>
-<td><code>year_only</code></td>
-<td>2021</td>
-</tr>
-<tr>
-<td><code>none</code></td>
-<td><em>(no date)</em></td>
-</tr>
-</tbody>
-</table>
-<hr>
 </div>
 <div class="section level2">
 <h2 id="rendering-a-resume">Rendering a resume<a class="anchor" aria-label="anchor" href="#rendering-a-resume"></a>
@@ -363,17 +269,17 @@ i Next steps:
 <code class="sourceCode R"><span><span class="co"># Scaffold mode</span></span>
 <span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Render mode — full CV with Font Awesome icons in the contact line</span></span>
+<span><span class="co"># Render mode -- full CV with Font Awesome icons in the contact line</span></span>
 <span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span></span>
-<span>  data        <span class="op">=</span> <span class="st">"~/my_cv/cv-data.xlsx"</span>,</span>
-<span>  photo       <span class="op">=</span> <span class="st">"~/my_cv/me.jpeg"</span>,</span>
+<span>  data        <span class="op">=</span> <span class="st">"cv-data.xlsx"</span>,</span>
+<span>  photo       <span class="op">=</span> <span class="st">"me.jpeg"</span>,</span>
 <span>  output_file <span class="op">=</span> <span class="st">"erwin-lares-cv.pdf"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Render mode — resume variant, plain text contact line</span></span>
+<span><span class="co"># Render mode -- resume variant, plain text contact line</span></span>
 <span><span class="fu"><a href="reference/create_cv.html">create_cv</a></span><span class="op">(</span></span>
-<span>  data        <span class="op">=</span> <span class="st">"~/my_cv/cv-data.xlsx"</span>,</span>
-<span>  photo       <span class="op">=</span> <span class="st">"~/my_cv/me.jpeg"</span>,</span>
+<span>  data        <span class="op">=</span> <span class="st">"cv-data.xlsx"</span>,</span>
+<span>  photo       <span class="op">=</span> <span class="st">"me.jpeg"</span>,</span>
 <span>  variant     <span class="op">=</span> <span class="st">"resume"</span>,</span>
 <span>  use_icons   <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  output_file <span class="op">=</span> <span class="st">"erwin-lares-resume.pdf"</span></span>
@@ -381,17 +287,17 @@ i Next steps:
 <p><strong>Arguments:</strong></p>
 <ul>
 <li>
-<code>data</code> — path to the workbook. <code>NULL</code> triggers scaffold mode.</li>
+<code>data</code> – path to the workbook. <code>NULL</code> triggers scaffold mode.</li>
 <li>
-<code>photo</code> — path to the profile image. <code>NULL</code> renders without a photo.</li>
+<code>photo</code> – path to the profile image. <code>NULL</code> renders without a photo.</li>
 <li>
-<code>output_file</code> — PDF filename. Defaults to <code>"CV.pdf"</code>.</li>
+<code>output_file</code> – PDF filename. Defaults to <code>"CV.pdf"</code>.</li>
 <li>
-<code>overwrite</code> — whether to overwrite existing files. Defaults to <code>FALSE</code>.</li>
+<code>overwrite</code> – whether to overwrite existing files. Defaults to <code>FALSE</code>.</li>
 <li>
-<code>variant</code> — <code>"cv"</code> (all rows) or <code>"resume"</code> (checked rows only).</li>
+<code>variant</code> – <code>"cv"</code> (all rows) or <code>"resume"</code> (checked rows only).</li>
 <li>
-<code>use_icons</code> — <code>"fontawesome"</code> (default) or <code>"none"</code>.</li>
+<code>use_icons</code> – <code>"fontawesome"</code> (default) or <code>"none"</code>.</li>
 </ul>
 </div>
 <div class="section level3">
@@ -419,7 +325,7 @@ i Next steps:
 <span></span>
 <span><span class="va">cv</span><span class="op">$</span><span class="va">experience</span>           <span class="co"># a data frame</span></span>
 <span><span class="va">cv</span><span class="op">$</span><span class="va">sections</span>             <span class="co"># the sections control sheet</span></span>
-<span><span class="va">cv</span><span class="op">$</span><span class="va">profile</span><span class="op">[[</span><span class="st">"email"</span><span class="op">]</span><span class="op">]</span>  <span class="co"># a scalar string</span></span>
+<span><span class="va">cv</span><span class="op">$</span><span class="va">profile</span><span class="op">[[</span><span class="st">"email"</span><span class="op">]</span><span class="op">]</span>   <span class="co"># a scalar string</span></span>
 <span><span class="va">cv</span><span class="op">$</span><span class="va">theme</span><span class="op">[[</span><span class="st">"accent_color"</span><span class="op">]</span><span class="op">]</span>  <span class="co"># a scalar string</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -435,7 +341,7 @@ i Next steps:
 <h3 id="cv_render_section">
 <code>cv_render_section()</code><a class="anchor" aria-label="anchor" href="#cv_render_section"></a>
 </h3>
-<p>Iterates over a CV data frame and writes each row as a formatted Typst entry. Called inside <code>CV.qmd</code> — you will not normally call this directly.</p>
+<p>Iterates over a CV data frame and writes each row as a formatted Typst entry. Called inside <code>CV.qmd</code> – you will not normally call this directly.</p>
 </div>
 <div class="section level3">
 <h3 id="typst_escape">
@@ -462,7 +368,7 @@ i Next steps:
 </h2>
 <p>Every section sheet shares a common column spine:</p>
 <pre><code><span><span class="va">title</span> <span class="op">|</span> <span class="va">unit</span> <span class="op">|</span> <span class="va">startMonth</span> <span class="op">|</span> <span class="va">startYear</span> <span class="op">|</span> <span class="va">endMonth</span> <span class="op">|</span> <span class="va">endYear</span> <span class="op">|</span> <span class="va">where</span> <span class="op">|</span> <span class="va">detail</span> <span class="op">|</span> <span class="va">include_in_resume</span></span></code></pre>
-<p><code>title</code> is always the primary entry label. <code>unit</code> is the secondary line. <code>include_in_resume</code> is a boolean checkbox column — check a row to include it when rendering with <code>variant = "resume"</code>. Leave cells blank rather than typing <code>NA</code>.</p>
+<p><code>title</code> is always the primary entry label. <code>unit</code> is the secondary line. <code>include_in_resume</code> is a boolean checkbox column – check a row to include it when rendering with <code>variant = "resume"</code>. Leave cells blank rather than typing <code>NA</code>.</p>
 <div class="section level3">
 <h3 id="date-conventions">Date conventions<a class="anchor" aria-label="anchor" href="#date-conventions"></a>
 </h3>
@@ -509,17 +415,26 @@ i Next steps:
 </div>
 </div>
 <div class="section level2">
+<h2 id="migration-notes">Migration notes<a class="anchor" aria-label="anchor" href="#migration-notes"></a>
+</h2>
+<p>Detailed notes on upgrading from previous versions are available in the <a href="https://erwinlares.github.io/curriculr/news/index.html">changelog</a>. The key changes by version:</p>
+<p><strong>v0.2.0 to v0.3.0</strong> – <code>photo = NULL</code> now produces a no-photo layout instead of falling back to a placeholder. Workbooks need an <code>include_in_resume</code> column on every section sheet. An optional <code>theme</code> sheet controls fonts, colors, and page layout. <code>openxlsx2</code> replaces <code>readxl</code>.</p>
+<p><strong>v0.1.0 to v0.2.0</strong> – <code><a href="reference/create_cv.html">create_cv()</a></code> gained scaffold mode (no arguments) and render mode (with arguments). Workbooks need a <code>sections</code> sheet to control which sections appear and in what order.</p>
+<hr>
+</div>
+<div class="section level2">
 <h2 id="related-packages">Related packages<a class="anchor" aria-label="anchor" href="#related-packages"></a>
 </h2>
-<p>curriculr is one of three sibling packages:</p>
+<p>curriculr shares an author and design philosophy with three other R packages focused on reproducible research workflows:</p>
 <ul>
 <li>
-<a href="https://github.com/erwinlares/toolero" class="external-link">toolero</a> — research workflow toolkit</li>
+<a href="https://github.com/erwinlares/toolero" class="external-link">toolero</a> – research project scaffolding and data wrangling utilities</li>
 <li>
-<a href="https://github.com/erwinlares/containr" class="external-link">containr</a> — Docker containerization</li>
+<a href="https://github.com/erwinlares/containr" class="external-link">containr</a> – containerization of R projects via Dockerfile generation</li>
 <li>
-<strong>curriculr</strong> — data-driven CV generation with Quarto and Typst</li>
+<a href="https://github.com/erwinlares/submitr" class="external-link">submitr</a> – job submission to UW-Madison’s CHTC from inside R</li>
 </ul>
+<p>Together, toolero, containr, and submitr form the <strong>From the Notebook to the Cluster</strong> pipeline. curriculr is independent but follows the same conventions: small focused functions, data-driven workflows, and Quarto as the publishing layer.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -532,6 +447,14 @@ i Next steps:
 <li>
 <a href="https://github.com/posquit0/Awesome-CV" class="external-link">Awesome CV</a> by Byungjin Park (posquit0)</li>
 </ul>
+<hr>
+</div>
+<div class="section level2">
+<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
+</h2>
+<p>If you use curriculr in your work, please cite it:</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"curriculr"</span><span class="op">)</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level2">
