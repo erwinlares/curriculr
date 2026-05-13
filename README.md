@@ -23,7 +23,7 @@ You can install curriculr from CRAN:
 install.packages("curriculr")
 ```
 
-Install the development version from GitHub:
+For the latest development features, install from GitHub:
 
 ```r
 # install.packages("pak")
@@ -37,7 +37,7 @@ pak::pak("erwinlares/curriculr")
 
 ---
 
-## For new users
+## Getting started
 
 ### Step 1 — scaffold your project
 
@@ -101,70 +101,6 @@ statement centered on the page:
 ```r
 create_cv(data = "cv-data-template.xlsx")
 ```
-
----
-
-## For existing users updating from v0.2.0
-
-v0.3.0 introduces several workbook schema changes and new arguments. Here is
-what you need to know.
-
-**`photo = NULL` now means no photo.** Previously, omitting `photo` in render
-mode fell back to a bundled placeholder image. It now produces a single-column
-header layout with no image. Supply a path explicitly to restore the
-two-column layout.
-
-**Your workbook needs an `include_in_resume` column on every section sheet.**
-This is a boolean column (checked/unchecked) that controls which rows appear
-when rendering in resume variant mode. Add a column named `include_in_resume`
-to each section sheet and check the rows you want to include in a focused
-resume. Rows without this column are always included.
-
-**Your workbook can have an optional `theme` sheet.** This sheet controls
-fonts, colors, and page layout. If absent, built-in defaults are used. Copy
-the `theme` sheet from the updated template workbook to gain full control over
-the visual appearance without editing `CV.qmd` directly.
-
-**`readxl` is no longer required.** curriculr now uses `openxlsx2` for all
-workbook reading. If you have `readxl` in your own explicit dependencies for
-curriculr-related code, you can remove it.
-
----
-
-## For existing users updating from v0.1.0
-
-v0.2.0 changes how `create_cv()` works and adds a `sections` sheet to the
-workbook schema. Here is what you need to know.
-
-**`create_cv()` now has two modes:**
-
-- **Scaffold mode** (no arguments) — copies template files to your current
-  directory. Use this once to get started or to reset.
-- **Render mode** (with arguments) — reads your workbook and renders the PDF.
-  Use this every time you update your CV.
-
-**Your workbook needs a `sections` sheet.** This sheet controls which sections
-appear in the rendered PDF and in what order. Add it manually or copy it from
-the updated template workbook. The schema is:
-
-| section | label | title_col | org_col | detail_col | date_fun | where_col |
-|---|---|---|---|---|---|---|
-| education | Education | title | institution | detail | year | where |
-| experience | Experience | title | unit | detail | date | where |
-
-Row order is render order. Delete a row to exclude a section. Add a row for
-any sheet that follows the standard column schema and it will render
-automatically without any R code changes.
-
-The `date_fun` column accepts five tokens:
-
-| token | produces |
-|---|---|
-| `date` | Jan 2018 - Dec 2022 |
-| `year` | 2018 - 2022 |
-| `month_year` | Jan 2018 |
-| `year_only` | 2021 |
-| `none` | *(no date)* |
 
 ---
 
@@ -244,17 +180,17 @@ triggers render mode.
 # Scaffold mode
 create_cv()
 
-# Render mode — full CV with Font Awesome icons in the contact line
+# Render mode -- full CV with Font Awesome icons in the contact line
 create_cv(
-  data        = "~/my_cv/cv-data.xlsx",
-  photo       = "~/my_cv/me.jpeg",
+  data        = "cv-data.xlsx",
+  photo       = "me.jpeg",
   output_file = "erwin-lares-cv.pdf"
 )
 
-# Render mode — resume variant, plain text contact line
+# Render mode -- resume variant, plain text contact line
 create_cv(
-  data        = "~/my_cv/cv-data.xlsx",
-  photo       = "~/my_cv/me.jpeg",
+  data        = "cv-data.xlsx",
+  photo       = "me.jpeg",
   variant     = "resume",
   use_icons   = "none",
   output_file = "erwin-lares-resume.pdf"
@@ -263,12 +199,12 @@ create_cv(
 
 **Arguments:**
 
-- `data` — path to the workbook. `NULL` triggers scaffold mode.
-- `photo` — path to the profile image. `NULL` renders without a photo.
-- `output_file` — PDF filename. Defaults to `"CV.pdf"`.
-- `overwrite` — whether to overwrite existing files. Defaults to `FALSE`.
-- `variant` — `"cv"` (all rows) or `"resume"` (checked rows only).
-- `use_icons` — `"fontawesome"` (default) or `"none"`.
+- `data` -- path to the workbook. `NULL` triggers scaffold mode.
+- `photo` -- path to the profile image. `NULL` renders without a photo.
+- `output_file` -- PDF filename. Defaults to `"CV.pdf"`.
+- `overwrite` -- whether to overwrite existing files. Defaults to `FALSE`.
+- `variant` -- `"cv"` (all rows) or `"resume"` (checked rows only).
+- `use_icons` -- `"fontawesome"` (default) or `"none"`.
 
 ### `add_section()`
 
@@ -297,7 +233,7 @@ cv <- read_cv_data("cv-data-template.xlsx", variant = "resume")
 
 cv$experience           # a data frame
 cv$sections             # the sections control sheet
-cv$profile[["email"]]  # a scalar string
+cv$profile[["email"]]   # a scalar string
 cv$theme[["accent_color"]]  # a scalar string
 ```
 
@@ -314,7 +250,7 @@ cv_contact_line(cv$profile, use_icons = "none")
 ### `cv_render_section()`
 
 Iterates over a CV data frame and writes each row as a formatted Typst entry.
-Called inside `CV.qmd` — you will not normally call this directly.
+Called inside `CV.qmd` -- you will not normally call this directly.
 
 ### `typst_escape()`
 
@@ -342,7 +278,7 @@ title | unit | startMonth | startYear | endMonth | endYear | where | detail | in
 ```
 
 `title` is always the primary entry label. `unit` is the secondary line.
-`include_in_resume` is a boolean checkbox column — check a row to include it
+`include_in_resume` is a boolean checkbox column -- check a row to include it
 when rendering with `variant = "resume"`. Leave cells blank rather than typing
 `NA`.
 
@@ -357,13 +293,39 @@ when rendering with `variant = "resume"`. Leave cells blank rather than typing
 
 ---
 
+## Migration notes
+
+Detailed notes on upgrading from previous versions are available in the
+[changelog](https://erwinlares.github.io/curriculr/news/index.html). The
+key changes by version:
+
+**v0.2.0 to v0.3.0** -- `photo = NULL` now produces a no-photo layout
+instead of falling back to a placeholder. Workbooks need an
+`include_in_resume` column on every section sheet. An optional `theme` sheet
+controls fonts, colors, and page layout. `openxlsx2` replaces `readxl`.
+
+**v0.1.0 to v0.2.0** -- `create_cv()` gained scaffold mode (no arguments)
+and render mode (with arguments). Workbooks need a `sections` sheet to
+control which sections appear and in what order.
+
+---
+
 ## Related packages
 
-curriculr is one of three sibling packages:
+curriculr shares an author and design philosophy with three other R packages
+focused on reproducible research workflows:
 
-- [toolero](https://github.com/erwinlares/toolero) — research workflow toolkit
-- [containr](https://github.com/erwinlares/containr) — Docker containerization
-- **curriculr** — data-driven CV generation with Quarto and Typst
+- [toolero](https://github.com/erwinlares/toolero) -- research project
+  scaffolding and data wrangling utilities
+- [containr](https://github.com/erwinlares/containr) -- containerization
+  of R projects via Dockerfile generation
+- [submitr](https://github.com/erwinlares/submitr) -- job submission to
+  UW-Madison's CHTC from inside R
+
+Together, toolero, containr, and submitr form the **From the Notebook to
+the Cluster** pipeline. curriculr is independent but follows the same
+conventions: small focused functions, data-driven workflows, and
+Quarto as the publishing layer.
 
 ---
 
@@ -375,6 +337,16 @@ curriculr was inspired by two prior projects:
   Rob Hyndman, and contributors
 - [Awesome CV](https://github.com/posquit0/Awesome-CV) by Byungjin Park
   (posquit0)
+
+---
+
+## Citation
+
+If you use curriculr in your work, please cite it:
+
+```r
+citation("curriculr")
+```
 
 ---
 
