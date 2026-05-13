@@ -1280,3 +1280,119 @@ tests/testthat/test-read-cv-data.R  -- withr upgrade, new coverage
 Active badges: - DOI (Zenodo) - R-CMD-check (GitHub Actions) - CRAN
 status (pending acceptance) - Lifecycle: experimental - Codecov test
 coverage
+
+------------------------------------------------------------------------
+
+## Session 6 — 2026-05-08
+
+### What we set out to do
+
+This session addressed CRAN reviewer feedback on the v0.3.0 submission
+and prepared the package for resubmission. Three issues were raised by
+the reviewer.
+
+------------------------------------------------------------------------
+
+### CRAN reviewer feedback and fixes
+
+**1. Software names in DESCRIPTION title not in single quotes.**
+
+`Quarto` and `Typst` in the title were not quoted per CRAN convention.
+Fixed:
+
+    Title: Generate Data-Driven CVs with 'Quarto' and 'Typst'
+
+**2. Replace `\dontrun{}` with `\donttest{}` where examples can run.**
+
+CRAN’s position is that `\dontrun{}` signals “this cannot run at all”
+and adds a visible “# Not run:” warning that discourages users from
+trying the examples. `\donttest{}` is the correct wrapper for examples
+that are skipped during automated checks but can be run by users. Four
+functions were updated:
+
+- [`create_cv()`](https://erwinlares.github.io/curriculr/reference/create_cv.md)
+  — scaffold mode (`withr::with_dir(tempdir(), create_cv())`) moved to
+  `\donttest{}`. Render-mode examples requiring user-supplied files,
+  Quarto, and Typst kept in `\dontrun{}`.
+- [`read_cv_data()`](https://erwinlares.github.io/curriculr/reference/read_cv_data.md)
+  — example using the package template file via
+  `system.file("extdata", "cv-data-template.xlsx", package = "curriculr")`
+  moved to `\donttest{}`. User-file examples kept in `\dontrun{}`.
+- [`cv_render_section()`](https://erwinlares.github.io/curriculr/reference/cv_render_section.md)
+  — example loading the template file and rendering the experience
+  section moved to `\donttest{}`. Quarto-context examples referencing
+  internal helpers kept in `\dontrun{}`.
+- [`add_section()`](https://erwinlares.github.io/curriculr/reference/add_section.md)
+  — example copying the template to
+  [`tempdir()`](https://rdrr.io/r/base/tempfile.html) and adding a
+  section moved to `\donttest{}`. User-file examples kept in
+  `\dontrun{}`.
+
+The pattern established: use `\donttest{}` when the example can run with
+the template file from `inst/extdata/` or with
+[`tempdir()`](https://rdrr.io/r/base/tempfile.html); keep `\dontrun{}`
+when the example genuinely requires missing software (Quarto, Typst) or
+user-supplied files that cannot be approximated.
+
+**3. Examples for unexported functions.**
+
+CRAN flagged `man/dot-cv_theme_defaults.Rd` — roxygen was generating Rd
+files for all ten internal helper functions because their roxygen blocks
+used `#'` rather than `#`. The fix was to add `@noRd` to all ten
+internal helpers, preventing Rd file generation while preserving the
+source documentation:
+
+Functions updated in `cv-contact.R`: `.fa_icon_map()`,
+`.cv_theme_defaults()`, `.resolve_theme()`, `.build_format_block()`,
+`.build_typst_theme_block()`.
+
+Functions updated in other files: `.cv_date_range()`,
+`.cv_year_range()`, `.cv_entry()`, `.build_section_blocks()`,
+`.cv_value()`.
+
+Two `[.resolve_theme()]` cross-reference links in
+`.build_format_block()` and `.build_typst_theme_block()` were changed to
+backtick code (`.resolve_theme()`) since the Rd topic no longer exists
+after `@noRd` was added.
+
+------------------------------------------------------------------------
+
+### renv.lock cleanup
+
+The lockfile had accumulated development packages (`devtools`,
+`usethis`, `rhub`, and others) from implicit snapshot mode. Fixed by
+switching to explicit mode and rebuilding from scratch:
+
+``` r
+
+renv::settings$snapshot.type("explicit")
+renv::init(force = TRUE, bare = TRUE)
+renv::snapshot()
+```
+
+Explicit mode only captures packages in `DESCRIPTION` and their
+transitive dependencies. Going forward, dev packages can be installed to
+the system library with `install.packages("pkg", lib = .Library)` to
+keep them out of the project lockfile entirely.
+
+------------------------------------------------------------------------
+
+### devtools::check() results after fixes
+
+0 errors \| 0 warnings \| 0 notes
+
+------------------------------------------------------------------------
+
+### Files changed in Session 6
+
+``` text
+R/create-cv.R       -- \dontrun -> \donttest for scaffold example
+R/read-cv-data.R    -- \dontrun -> \donttest for template-file example
+R/typst-render.R    -- \dontrun -> \donttest for template-file example
+R/add-section.R     -- \dontrun -> \donttest for temp-dir example
+R/cv-contact.R      -- @noRd added to all five internal helpers,
+                       [.resolve_theme()] -> `.resolve_theme()`
+DESCRIPTION         -- single quotes around Quarto and Typst in title
+renv.lock           -- rebuilt in explicit mode, dev packages removed
+cran-comments.md    -- updated for resubmission
+```

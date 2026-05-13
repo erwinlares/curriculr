@@ -6,6 +6,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Data-Driven CVs with Quarto and Typst • curriculr</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="icon" type="”image/svg+xml”" href="favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="icon" sizes="any" href="favicon.ico">
+<link rel="manifest" href="site.webmanifest">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
@@ -13,6 +18,7 @@
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Data-Driven CVs with Quarto and Typst">
 <meta name="description" content="Provides tools for producing data-driven curriculum vitae documents from structured data stored in an Excel workbook. The core workflow reads CV content from a workbook, converts it into Typst layout blocks, and renders a polished PDF via the Quarto publishing system. Includes functions for reading and cleaning CV data, building Typst section headings and entries, rendering CV sections from data frames, and scaffolding new CV projects with a standard folder structure and template workbook. Designed to separate content from layout: CV data lives in the spreadsheet, rendering configuration lives in Quarto, and transformation logic lives in small, reusable R functions. See the Typst typesetting system at &lt;https://typst.app&gt; and the Quarto publishing system at &lt;https://quarto.org&gt;. Inspired by the vitae package &lt;https://CRAN.R-project.org/package=vitae&gt; and the Awesome CV LaTeX template &lt;https://github.com/posquit0/Awesome-CV&gt;.">
 <meta property="og:description" content="Provides tools for producing data-driven curriculum vitae documents from structured data stored in an Excel workbook. The core workflow reads CV content from a workbook, converts it into Typst layout blocks, and renders a polished PDF via the Quarto publishing system. Includes functions for reading and cleaning CV data, building Typst section headings and entries, rendering CV sections from data frames, and scaffolding new CV projects with a standard folder structure and template workbook. Designed to separate content from layout: CV data lives in the spreadsheet, rendering configuration lives in Quarto, and transformation logic lives in small, reusable R functions. See the Typst typesetting system at &lt;https://typst.app&gt; and the Quarto publishing system at &lt;https://quarto.org&gt;. Inspired by the vitae package &lt;https://CRAN.R-project.org/package=vitae&gt; and the Awesome CV LaTeX template &lt;https://github.com/posquit0/Awesome-CV&gt;.">
+<meta property="og:image" content="https://erwinlares.github.io/curriculr/logo.png">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -53,8 +59,10 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="curriculr-">curriculr <img src="reference/figures/hex-sticker.png" align="right" height="139" alt="curriculr package logo"><a class="anchor" aria-label="anchor" href="#curriculr-"></a>
-</h1></div>
+<div class="page-header">
+<img src="logo.png" class="logo" alt=""><h1 id="curriculr-">curriculr <a class="anchor" aria-label="anchor" href="#curriculr-"></a>
+</h1>
+</div>
 <!-- badges: start -->
 
 <p><code>curriculr</code> is an R package for producing data-driven curriculum vitae documents. You maintain your CV content in an Excel workbook. curriculr reads it, converts it into Typst layout blocks, and renders a polished PDF via Quarto’s Typst engine. No LaTeX. No vitae. No custom <code>.cls</code> files.</p>
@@ -535,6 +543,7 @@ i Next steps:
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
+<li><a href="https://cloud.r-project.org/package=curriculr" class="external-link">View on CRAN</a></li>
 <li><a href="https://github.com/erwinlares/curriculr/" class="external-link">Browse source code</a></li>
 <li><a href="https://github.com/erwinlares/curriculr/issues" class="external-link">Report a bug</a></li>
 </ul>
@@ -566,11 +575,13 @@ i Next steps:
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://doi.org/10.5281/zenodo.19930400" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.19930400.svg" alt="DOI"></a></li>
 <li><a href="https://github.com/erwinlares/curriculr/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/erwinlares/curriculr/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://doi.org/10.5281/zenodo.19930400" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.19930400.svg" alt="DOI"></a></li>
 <li><a href="https://CRAN.R-project.org/package=curriculr" class="external-link"><img src="https://www.r-pkg.org/badges/version/curriculr" alt="CRAN status"></a></li>
+<li><a href="https://cran.r-project.org/package=curriculr" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/curriculr" alt="CRAN downloads"></a></li>
 <li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
 <li><a href="https://app.codecov.io/gh/erwinlares/curriculr" class="external-link"><img src="https://codecov.io/gh/erwinlares/curriculr/graph/badge.svg" alt="Codecov test coverage"></a></li>
+<li><a href="https://erwinlares.r-universe.dev/curriculr" class="external-link"><img src="https://erwinlares.r-universe.dev/badges/curriculr" alt="r-universe"></a></li>
 </ul>
 </div>
 

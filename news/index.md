@@ -2,6 +2,8 @@
 
 ## curriculr 0.3.0
 
+CRAN release: 2026-05-13
+
 ### Breaking changes
 
 - [`read_cv_data()`](https://erwinlares.github.io/curriculr/reference/read_cv_data.md)
