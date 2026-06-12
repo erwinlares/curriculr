@@ -54,6 +54,26 @@ test_that("cv_contact_line() with fontawesome includes email value", {
 })
 
 # ---------------------------------------------------------------------------
+# cv_contact_line() — Typst escaping
+# ---------------------------------------------------------------------------
+
+test_that("cv_contact_line() escapes email @ exactly once", {
+    result <- cv_contact_line(full_profile, use_icons = "fontawesome")
+    expect_false(grepl("\\\\@", result, fixed = TRUE),
+                 label = "double-escaped \\@ should not appear in output")
+    expect_true(grepl("\\@", result, fixed = TRUE),
+                label = "single-escaped \\@ should appear in output")
+})
+
+test_that("cv_contact_line() escapes email @ exactly once with use_icons = 'none'", {
+    result <- cv_contact_line(full_profile, use_icons = "none")
+    expect_false(grepl("\\\\@", result, fixed = TRUE))
+    expect_true(grepl("\\@",   result, fixed = TRUE))
+})
+
+
+
+# ---------------------------------------------------------------------------
 # cv_contact_line() — use_icons = "none"
 # ---------------------------------------------------------------------------
 

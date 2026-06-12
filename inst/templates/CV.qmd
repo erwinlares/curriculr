@@ -21,6 +21,9 @@ execute:
 ```{r}
 #| label: setup
 
+if (!requireNamespace("curriculr", quietly = TRUE)) {
+  knitr::knit_exit()
+}
 library(curriculr)
 
 # Path to the Excel workbook and variant are injected by create_cv() at render
