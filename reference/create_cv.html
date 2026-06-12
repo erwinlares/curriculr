@@ -5,7 +5,7 @@ current working directory and prints instructions for the next step. No
 rendering takes place."><meta property="og:description" content="Called with no arguments, create_cv() runs in scaffold mode: it
 copies the template Excel workbook and placeholder profile image to the
 current working directory and prints instructions for the next step. No
-rendering takes place."><meta property="og:image" content="https://erwinlares.github.io/curriculr/logo.png"></head><body>
+rendering takes place."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -37,7 +37,8 @@ rendering takes place."><meta property="og:image" content="https://erwinlares.gi
 </nav><div class="container template-reference-topic">
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Generate a CV document from a curriculr workbook</h1>
+
+      <h1>Generate a CV document from a curriculr workbook</h1>
       <small class="dont-index">Source: <a href="https://github.com/erwinlares/curriculr/blob/main/R/create-cv.R" class="external-link"><code>R/create-cv.R</code></a></small>
       <div class="d-none name"><code>create_cv.Rd</code></div>
     </div>
@@ -138,12 +139,12 @@ defaults.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># Scaffold mode — copy template files to a temp directory</span></span></span>
 <span class="r-in"><span><span class="fu">withr</span><span class="fu">::</span><span class="fu"><a href="https://withr.r-lib.org/reference/with_dir.html" class="external-link">with_dir</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="fu">create_cv</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Created <span style="color: #0000BB;">/tmp/RtmpVMYZfs/cv-data-template.xlsx</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Created <span style="color: #0000BB;">/tmp/RtmpVMYZfs/placeholder.png</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Created <span style="color: #0000BB;">/tmp/RtmpyiLVt4/cv-data-template.xlsx</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Created <span style="color: #0000BB;">/tmp/RtmpyiLVt4/placeholder.png</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Next steps:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Open <span style="color: #0000BB;">/tmp/RtmpVMYZfs/cv-data-template.xlsx</span> and fill in the <span style="color: #0000BB;">"profile"</span> sheet with</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Open <span style="color: #0000BB;">/tmp/RtmpyiLVt4/cv-data-template.xlsx</span> and fill in the <span style="color: #0000BB;">"profile"</span> sheet with</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> your information.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Replace <span style="color: #0000BB;">/tmp/RtmpVMYZfs/placeholder.png</span> with your own profile photo.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Replace <span style="color: #0000BB;">/tmp/RtmpyiLVt4/placeholder.png</span> with your own profile photo.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Call `create_cv(data = 'cv-data-template.xlsx', photo = 'your-photo.png')` to</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> render your CV.</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
