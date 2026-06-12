@@ -44,7 +44,7 @@ cv_contact_line <- function(profile, use_icons = "fontawesome") {
         display_val <- switch(field,
                               github   = paste0("github.com/", val),
                               linkedin = paste0("linkedin.com/", val),
-                              typst_escape(val)
+            val
         )
         display_val <- typst_escape(display_val)
 
