@@ -52,9 +52,11 @@ create_cv()
 You will see:
 
 ```
-v Created cv-data-template.xlsx
-v Created placeholder.png
-i Next steps:
+- `Curriculr` creates cv-data-template.xlsx
+- `Curriculr` creates placeholder.png
+
+**Next steps**:
+
 1. Open cv-data-template.xlsx and fill in the profile sheet.
 2. Replace placeholder.png with your own profile photo.
 3. Call create_cv(data = 'cv-data-template.xlsx', photo = 'your-photo.png')
