@@ -37,32 +37,31 @@ test_that("cv_contact_line() with fontawesome uses Typst h() separator", {
     expect_match(result, "#h(0.6em)", fixed = TRUE)
 })
 
-test_that("cv_contact_line() with fontawesome expands github to full URL", {
+test_that("cv_contact_line() with fontawesome does not include github URL text", {
     result <- cv_contact_line(full_profile, use_icons = "fontawesome")
-    expect_match(result, "github.com/fpalmer-draws", fixed = TRUE)
+    expect_false(grepl("github.com/fpalmer-draws", result, fixed = TRUE))
 })
 
-test_that("cv_contact_line() with fontawesome expands linkedin to full URL", {
+test_that("cv_contact_line() with fontawesome does not include linkedin URL text", {
     result <- cv_contact_line(full_profile, use_icons = "fontawesome")
-    expect_match(result, "linkedin.com/in/frank-palmer-illustration",
-                 fixed = TRUE)
+    expect_false(grepl("linkedin.com/in/frank-palmer-illustration", result,
+                       fixed = TRUE))
 })
 
-test_that("cv_contact_line() with fontawesome includes email value", {
+test_that("cv_contact_line() with fontawesome renders email as icon only", {
     result <- cv_contact_line(email_only_profile, use_icons = "fontawesome")
-    expect_match(result, "frank", fixed = TRUE)
+    expect_match(result, '#fa-icon("envelope")', fixed = TRUE)
+    expect_false(grepl("frank", result, fixed = TRUE))
 })
 
 # ---------------------------------------------------------------------------
 # cv_contact_line() — Typst escaping
 # ---------------------------------------------------------------------------
 
-test_that("cv_contact_line() escapes email @ exactly once", {
+test_that("cv_contact_line() fontawesome output contains no escaped @ symbols", {
     result <- cv_contact_line(full_profile, use_icons = "fontawesome")
-    expect_false(grepl("\\\\@", result, fixed = TRUE),
-                 label = "double-escaped \\@ should not appear in output")
-    expect_true(grepl("\\@", result, fixed = TRUE),
-                label = "single-escaped \\@ should appear in output")
+    expect_false(grepl("\\@", result, fixed = TRUE),
+                 label = "no @ escaping expected in icon-only output")
 })
 
 test_that("cv_contact_line() escapes email @ exactly once with use_icons = 'none'", {
