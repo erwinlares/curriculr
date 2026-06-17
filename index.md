@@ -1,4 +1,4 @@
-# curriculr ![curriculr package logo](reference/figures/logo.png)
+# curriculr ![curriculr package logo](reference/figures/hex-sticker.png)
 
 `curriculr` is an R package for producing data-driven curriculum vitae
 documents. You maintain your CV content in an Excel workbook. curriculr
