@@ -119,9 +119,9 @@ file.copy(
 )
 #> [1] TRUE
 add_section(tmp, section = "patents")
-#> ✔ Added sheet "patents" to /tmp/Rtmp75qcfw/cv-data.xlsx.
+#> ✔ Added sheet "patents" to /tmp/RtmpaNu2pb/cv-data.xlsx.
 #> ✔ Registered "patents" in the "sections" sheet.
-#> ✔ Workbook saved to /tmp/Rtmp75qcfw/cv-data.xlsx.
+#> ✔ Workbook saved to /tmp/RtmpaNu2pb/cv-data.xlsx.
 # }
 
 if (FALSE) { # \dontrun{
