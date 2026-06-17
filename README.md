@@ -1,4 +1,4 @@
-# curriculr <img src="man/figures/logo.png" align="right" height="139" alt="curriculr package logo"/>
+# curriculr <img src="man/figures/hex-sticker.png" align="right" height="139" alt="curriculr package logo"/>
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/erwinlares/curriculr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/erwinlares/curriculr/actions/workflows/R-CMD-check.yaml)
