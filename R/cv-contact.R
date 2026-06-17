@@ -12,10 +12,11 @@
 #' Build the contact line for the CV header
 #'
 #' Assembles a Typst-formatted contact line from a profile vector. When
-#' `use_icons = "fontawesome"`, known contact fields are rendered with their
-#' Font Awesome icon via the Typst `@preview/fontawesome` package. Fields with
-#' no icon equivalent fall back to plain text with a warning. When
-#' `use_icons = "none"`, all fields render as plain text.
+#' `use_icons = "fontawesome"`, known contact fields are rendered as their
+#' Font Awesome icon only via the Typst `@preview/fontawesome` package -- the
+#' text label is omitted. Fields with no icon equivalent fall back to plain
+#' text with a warning. When `use_icons = "none"`, all fields render as plain
+#' text.
 #'
 #' This function is called inside `CV.qmd` and is exported so that users
 #' building custom Quarto templates can call it directly.
@@ -44,7 +45,7 @@ cv_contact_line <- function(profile, use_icons = "fontawesome") {
         display_val <- switch(field,
                               github   = paste0("github.com/", val),
                               linkedin = paste0("linkedin.com/", val),
-            val
+                              val
         )
         display_val <- typst_escape(display_val)
 
@@ -57,7 +58,7 @@ cv_contact_line <- function(profile, use_icons = "fontawesome") {
                 )
                 return(display_val)
             }
-            return(paste0("#fa-icon(\"", icon, "\") ", display_val))
+            return(paste0("#fa-icon(\"", icon, "\")"))
         }
 
         display_val
