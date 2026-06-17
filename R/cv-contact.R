@@ -43,8 +43,10 @@ cv_contact_line <- function(profile, use_icons = "fontawesome") {
 
         # Expand github and linkedin to full URLs for display
         display_val <- switch(field,
-                              github   = paste0("github.com/", val),
-                              linkedin = paste0("linkedin.com/", val),
+                              github   = if (grepl("^http", val)) sub(".*github\\.com/", "github.com/", val)
+                              else paste0("github.com/", val),
+                              linkedin = if (grepl("^http", val)) sub(".*linkedin\\.com/", "linkedin.com/", val)
+                              else paste0("linkedin.com/", val),
                               val
         )
         display_val <- typst_escape(display_val)
@@ -58,7 +60,7 @@ cv_contact_line <- function(profile, use_icons = "fontawesome") {
                 )
                 return(display_val)
             }
-            return(paste0("#fa-icon(\"", icon, "\")"))
+            return(paste0("#fa-icon(\"", icon, "\") ", display_val))
         }
 
         display_val

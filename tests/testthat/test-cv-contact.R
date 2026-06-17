@@ -37,31 +37,32 @@ test_that("cv_contact_line() with fontawesome uses Typst h() separator", {
     expect_match(result, "#h(0.6em)", fixed = TRUE)
 })
 
-test_that("cv_contact_line() with fontawesome does not include github URL text", {
+test_that("cv_contact_line() with fontawesome expands github to full URL", {
     result <- cv_contact_line(full_profile, use_icons = "fontawesome")
-    expect_false(grepl("github.com/fpalmer-draws", result, fixed = TRUE))
+    expect_match(result, "github.com/fpalmer-draws", fixed = TRUE)
 })
 
-test_that("cv_contact_line() with fontawesome does not include linkedin URL text", {
+test_that("cv_contact_line() with fontawesome expands linkedin to full URL", {
     result <- cv_contact_line(full_profile, use_icons = "fontawesome")
-    expect_false(grepl("linkedin.com/in/frank-palmer-illustration", result,
-                       fixed = TRUE))
+    expect_match(result, "linkedin.com/in/frank-palmer-illustration",
+                 fixed = TRUE)
 })
 
-test_that("cv_contact_line() with fontawesome renders email as icon only", {
+test_that("cv_contact_line() with fontawesome includes email value", {
     result <- cv_contact_line(email_only_profile, use_icons = "fontawesome")
-    expect_match(result, '#fa-icon("envelope")', fixed = TRUE)
-    expect_false(grepl("frank", result, fixed = TRUE))
+    expect_match(result, "frank", fixed = TRUE)
 })
 
 # ---------------------------------------------------------------------------
 # cv_contact_line() — Typst escaping
 # ---------------------------------------------------------------------------
 
-test_that("cv_contact_line() fontawesome output contains no escaped @ symbols", {
+test_that("cv_contact_line() escapes email @ exactly once", {
     result <- cv_contact_line(full_profile, use_icons = "fontawesome")
-    expect_false(grepl("\\@", result, fixed = TRUE),
-                 label = "no @ escaping expected in icon-only output")
+    expect_false(grepl("\\\\@", result, fixed = TRUE),
+                 label = "double-escaped \\@ should not appear in output")
+    expect_true(grepl("\\@", result, fixed = TRUE),
+                label = "single-escaped \\@ should appear in output")
 })
 
 test_that("cv_contact_line() escapes email @ exactly once with use_icons = 'none'", {
@@ -69,7 +70,6 @@ test_that("cv_contact_line() escapes email @ exactly once with use_icons = 'none
     expect_false(grepl("\\\\@", result, fixed = TRUE))
     expect_true(grepl("\\@",   result, fixed = TRUE))
 })
-
 
 
 # ---------------------------------------------------------------------------
@@ -270,4 +270,22 @@ test_that(".build_typst_theme_block() wraps output in typst code fence", {
     block <- curriculr:::.build_typst_theme_block(theme)
     expect_match(block, "```{=typst}", fixed = TRUE)
     expect_match(block, "```",         fixed = TRUE)
+})
+
+# ---------------------------------------------------------------------------
+# cv_contact_line() — full URL normalization for github and linkedin
+# ---------------------------------------------------------------------------
+
+test_that("cv_contact_line() normalizes full github URL to display form", {
+    profile <- c(github = "https://github.com/fpalmer-draws")
+    result  <- cv_contact_line(profile, use_icons = "none")
+    expect_match(result, "github.com/fpalmer-draws", fixed = TRUE)
+    expect_false(grepl("https://", result, fixed = TRUE))
+})
+
+test_that("cv_contact_line() normalizes full linkedin URL to display form", {
+    profile <- c(linkedin = "https://www.linkedin.com/in/frank-palmer-illustration")
+    result  <- cv_contact_line(profile, use_icons = "none")
+    expect_match(result, "linkedin.com/in/frank-palmer-illustration", fixed = TRUE)
+    expect_false(grepl("https://", result, fixed = TRUE))
 })
