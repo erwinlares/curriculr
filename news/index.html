@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">curriculr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,6 +36,14 @@
       <small>Source: <a href="https://github.com/erwinlares/curriculr/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.1" id="curriculr-031">curriculr 0.3.1<a class="anchor" aria-label="anchor" href="#curriculr-031"></a></h2>
+<div class="section level4">
+<h4 id="bug-fixes-0-3-1">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-3-1"></a></h4>
+<ul><li><p><code><a href="../reference/cv_contact_line.html">cv_contact_line()</a></code>: when <code>use_icons = "fontawesome"</code>, contact fields now render as icons only. Previously the icon and the text label both appeared, producing redundant output like the globe icon followed by “erwinlares.com”.</p></li>
+<li><p><code><a href="../reference/cv_contact_line.html">cv_contact_line()</a></code>: email addresses no longer render with a spurious backslash before the <code>@</code> symbol in Typst PDF output. The double call to <code><a href="../reference/typst_escape.html">typst_escape()</a></code> inside the <code><a href="https://rdrr.io/r/base/switch.html" class="external-link">switch()</a></code> default arm caused <code>@</code> to be escaped twice, producing a literal backslash in the rendered document. Fixed by removing the inner <code><a href="../reference/typst_escape.html">typst_escape()</a></code> call so all fields are escaped exactly once (thanks <a href="https://github.com/gygl" class="external-link">@gygl</a>!).</p></li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.0" id="curriculr-030">curriculr 0.3.0<a class="anchor" aria-label="anchor" href="#curriculr-030"></a></h2><p class="text-muted">CRAN release: 2026-05-13</p>
 <div class="section level3">

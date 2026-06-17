@@ -1,5 +1,25 @@
 # Changelog
 
+## curriculr 0.3.1
+
+#### Bug fixes
+
+- [`cv_contact_line()`](https://erwinlares.github.io/curriculr/reference/cv_contact_line.md):
+  when `use_icons = "fontawesome"`, contact fields now render as icons
+  only. Previously the icon and the text label both appeared, producing
+  redundant output like the globe icon followed by “erwinlares.com”.
+
+- [`cv_contact_line()`](https://erwinlares.github.io/curriculr/reference/cv_contact_line.md):
+  email addresses no longer render with a spurious backslash before the
+  `@` symbol in Typst PDF output. The double call to
+  [`typst_escape()`](https://erwinlares.github.io/curriculr/reference/typst_escape.md)
+  inside the [`switch()`](https://rdrr.io/r/base/switch.html) default
+  arm caused `@` to be escaped twice, producing a literal backslash in
+  the rendered document. Fixed by removing the inner
+  [`typst_escape()`](https://erwinlares.github.io/curriculr/reference/typst_escape.md)
+  call so all fields are escaped exactly once (thanks
+  [@gygl](https://github.com/gygl)!).
+
 ## curriculr 0.3.0
 
 CRAN release: 2026-05-13
