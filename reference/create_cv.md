@@ -40,6 +40,11 @@ create_cv(
 - overwrite:
 
   A logical. Whether to overwrite existing files. Defaults to `FALSE`.
+  In scaffold mode, controls whether the template workbook and
+  placeholder image are replaced if they already exist in the
+  destination directory. Has no effect in render mode – the intermediate
+  `CV.qmd` is always written to a temporary directory and never touches
+  the workbook folder.
 
 - variant:
 
@@ -86,17 +91,14 @@ the same directory as the workbook.
 
 3.  Resolves theme values from the workbook or built-in defaults.
 
-4.  Writes `CV.qmd` by injecting all resolved values into the package
-    template via sentinel substitution.
+4.  Writes an intermediate `CV.qmd` to a temporary directory by
+    injecting all resolved values into the package template via sentinel
+    substitution. The temporary file is deleted automatically after
+    rendering – it never appears in the workbook directory.
 
 5.  Calls
     [`quarto::quarto_render()`](https://quarto-dev.github.io/quarto-r/reference/quarto_render.html)
-    to produce the PDF.
-
-When `photo = NULL`, the CV header renders as a single full-width column
-containing the name, contact line, address, and profile statement. When
-a photo path is supplied, the header uses a two-column layout with the
-photo on the left.
+    to produce the PDF, written to the same directory as the workbook.
 
 When `variant = "resume"`, row-level filtering is controlled entirely by
 the `include_in_resume` column in each section sheet. Check the rows you
@@ -113,12 +115,12 @@ filled from defaults.
 # \donttest{
 # Scaffold mode — copy template files to a temp directory
 withr::with_dir(tempdir(), create_cv())
-#> ✔ Created /tmp/RtmppJMdNx/cv-data-template.xlsx
-#> ✔ Created /tmp/RtmppJMdNx/placeholder.png
+#> ✔ Created /tmp/RtmpYTcVMK/cv-data-template.xlsx
+#> ✔ Created /tmp/RtmpYTcVMK/placeholder.png
 #> ℹ Next steps:
-#> Open /tmp/RtmppJMdNx/cv-data-template.xlsx and fill in the "profile" sheet with
+#> Open /tmp/RtmpYTcVMK/cv-data-template.xlsx and fill in the "profile" sheet with
 #> your information.
-#> Replace /tmp/RtmppJMdNx/placeholder.png with your own profile photo.
+#> Replace /tmp/RtmpYTcVMK/placeholder.png with your own profile photo.
 #> Call `create_cv(data = 'cv-data-template.xlsx', photo = 'your-photo.png')` to
 #> render your CV.
 # }

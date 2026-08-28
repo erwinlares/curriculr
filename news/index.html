@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">curriculr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,6 +36,19 @@
       <small>Source: <a href="https://github.com/erwinlares/curriculr/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.1.9000" id="curriculr-0319000">curriculr 0.3.1.9000<a class="anchor" aria-label="anchor" href="#curriculr-0319000"></a></h2>
+<div class="section level4">
+<h4 id="new-features-0-3-1-9000">New features<a class="anchor" aria-label="anchor" href="#new-features-0-3-1-9000"></a></h4>
+<ul><li>
+<code><a href="../reference/cv_render_section.html">cv_render_section()</a></code> now aggregates multi-row entries automatically. Rows sharing the same <code>title</code>, <code>unit</code>, <code>startMonth</code>, <code>startYear</code>, <code>endMonth</code>, <code>endYear</code>, and <code>where</code> values are treated as a single entry: one header renders at the top with the date and location right-aligned, and each <code>detail</code> value appears as an indented bullet beneath it. Single-detail entries continue to render exactly as before. Row order in the workbook controls bullet order. This behavior applies to all sections, not just experience.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="improvements-0-3-1-9000">Improvements<a class="anchor" aria-label="anchor" href="#improvements-0-3-1-9000"></a></h4>
+<ul><li>
+<code><a href="../reference/create_cv.html">create_cv()</a></code> now writes the intermediate <code>CV.qmd</code> to a temporary directory rather than the workbook folder. The file is never visible to the user and is cleaned up automatically. As a result, <code>overwrite</code> no longer has any effect in render mode – re-running <code><a href="../reference/create_cv.html">create_cv()</a></code> on an existing project requires no flags.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.1" id="curriculr-031">curriculr 0.3.1<a class="anchor" aria-label="anchor" href="#curriculr-031"></a></h2>
 <div class="section level4">
@@ -130,7 +143,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

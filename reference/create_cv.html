@@ -13,7 +13,7 @@ rendering takes place."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">curriculr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -85,7 +85,11 @@ Defaults to <code>"CV.pdf"</code>. Ignored in scaffold mode.</p></dd>
 
 <dt id="arg-overwrite">overwrite<a class="anchor" aria-label="anchor" href="#arg-overwrite"></a></dt>
 <dd><p>A logical. Whether to overwrite existing files. Defaults
-to <code>FALSE</code>.</p></dd>
+to <code>FALSE</code>. In scaffold mode, controls whether the template workbook and
+placeholder image are replaced if they already exist in the destination
+directory. Has no effect in render mode – the intermediate <code>CV.qmd</code> is
+always written to a temporary directory and never touches the workbook
+folder.</p></dd>
 
 
 <dt id="arg-variant">variant<a class="anchor" aria-label="anchor" href="#arg-variant"></a></dt>
@@ -118,14 +122,13 @@ the same directory as the workbook.</p>
 </ol><p><strong>Render mode</strong> (<code>data</code> supplied):</p><ol><li><p>Resolves and validates the workbook and photo paths.</p></li>
 <li><p>Reads the workbook with <code><a href="read_cv_data.html">read_cv_data()</a></code>, applying <code>variant</code> filtering.</p></li>
 <li><p>Resolves theme values from the workbook or built-in defaults.</p></li>
-<li><p>Writes <code>CV.qmd</code> by injecting all resolved values into the package
-template via sentinel substitution.</p></li>
-<li><p>Calls <code><a href="https://quarto-dev.github.io/quarto-r/reference/quarto_render.html" class="external-link">quarto::quarto_render()</a></code> to produce the PDF.</p></li>
-</ol><p>When <code>photo = NULL</code>, the CV header renders as a single full-width column
-containing the name, contact line, address, and profile statement. When
-a photo path is supplied, the header uses a two-column layout with the
-photo on the left.</p>
-<p>When <code>variant = "resume"</code>, row-level filtering is controlled entirely by
+<li><p>Writes an intermediate <code>CV.qmd</code> to a temporary directory by injecting
+all resolved values into the package template via sentinel substitution.
+The temporary file is deleted automatically after rendering – it never
+appears in the workbook directory.</p></li>
+<li><p>Calls <code><a href="https://quarto-dev.github.io/quarto-r/reference/quarto_render.html" class="external-link">quarto::quarto_render()</a></code> to produce the PDF, written to the same
+directory as the workbook.</p></li>
+</ol><p>When <code>variant = "resume"</code>, row-level filtering is controlled entirely by
 the <code>include_in_resume</code> column in each section sheet. Check the rows you
 want included in the resume and leave the rest unchecked.</p>
 <p>Theme values (fonts, colors, page layout) are read from the <code>theme</code> sheet
@@ -139,12 +142,12 @@ defaults.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># Scaffold mode — copy template files to a temp directory</span></span></span>
 <span class="r-in"><span><span class="fu">withr</span><span class="fu">::</span><span class="fu"><a href="https://withr.r-lib.org/reference/with_dir.html" class="external-link">with_dir</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="fu">create_cv</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Created <span style="color: #0000BB;">/tmp/RtmppJMdNx/cv-data-template.xlsx</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Created <span style="color: #0000BB;">/tmp/RtmppJMdNx/placeholder.png</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Created <span style="color: #0000BB;">/tmp/RtmpYTcVMK/cv-data-template.xlsx</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Created <span style="color: #0000BB;">/tmp/RtmpYTcVMK/placeholder.png</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Next steps:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Open <span style="color: #0000BB;">/tmp/RtmppJMdNx/cv-data-template.xlsx</span> and fill in the <span style="color: #0000BB;">"profile"</span> sheet with</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Open <span style="color: #0000BB;">/tmp/RtmpYTcVMK/cv-data-template.xlsx</span> and fill in the <span style="color: #0000BB;">"profile"</span> sheet with</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> your information.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Replace <span style="color: #0000BB;">/tmp/RtmppJMdNx/placeholder.png</span> with your own profile photo.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Replace <span style="color: #0000BB;">/tmp/RtmpYTcVMK/placeholder.png</span> with your own profile photo.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Call `create_cv(data = 'cv-data-template.xlsx', photo = 'your-photo.png')` to</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> render your CV.</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
@@ -188,7 +191,7 @@ defaults.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

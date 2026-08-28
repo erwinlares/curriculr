@@ -57,6 +57,12 @@ blocks to the Quarto document output stream.
 
 ## Details
 
+Rows that share the same combination of `title`, `unit`, `startMonth`,
+`startYear`, `endMonth`, `endYear`, and `where` are treated as a single
+entry with multiple responsibilities. When more than one such row
+exists, the details are rendered as an indented bulleted list beneath
+the entry header rather than repeating the header for each row.
+
 This function is intended to be called inside a Quarto document chunk
 with `results = 'asis'`. The [`cat()`](https://rdrr.io/r/base/cat.html)
 call writes raw Typst blocks directly into the document output stream.

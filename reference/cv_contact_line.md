@@ -1,10 +1,11 @@
 # Build the contact line for the CV header
 
 Assembles a Typst-formatted contact line from a profile vector. When
-`use_icons = "fontawesome"`, known contact fields are rendered with
-their Font Awesome icon via the Typst `@preview/fontawesome` package.
-Fields with no icon equivalent fall back to plain text with a warning.
-When `use_icons = "none"`, all fields render as plain text.
+`use_icons = "fontawesome"`, known contact fields are rendered as their
+Font Awesome icon only via the Typst `@preview/fontawesome` package –
+the text label is omitted. Fields with no icon equivalent fall back to
+plain text with a warning. When `use_icons = "none"`, all fields render
+as plain text.
 
 ## Usage
 
