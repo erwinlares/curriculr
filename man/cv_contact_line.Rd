@@ -18,10 +18,11 @@ A character string of raw Typst markup for the contact line.
 }
 \description{
 Assembles a Typst-formatted contact line from a profile vector. When
-\code{use_icons = "fontawesome"}, known contact fields are rendered with their
-Font Awesome icon via the Typst \verb{@preview/fontawesome} package. Fields with
-no icon equivalent fall back to plain text with a warning. When
-\code{use_icons = "none"}, all fields render as plain text.
+\code{use_icons = "fontawesome"}, known contact fields are rendered as their
+Font Awesome icon only via the Typst \verb{@preview/fontawesome} package -- the
+text label is omitted. Fields with no icon equivalent fall back to plain
+text with a warning. When \code{use_icons = "none"}, all fields render as plain
+text.
 }
 \details{
 This function is called inside \code{CV.qmd} and is exported so that users

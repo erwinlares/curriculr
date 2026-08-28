@@ -8,6 +8,12 @@
 #' Iterates over a CV data frame and writes each row as a Typst CV entry by
 #' calling `.cv_entry()` for each row and passing the result to [base::cat()].
 #'
+#' Rows that share the same combination of `title`, `unit`, `startMonth`,
+#' `startYear`, `endMonth`, `endYear`, and `where` are treated as a single
+#' entry with multiple responsibilities. When more than one such row exists,
+#' the details are rendered as an indented bulleted list beneath the entry
+#' header rather than repeating the header for each row.
+#'
 #' This function is intended to be called inside a Quarto document chunk with
 #' `results = 'asis'`. The `cat()` call writes raw Typst blocks directly into
 #' the document output stream. Nothing is returned — the function is called
@@ -105,14 +111,18 @@ cv_render_section <- function(data,
 
 #' Build Typst blocks for a CV section
 #'
-#' Internal builder called by `cv_render_section()`. Iterates over each row of
-#' `data` and assembles a character vector of Typst entry blocks. Separating
-#' the building step from the printing step makes the output testable without
-#' capturing stdout.
+#' Internal builder called by `cv_render_section()`. Groups rows by their
+#' composite key (title, org, date, location), then assembles one Typst block
+#' per group. Groups with a single detail row call `.cv_entry()` as before.
+#' Groups with multiple detail rows call `.cv_entry_bulleted()`, which renders
+#' the details as an indented bulleted list beneath the entry header.
+#'
+#' Row order within a group is preserved from the original data frame, which
+#' is sorted by `startYear` descending in `read_cv_data()`.
 #'
 #' @inheritParams cv_render_section
 #'
-#' @return A character vector of Typst blocks, one element per row in `data`.
+#' @return A character vector of Typst blocks, one element per group in `data`.
 #'
 #' @keywords internal
 #' @noRd
@@ -123,18 +133,71 @@ cv_render_section <- function(data,
                                   date_fun   = .cv_date_range,
                                   where_col  = "where") {
 
-    blocks <- vector("character", nrow(data))
+    # -- 1. Build the composite grouping key ------------------------------------
+    # The key uniquely identifies one entry header. Rows sharing the same key
+    # are responsibilities under one position; they render as bullets rather
+    # than repeated headers. NA values in any key column are coerced to ""
+    # before pasting so they form a stable, consistent key.
+    key_cols <- c(title_col, org_col, where_col,
+                  "startMonth", "startYear", "endMonth", "endYear")
+    key_cols <- intersect(key_cols, names(data))
 
-    for (i in seq_len(nrow(data))) {
-        row <- data[i, , drop = FALSE]
+    key_values <- lapply(key_cols, function(col) {
+        x <- data[[col]]
+        ifelse(is.na(x), "", x)
+    })
+    group_key <- do.call(paste, c(key_values, sep = "\u001f"))
 
-        blocks[[i]] <- .cv_entry(
-            title        = .cv_value(row, title_col),
-            organization = if (!is.null(org_col))    .cv_value(row, org_col)    else "",
-            detail       = if (!is.null(detail_col)) .cv_value(row, detail_col) else "",
-            when         = if (!is.null(date_fun))   date_fun(row)              else "",
-            where        = if (!is.null(where_col))  .cv_value(row, where_col)  else ""
-        )
+    # -- 2. Preserve original row order for group appearance --------------------
+    # factor() with levels set to first-occurrence order means groups render
+    # in the order they appear in the data, not alphabetically.
+    group_factor  <- factor(group_key, levels = unique(group_key))
+    group_indices <- split(seq_len(nrow(data)), group_factor)
+
+    # -- 3. Build one block per group ------------------------------------------
+    blocks <- vector("character", length(group_indices))
+
+    for (g in seq_along(group_indices)) {
+        idx  <- group_indices[[g]]
+        rows <- data[idx, , drop = FALSE]
+
+        # Use the first row for all header fields -- title, org, date, location
+        # are identical across all rows in a group by definition.
+        first_row <- rows[1L, , drop = FALSE]
+
+        title <- .cv_value(first_row, title_col)
+        org   <- if (!is.null(org_col))   .cv_value(first_row, org_col)   else ""
+        when  <- if (!is.null(date_fun))  date_fun(first_row)             else ""
+        where <- if (!is.null(where_col)) .cv_value(first_row, where_col) else ""
+
+        # Collect detail values across all rows in the group
+        details <- if (!is.null(detail_col)) {
+            vals <- vapply(seq_len(nrow(rows)), function(i) {
+                v <- .cv_value(rows[i, , drop = FALSE], detail_col)
+                if (is.na(v) || !nzchar(trimws(v))) NA_character_ else v
+            }, character(1L))
+            vals[!is.na(vals)]
+        } else {
+            character(0)
+        }
+
+        blocks[[g]] <- if (length(details) > 1L) {
+            .cv_entry_bulleted(
+                title        = title,
+                organization = org,
+                details      = details,
+                when         = when,
+                where        = where
+            )
+        } else {
+            .cv_entry(
+                title        = title,
+                organization = org,
+                detail       = if (length(details) == 1L) details[[1L]] else "",
+                when         = when,
+                where        = where
+            )
+        }
     }
 
     blocks

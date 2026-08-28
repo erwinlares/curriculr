@@ -24,7 +24,11 @@
 #' @param output_file A character string. Name of the output PDF file.
 #'   Defaults to `"CV.pdf"`. Ignored in scaffold mode.
 #' @param overwrite A logical. Whether to overwrite existing files. Defaults
-#'   to `FALSE`.
+#'   to `FALSE`. In scaffold mode, controls whether the template workbook and
+#'   placeholder image are replaced if they already exist in the destination
+#'   directory. Has no effect in render mode -- the intermediate `CV.qmd` is
+#'   always written to a temporary directory and never touches the workbook
+#'   folder.
 #' @param variant A character string. Controls content scope. `"cv"` (the
 #'   default) renders all rows from every section. `"resume"` renders only
 #'   rows where `include_in_resume` is checked in the workbook.
@@ -48,14 +52,12 @@
 #' 1. Resolves and validates the workbook and photo paths.
 #' 2. Reads the workbook with [read_cv_data()], applying `variant` filtering.
 #' 3. Resolves theme values from the workbook or built-in defaults.
-#' 4. Writes `CV.qmd` by injecting all resolved values into the package
-#'    template via sentinel substitution.
-#' 5. Calls `quarto::quarto_render()` to produce the PDF.
-#'
-#' When `photo = NULL`, the CV header renders as a single full-width column
-#' containing the name, contact line, address, and profile statement. When
-#' a photo path is supplied, the header uses a two-column layout with the
-#' photo on the left.
+#' 4. Writes an intermediate `CV.qmd` to a temporary directory by injecting
+#'    all resolved values into the package template via sentinel substitution.
+#'    The temporary file is deleted automatically after rendering -- it never
+#'    appears in the workbook directory.
+#' 5. Calls `quarto::quarto_render()` to produce the PDF, written to the same
+#'    directory as the workbook.
 #'
 #' When `variant = "resume"`, row-level filtering is controlled entirely by
 #' the `include_in_resume` column in each section sheet. Check the rows you
@@ -201,15 +203,14 @@ create_cv <- function(data        = NULL,
     # -- 4. Resolve theme -------------------------------------------------------
     theme <- .resolve_theme(cv$theme)
 
-    # -- 5. Write CV.qmd -------------------------------------------------------
-    qmd_dst <- fs::path(output_dir, "CV.qmd")
-
-    if (fs::file_exists(qmd_dst) && !overwrite) {
-        cli::cli_abort(
-            "{.path {qmd_dst}} already exists.
-       Use {.code overwrite = TRUE} to replace it."
-        )
-    }
+    # -- 5. Write CV.qmd to a temp directory ------------------------------------
+    # The intermediate .qmd is implementation detail, not a user deliverable.
+    # Writing it to a temp directory means the workbook folder stays clean,
+    # the overwrite guard is unnecessary (temp dirs are always fresh), and
+    # the user never has to manage a file they didn't ask for.
+    tmp_dir <- tempfile(pattern = "curriculr-")
+    dir.create(tmp_dir)
+    qmd_dst <- fs::path(tmp_dir, "CV.qmd")
 
     qmd_src <- system.file(
         "templates", "CV.qmd",
@@ -219,7 +220,8 @@ create_cv <- function(data        = NULL,
 
     qmd_content <- readr::read_file(qmd_src)
 
-    # Path sentinels
+    # Path sentinels -- both use absolute paths so they resolve correctly
+    # from the temp directory rather than relative to the workbook location.
     qmd_content <- gsub(
         "__CURRICULR_DATA_PATH__",
         as.character(data),
@@ -227,12 +229,11 @@ create_cv <- function(data        = NULL,
     )
     qmd_content <- gsub(
         "__CURRICULR_PHOTO_PATH__",
-        photo_rel,
+        if (!is.null(photo)) as.character(photo) else "",
         qmd_content, fixed = TRUE
     )
 
-    # Variant sentinel — passed to read_cv_data() inside CV.qmd so the
-    # Quarto subprocess applies the same filtering as the R session did.
+    # Variant sentinel
     qmd_content <- gsub(
         "__CURRICULR_VARIANT__",
         variant,
@@ -253,7 +254,7 @@ create_cv <- function(data        = NULL,
         qmd_content, fixed = TRUE
     )
 
-    # use_icons sentinel — passed to cv_contact_line() inside CV.qmd
+    # use_icons sentinel
     qmd_content <- gsub(
         "__CURRICULR_USE_ICONS__",
         use_icons,
@@ -261,13 +262,19 @@ create_cv <- function(data        = NULL,
     )
 
     readr::write_file(qmd_content, qmd_dst)
-    cli::cli_alert_success("Written {.path {qmd_dst}}")
 
     # -- 6. Render to PDF -------------------------------------------------------
     cli::cli_alert_info("Rendering CV with Quarto ...")
 
+    # Quarto's output-file only accepts a filename, not a path. It writes the
+    # PDF relative to the input .qmd location. We copy CV.qmd into output_dir
+    # for the render so the PDF lands there, then remove the copy immediately.
+    qmd_render_dst <- fs::path(output_dir, "CV.qmd")
+    fs::file_copy(qmd_dst, qmd_render_dst, overwrite = TRUE)
+    on.exit(fs::file_delete(qmd_render_dst), add = TRUE)
+
     quarto::quarto_render(
-        input         = as.character(qmd_dst),
+        input         = as.character(qmd_render_dst),
         output_format = "typst",
         output_file   = output_file,
         quiet         = FALSE

@@ -109,3 +109,79 @@ cv_section <- function(title) {
         right
     )
 }
+
+# .cv_entry_bulleted() --------------------------------------------------
+
+#' Create a Typst CV entry with a bulleted detail list
+#'
+#' Generates a raw Typst block for one CV entry where multiple detail items
+#' are rendered as an indented bulleted list beneath the entry header. Used
+#' when more than one row shares the same composite key (title, organization,
+#' dates, location) in the source data.
+#'
+#' The bullet character is ▪ (U+25AA, BLACK SMALL SQUARE). The list is
+#' set slightly smaller than body text and indented to sit visually beneath
+#' the organization line.
+#'
+#' @param title A character string. The main entry label.
+#' @param organization A character string. The secondary line: employer,
+#'   institution, publisher, or venue. Defaults to `""`.
+#' @param details A character vector. One element per bullet point.
+#' @param when A character string. The date or date range. Defaults to `""`.
+#' @param where A character string. Location associated with the entry.
+#'   Defaults to `""`.
+#'
+#' @return A character string of raw Typst markup.
+#'
+#' @keywords internal
+#' @noRd
+.cv_entry_bulleted <- function(title        = "",
+                               organization = "",
+                               details      = character(0),
+                               when         = "",
+                               where        = "") {
+
+    title        <- typst_escape(title)
+    organization <- typst_escape(organization)
+    when         <- typst_escape(when)
+    where        <- typst_escape(where)
+
+    right_parts <- c(when, where)
+    right       <- paste(right_parts[nzchar(right_parts)], collapse = "\\\n")
+
+    # Build each bullet line as a Typst content line
+    bullet_lines <- vapply(details, function(d) {
+        sprintf(
+            "    #pad(left: 1em)[#text(size: 8.25pt, fill: bodygray)[\u25aa #h(0.3em) %s]]\\",
+            typst_escape(d)
+        )
+    }, character(1L))
+
+    # Last bullet should not have a trailing backslash (line break)
+    if (length(bullet_lines) > 0L) {
+        bullet_lines[[length(bullet_lines)]] <- sub("\\\\$", "",
+                                                    bullet_lines[[length(bullet_lines)]])
+    }
+
+    bullets_block <- paste(bullet_lines, collapse = "\n")
+
+    sprintf(
+        paste0(
+            '\n```{=typst}\n',
+            '#grid(\n',
+            '  columns: (1fr, 1.68in),\n',
+            '  gutter: 0.65em,\n',
+            '  [\n',
+            '    #text(size: 9.15pt, weight: "semibold", fill: dark)[%s]\\\n',
+            '    %s\n',
+            '  ],\n',
+            '  [#align(right)[#text(size: 8.1pt, fill: accent)[%s]]]\n',
+            ')\n',
+            '#v(0.36em)\n',
+            '```\n'
+        ),
+        title,
+        bullets_block,
+        right
+    )
+}

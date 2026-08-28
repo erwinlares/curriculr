@@ -42,6 +42,12 @@ Iterates over a CV data frame and writes each row as a Typst CV entry by
 calling \code{.cv_entry()} for each row and passing the result to \code{\link[base:cat]{base::cat()}}.
 }
 \details{
+Rows that share the same combination of \code{title}, \code{unit}, \code{startMonth},
+\code{startYear}, \code{endMonth}, \code{endYear}, and \code{where} are treated as a single
+entry with multiple responsibilities. When more than one such row exists,
+the details are rendered as an indented bulleted list beneath the entry
+header rather than repeating the header for each row.
+
 This function is intended to be called inside a Quarto document chunk with
 \code{results = 'asis'}. The \code{cat()} call writes raw Typst blocks directly into
 the document output stream. Nothing is returned — the function is called

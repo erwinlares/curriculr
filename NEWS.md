@@ -1,3 +1,24 @@
+# curriculr 0.3.1.9000
+
+### New features
+
+* `cv_render_section()` now aggregates multi-row entries automatically. Rows
+  sharing the same `title`, `unit`, `startMonth`, `startYear`, `endMonth`,
+  `endYear`, and `where` values are treated as a single entry: one header
+  renders at the top with the date and location right-aligned, and each
+  `detail` value appears as an indented bullet beneath it. Single-detail
+  entries continue to render exactly as before. Row order in the workbook
+  controls bullet order. This behavior applies to all sections, not just
+  experience.
+
+### Improvements
+
+* `create_cv()` now writes the intermediate `CV.qmd` to a temporary directory
+  rather than the workbook folder. The file is never visible to the user and
+  is cleaned up automatically. As a result, `overwrite` no longer has any
+  effect in render mode -- re-running `create_cv()` on an existing project
+  requires no flags.
+
 # curriculr 0.3.1
 
 ### Bug fixes

@@ -26,7 +26,11 @@ two-column header layout.}
 Defaults to \code{"CV.pdf"}. Ignored in scaffold mode.}
 
 \item{overwrite}{A logical. Whether to overwrite existing files. Defaults
-to \code{FALSE}.}
+to \code{FALSE}. In scaffold mode, controls whether the template workbook and
+placeholder image are replaced if they already exist in the destination
+directory. Has no effect in render mode -- the intermediate \code{CV.qmd} is
+always written to a temporary directory and never touches the workbook
+folder.}
 
 \item{variant}{A character string. Controls content scope. \code{"cv"} (the
 default) renders all rows from every section. \code{"resume"} renders only
@@ -65,15 +69,13 @@ the same directory as the workbook.
 \item Resolves and validates the workbook and photo paths.
 \item Reads the workbook with \code{\link[=read_cv_data]{read_cv_data()}}, applying \code{variant} filtering.
 \item Resolves theme values from the workbook or built-in defaults.
-\item Writes \code{CV.qmd} by injecting all resolved values into the package
-template via sentinel substitution.
-\item Calls \code{quarto::quarto_render()} to produce the PDF.
+\item Writes an intermediate \code{CV.qmd} to a temporary directory by injecting
+all resolved values into the package template via sentinel substitution.
+The temporary file is deleted automatically after rendering -- it never
+appears in the workbook directory.
+\item Calls \code{quarto::quarto_render()} to produce the PDF, written to the same
+directory as the workbook.
 }
-
-When \code{photo = NULL}, the CV header renders as a single full-width column
-containing the name, contact line, address, and profile statement. When
-a photo path is supplied, the header uses a two-column layout with the
-photo on the left.
 
 When \code{variant = "resume"}, row-level filtering is controlled entirely by
 the \code{include_in_resume} column in each section sheet. Check the rows you
