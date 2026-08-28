@@ -115,12 +115,12 @@ filled from defaults.
 # \donttest{
 # Scaffold mode — copy template files to a temp directory
 withr::with_dir(tempdir(), create_cv())
-#> ✔ Created /tmp/RtmpYTcVMK/cv-data-template.xlsx
-#> ✔ Created /tmp/RtmpYTcVMK/placeholder.png
+#> ✔ Created /tmp/RtmpRJlXfL/cv-data-template.xlsx
+#> ✔ Created /tmp/RtmpRJlXfL/placeholder.png
 #> ℹ Next steps:
-#> Open /tmp/RtmpYTcVMK/cv-data-template.xlsx and fill in the "profile" sheet with
+#> Open /tmp/RtmpRJlXfL/cv-data-template.xlsx and fill in the "profile" sheet with
 #> your information.
-#> Replace /tmp/RtmpYTcVMK/placeholder.png with your own profile photo.
+#> Replace /tmp/RtmpRJlXfL/placeholder.png with your own profile photo.
 #> Call `create_cv(data = 'cv-data-template.xlsx', photo = 'your-photo.png')` to
 #> render your CV.
 # }
