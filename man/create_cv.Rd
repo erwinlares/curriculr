@@ -22,15 +22,15 @@ Defaults to \code{NULL}, which renders the CV without a profile photo using
 a single-column header layout. Supply a path to use a photo with the
 two-column header layout.}
 
-\item{output_file}{A character string. Name of the output PDF file.
+\item{output_file}{A character string. Name of the output PDF file, without
+a directory component -- the PDF is always written beside the workbook.
 Defaults to \code{"CV.pdf"}. Ignored in scaffold mode.}
 
 \item{overwrite}{A logical. Whether to overwrite existing files. Defaults
 to \code{FALSE}. In scaffold mode, controls whether the template workbook and
 placeholder image are replaced if they already exist in the destination
 directory. Has no effect in render mode -- the intermediate \code{CV.qmd} is
-always written to a temporary directory and never touches the workbook
-folder.}
+written to a temporary directory and never touches the workbook folder.}
 
 \item{variant}{A character string. Controls content scope. \code{"cv"} (the
 default) renders all rows from every section. \code{"resume"} renders only
@@ -53,9 +53,10 @@ rendering takes place.
 }
 \details{
 Called with \code{data} and \code{photo} arguments, \code{create_cv()} runs in \strong{render
-mode}: it reads the workbook, generates \code{CV.qmd}, and renders it to PDF
-using Quarto's Typst engine. Both \code{CV.qmd} and \code{CV.pdf} are written to
-the same directory as the workbook.
+mode}: it reads the workbook, generates an intermediate \code{CV.qmd} in a
+temporary directory, renders it to PDF there using Quarto's Typst engine,
+and copies only the finished PDF back beside the workbook. Nothing else is
+written to the workbook folder.
 
 \strong{Scaffold mode} (no arguments):
 \enumerate{
@@ -71,11 +72,24 @@ the same directory as the workbook.
 \item Resolves theme values from the workbook or built-in defaults.
 \item Writes an intermediate \code{CV.qmd} to a temporary directory by injecting
 all resolved values into the package template via sentinel substitution.
-The temporary file is deleted automatically after rendering -- it never
-appears in the workbook directory.
-\item Calls \code{quarto::quarto_render()} to produce the PDF, written to the same
-directory as the workbook.
+\item Renders that file to PDF \strong{inside the temporary directory}, then copies
+the finished PDF beside the workbook. The temporary directory and
+everything in it are removed when the call returns.
 }
+
+Rendering in a temporary directory rather than in the workbook folder is a
+deliberate reproducibility choice. Quarto stages Typst packages into a
+\verb{.quarto/} cache in whichever directory it renders, and it walks up the
+directory tree looking for a \verb{_quarto.yml} to decide whether it is inside a
+project. Rendering in the workbook folder therefore made the output depend
+on where the workbook happened to live: a folder carrying a stale package
+cache, or sitting beneath someone's unrelated Quarto project, could render
+the same workbook differently. A fresh temporary directory has neither, so
+every render starts from the same conditions. It also means curriculr never
+creates or deletes files in a directory it does not own.
+
+Because the workbook and photo paths are injected into the template as
+absolute paths, they resolve correctly from the temporary directory.
 
 When \code{variant = "resume"}, row-level filtering is controlled entirely by
 the \code{include_in_resume} column in each section sheet. Check the rows you

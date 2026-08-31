@@ -11,9 +11,10 @@
 #' rendering takes place.
 #'
 #' Called with `data` and `photo` arguments, `create_cv()` runs in **render
-#' mode**: it reads the workbook, generates `CV.qmd`, and renders it to PDF
-#' using Quarto's Typst engine. Both `CV.qmd` and `CV.pdf` are written to
-#' the same directory as the workbook.
+#' mode**: it reads the workbook, generates an intermediate `CV.qmd` in a
+#' temporary directory, renders it to PDF there using Quarto's Typst engine,
+#' and copies only the finished PDF back beside the workbook. Nothing else is
+#' written to the workbook folder.
 #'
 #' @param data A character string or `NULL`. Path to the Excel workbook.
 #'   Defaults to `NULL`, which triggers scaffold mode.
@@ -21,14 +22,14 @@
 #'   Defaults to `NULL`, which renders the CV without a profile photo using
 #'   a single-column header layout. Supply a path to use a photo with the
 #'   two-column header layout.
-#' @param output_file A character string. Name of the output PDF file.
+#' @param output_file A character string. Name of the output PDF file, without
+#'   a directory component -- the PDF is always written beside the workbook.
 #'   Defaults to `"CV.pdf"`. Ignored in scaffold mode.
 #' @param overwrite A logical. Whether to overwrite existing files. Defaults
 #'   to `FALSE`. In scaffold mode, controls whether the template workbook and
 #'   placeholder image are replaced if they already exist in the destination
 #'   directory. Has no effect in render mode -- the intermediate `CV.qmd` is
-#'   always written to a temporary directory and never touches the workbook
-#'   folder.
+#'   written to a temporary directory and never touches the workbook folder.
 #' @param variant A character string. Controls content scope. `"cv"` (the
 #'   default) renders all rows from every section. `"resume"` renders only
 #'   rows where `include_in_resume` is checked in the workbook.
@@ -54,10 +55,23 @@
 #' 3. Resolves theme values from the workbook or built-in defaults.
 #' 4. Writes an intermediate `CV.qmd` to a temporary directory by injecting
 #'    all resolved values into the package template via sentinel substitution.
-#'    The temporary file is deleted automatically after rendering -- it never
-#'    appears in the workbook directory.
-#' 5. Calls `quarto::quarto_render()` to produce the PDF, written to the same
-#'    directory as the workbook.
+#' 5. Renders that file to PDF **inside the temporary directory**, then copies
+#'    the finished PDF beside the workbook. The temporary directory and
+#'    everything in it are removed when the call returns.
+#'
+#' Rendering in a temporary directory rather than in the workbook folder is a
+#' deliberate reproducibility choice. Quarto stages Typst packages into a
+#' `.quarto/` cache in whichever directory it renders, and it walks up the
+#' directory tree looking for a `_quarto.yml` to decide whether it is inside a
+#' project. Rendering in the workbook folder therefore made the output depend
+#' on where the workbook happened to live: a folder carrying a stale package
+#' cache, or sitting beneath someone's unrelated Quarto project, could render
+#' the same workbook differently. A fresh temporary directory has neither, so
+#' every render starts from the same conditions. It also means curriculr never
+#' creates or deletes files in a directory it does not own.
+#'
+#' Because the workbook and photo paths are injected into the template as
+#' absolute paths, they resolve correctly from the temporary directory.
 #'
 #' When `variant = "resume"`, row-level filtering is controlled entirely by
 #' the `include_in_resume` column in each section sheet. Check the rows you
@@ -180,14 +194,10 @@ create_cv <- function(data        = NULL,
         cli::cli_abort("Cannot find profile image at {.path {photo}}.")
     }
 
-    # photo = NULL is valid — CV.qmd renders a single-column header when
-    # photo_rel is an empty string. No fallback to placeholder in render mode.
+    # photo = NULL is valid — CV.qmd renders a single-column header when the
+    # photo sentinel resolves to an empty string. No fallback to placeholder
+    # in render mode.
     output_dir <- fs::path_dir(data)
-    photo_rel  <- if (!is.null(photo)) {
-        as.character(fs::path_rel(photo, output_dir))
-    } else {
-        ""
-    }
 
     # -- 3. Read the workbook ---------------------------------------------------
     cli::cli_alert_info("Reading workbook {.path {data}}")
@@ -205,11 +215,12 @@ create_cv <- function(data        = NULL,
 
     # -- 5. Write CV.qmd to a temp directory ------------------------------------
     # The intermediate .qmd is implementation detail, not a user deliverable.
-    # Writing it to a temp directory means the workbook folder stays clean,
-    # the overwrite guard is unnecessary (temp dirs are always fresh), and
-    # the user never has to manage a file they didn't ask for.
+    # The temp directory is also where the render happens (step 6), which keeps
+    # the render conditions identical from one call to the next.
     tmp_dir <- tempfile(pattern = "curriculr-")
     dir.create(tmp_dir)
+    on.exit(fs::dir_delete(tmp_dir), add = TRUE)
+
     qmd_dst <- fs::path(tmp_dir, "CV.qmd")
 
     qmd_src <- system.file(
@@ -264,23 +275,41 @@ create_cv <- function(data        = NULL,
     readr::write_file(qmd_content, qmd_dst)
 
     # -- 6. Render to PDF -------------------------------------------------------
+    # Quarto's output-file accepts a filename, not a path, and writes the PDF
+    # next to the input .qmd. Since the .qmd lives in the temp directory, the
+    # PDF lands there too and is copied out afterwards.
+    #
+    # An earlier version copied the .qmd into the workbook folder and rendered
+    # it there. That worked, but it made the render environment a property of
+    # the user's filesystem: Quarto stages a .quarto/ Typst package cache into
+    # the render directory and looks upward for a _quarto.yml, so the same
+    # workbook could render differently depending on where it was stored.
+    # Rendering in a fresh temp directory removes both dependencies, and has
+    # the side benefit that curriculr no longer writes to -- or deletes from --
+    # a directory belonging to the user.
     cli::cli_alert_info("Rendering CV with Quarto ...")
 
-    # Quarto's output-file only accepts a filename, not a path. It writes the
-    # PDF relative to the input .qmd location. We copy CV.qmd into output_dir
-    # for the render so the PDF lands there, then remove the copy immediately.
-    qmd_render_dst <- fs::path(output_dir, "CV.qmd")
-    fs::file_copy(qmd_dst, qmd_render_dst, overwrite = TRUE)
-    on.exit(fs::file_delete(qmd_render_dst), add = TRUE)
-
     quarto::quarto_render(
-        input         = as.character(qmd_render_dst),
+        input         = as.character(qmd_dst),
         output_format = "typst",
         output_file   = output_file,
         quiet         = FALSE
     )
 
+    rendered_pdf <- fs::path(tmp_dir, output_file)
+
+    if (!fs::file_exists(rendered_pdf)) {
+        cli::cli_abort(
+            "Quarto did not produce {.file {output_file}}.
+       The render may have failed -- check the Quarto output above."
+        )
+    }
+
+    # Copy rather than move: the temp directory may sit on a different
+    # filesystem than the workbook, which would make a rename fail.
     pdf_path <- fs::path(output_dir, output_file)
+    fs::file_copy(rendered_pdf, pdf_path, overwrite = TRUE)
+
     cli::cli_alert_success("CV rendered to {.path {pdf_path}}")
 
     invisible(pdf_path)

@@ -17,28 +17,45 @@ palmer_copy <- function(env = parent.frame()) {
     dst
 }
 
-# Runs create_cv() with quarto_render mocked, captures the path of the
-# intermediate CV.qmd written to the temp directory, and returns its lines.
-# Uses testthat::with_mocked_bindings() with a code block so the mock is
-# active for the entire duration of create_cv(). The captured path is stored
-# via an explicit environment reference to survive the closure boundary.
-run_and_capture_qmd <- function(...) {
-    captured_lines <- NULL
-    env            <- environment()
+# Runs create_cv() with quarto_render mocked and captures what the mock saw.
+#
+# The mock stands in for a successful render: it reads back the intermediate
+# CV.qmd (while create_cv() is still running, before the temp directory is
+# removed on exit) and writes a stub PDF where Quarto would have written the
+# real one. That stub matters -- create_cv() checks the PDF exists before
+# copying it out, so a mock that produced nothing would abort.
+#
+# Returns a list with the `input` path and `output_file` name passed to
+# quarto_render, the captured `lines` of CV.qmd, and the `result` returned by
+# create_cv().
+run_and_capture <- function(...) {
+    captured <- new.env(parent = emptyenv())
+    result   <- NULL
 
     testthat::with_mocked_bindings(
-        quarto_render = function(input, ...) {
-            env$captured_lines <- readLines(input)
+        quarto_render = function(input, output_file = "CV.pdf", ...) {
+            captured$input       <- input
+            captured$output_file <- output_file
+            captured$lines       <- readLines(input)
+            writeLines("%PDF-1.7", file.path(dirname(input), output_file))
             invisible(NULL)
         },
         .package = "quarto",
-        code     = create_cv(...)
+        code     = {
+            result <- create_cv(...)
+        }
     )
 
-    if (is.null(captured_lines)) {
+    if (is.null(captured$lines)) {
         stop("CV.qmd was not written or path was not captured")
     }
-    captured_lines
+
+    c(as.list(captured), list(result = result))
+}
+
+# Thin wrapper for the many tests that only care about CV.qmd content.
+run_and_capture_qmd <- function(...) {
+    run_and_capture(...)$lines
 }
 
 # ---------------------------------------------------------------------------
@@ -124,23 +141,59 @@ test_that("create_cv() render mode validates use_icons argument", {
 })
 
 # ---------------------------------------------------------------------------
+# Render location
+#
+# The render runs inside a temporary directory rather than beside the
+# workbook. Quarto stages a .quarto/ Typst package cache into whichever
+# directory it renders in, and looks upward for a _quarto.yml, so rendering in
+# the workbook folder made the output depend on where the workbook was stored.
+# These tests pin that down.
+# ---------------------------------------------------------------------------
+
+test_that("create_cv() renders outside the workbook directory", {
+    path <- palmer_copy()
+    cap  <- run_and_capture(data = path)
+    expect_false(identical(dirname(cap$input), dirname(path)))
+})
+
+test_that("create_cv() does not write CV.qmd to the workbook directory", {
+    path <- palmer_copy()
+    run_and_capture(data = path)
+    expect_false(file.exists(file.path(dirname(path), "CV.qmd")))
+})
+
+test_that("create_cv() copies the rendered PDF beside the workbook", {
+    path <- palmer_copy()
+    run_and_capture(data = path)
+    expect_true(file.exists(file.path(dirname(path), "CV.pdf")))
+})
+
+test_that("create_cv() honours a custom output_file name", {
+    path <- palmer_copy()
+    run_and_capture(data = path, output_file = "resume.pdf")
+    expect_true(file.exists(file.path(dirname(path), "resume.pdf")))
+})
+
+test_that("create_cv() aborts when Quarto produces no PDF", {
+    path <- palmer_copy()
+    expect_error(
+        testthat::with_mocked_bindings(
+            quarto_render = function(...) invisible(NULL),
+            .package = "quarto",
+            code     = create_cv(data = path)
+        ),
+        regexp = "did not produce"
+    )
+})
+
+# ---------------------------------------------------------------------------
 # Sentinel substitution — CV.qmd content
 #
 # quarto_render() is mocked via run_and_capture_qmd() so create_cv() runs
 # to completion and writes CV.qmd to its temp directory without invoking
-# Quarto. The mock captures the `input` path passed to quarto_render and
-# reads back the file content for assertion.
+# Quarto. The mock reads the file back while create_cv() is still running,
+# since the temp directory is removed when the call returns.
 # ---------------------------------------------------------------------------
-
-test_that("create_cv() does not write CV.qmd to the workbook directory", {
-    path <- palmer_copy()
-    testthat::with_mocked_bindings(
-        quarto_render = function(...) invisible(NULL),
-        .package = "quarto",
-        code     = create_cv(data = path)
-    )
-    expect_false(file.exists(file.path(dirname(path), "CV.qmd")))
-})
 
 test_that("create_cv() injects data path sentinel into CV.qmd", {
     path  <- palmer_copy()
@@ -261,14 +314,8 @@ test_that("create_cv() leaves no unreplaced __ sentinels in CV.qmd", {
 # ---------------------------------------------------------------------------
 
 test_that("create_cv() render mode invisibly returns the PDF path", {
-    path <- palmer_copy()
-    testthat::with_mocked_bindings(
-        quarto_render = function(...) invisible(NULL),
-        .package = "quarto",
-        code     = {
-            result <- create_cv(data = path)
-            expect_type(result, "character")
-            expect_match(result, "\\.pdf$")
-        }
-    )
+    path   <- palmer_copy()
+    result <- run_and_capture(data = path)$result
+    expect_type(result, "character")
+    expect_match(result, "\\.pdf$")
 })
