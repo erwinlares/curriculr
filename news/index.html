@@ -45,8 +45,8 @@
 </ul></div>
 <div class="section level4">
 <h4 id="improvements-0-3-1-9000">Improvements<a class="anchor" aria-label="anchor" href="#improvements-0-3-1-9000"></a></h4>
-<ul><li>
-<code><a href="../reference/create_cv.html">create_cv()</a></code> now writes the intermediate <code>CV.qmd</code> to a temporary directory rather than the workbook folder. The file is never visible to the user and is cleaned up automatically. As a result, <code>overwrite</code> no longer has any effect in render mode – re-running <code><a href="../reference/create_cv.html">create_cv()</a></code> on an existing project requires no flags.</li>
+<ul><li><p><code><a href="../reference/create_cv.html">create_cv()</a></code> now writes the intermediate <code>CV.qmd</code> to a temporary directory rather than the workbook folder. The file is never visible to the user and is cleaned up automatically. As a result, <code>overwrite</code> no longer has any effect in render mode – re-running <code><a href="../reference/create_cv.html">create_cv()</a></code> on an existing project requires no flags.</p></li>
+<li><p>Fixed bullet spacing in multi-responsibility CV entries. An earlier implementation wrapped each bullet in a block-level <code>#pad()</code>, causing the gap between bullets to inherit from the document’s <code>par.spacing</code> rather than from the package. Spacing is now set explicitly, which also makes rendered output consistent across different rendering environments. Thanks for <a href="https://github.com/orestesI" class="external-link">@orestesI</a> for the bug report</p></li>
 </ul></div>
 </div>
     <div class="section level2">

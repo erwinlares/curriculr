@@ -24,6 +24,14 @@
   [`create_cv()`](https://erwinlares.github.io/curriculr/reference/create_cv.md)
   on an existing project requires no flags.
 
+- Fixed bullet spacing in multi-responsibility CV entries. An earlier
+  implementation wrapped each bullet in a block-level `#pad()`, causing
+  the gap between bullets to inherit from the document’s `par.spacing`
+  rather than from the package. Spacing is now set explicitly, which
+  also makes rendered output consistent across different rendering
+  environments. Thanks for [@orestesI](https://github.com/orestesI) for
+  the bug report
+
 ## curriculr 0.3.1
 
 #### Bug fixes
