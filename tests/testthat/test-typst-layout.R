@@ -76,3 +76,71 @@ test_that(".cv_entry() omits em dash when only one of org/detail present", {
     expect_false(grepl("\u2014", result_org_only))
     expect_false(grepl("\u2014", result_detail_only))
 })
+
+# .cv_entry_bulleted() ----------------------------------------------------
+
+test_that(".cv_entry_bulleted() contains every detail supplied", {
+    # The aggregation contract. Multiple rows sharing a composite key collapse
+    # into one entry, and no responsibility may be dropped in the process.
+    details <- c("Alpha item", "Beta item", "Gamma item")
+    result  <- .cv_entry_bulleted(title = "T", details = details)
+
+    for (d in details) {
+        expect_true(grepl(d, result, fixed = TRUE), info = d)
+    }
+})
+
+test_that(".cv_entry_bulleted() escapes Typst-sensitive characters in details", {
+    # Detail text comes straight from the user's workbook, so it is the most
+    # likely route by which an unescaped character reaches the Typst compiler.
+    result <- .cv_entry_bulleted(
+        title   = "T",
+        details = c("Contact user@domain.com", "Plain item")
+    )
+    expect_true(grepl("\\\\@", result))
+})
+
+test_that(".cv_entry_bulleted() does not render the organization argument", {
+    # `organization` is accepted for call-site symmetry with .cv_entry() but is
+    # deliberately not rendered -- organization context is expected to live in
+    # the detail text itself. Pinned here because the decision is otherwise
+    # invisible in the code.
+    result <- .cv_entry_bulleted(
+        title        = "T",
+        organization = "ZZZUniqueOrgZZZ",
+        details      = c("Alpha", "Beta")
+    )
+    expect_false(grepl("ZZZUniqueOrgZZZ", result, fixed = TRUE))
+})
+
+test_that(".cv_entry_bulleted() emits a Typst list rather than padded blocks", {
+    # Regression guard. An earlier implementation wrapped each bullet in its own
+    # `#pad()`, which is block-level in Typst: the gap between bullets was then
+    # governed by the document's `par.spacing` rather than by anything this
+    # package controls. Emitting a single `#list()` keeps the spacing local.
+    result <- .cv_entry_bulleted(
+        title   = "T",
+        details = c("Alpha", "Beta", "Gamma")
+    )
+    expect_true(grepl("#list(", result, fixed = TRUE))
+    expect_false(grepl("#pad(", result, fixed = TRUE))
+})
+
+test_that(".cv_entry_bulleted() sets all vertical spacing explicitly", {
+    # The reproducibility guard. Every spacing value the bulleted entry depends
+    # on must appear in the emitted markup; anything omitted here would resolve
+    # against the enclosing document instead, which is precisely how identical
+    # data came to render with different bullet gaps in two builds. The test
+    # checks for the parameter names, not their values, so tuning the constants
+    # does not churn the suite.
+    result <- .cv_entry_bulleted(
+        title   = "T",
+        details = c("Alpha", "Beta")
+    )
+    expect_true(grepl("leading:",     result, fixed = TRUE))
+    expect_true(grepl("spacing:",     result, fixed = TRUE))
+    expect_true(grepl("tight: false", result, fixed = TRUE))
+    expect_true(grepl("indent:",      result, fixed = TRUE))
+    expect_true(grepl("body-indent:", result, fixed = TRUE))
+    expect_true(grepl("above:",       result, fixed = TRUE))
+})

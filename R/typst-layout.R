@@ -119,13 +119,29 @@ cv_section <- function(title) {
 #' when more than one row shares the same composite key (title, organization,
 #' dates, location) in the source data.
 #'
-#' The bullet character is ▪ (U+25AA, BLACK SMALL SQUARE). The list is
-#' set slightly smaller than body text and indented to sit visually beneath
-#' the organization line.
+#' The bullet character is ▪ (U+25AA, BLACK SMALL SQUARE). The list is set
+#' slightly smaller than body text and indented to sit visually beneath the
+#' entry title, with wrapped lines hanging under the bullet body rather than
+#' returning to the left margin.
+#'
+#' All vertical spacing in this block is set explicitly rather than inherited
+#' from the surrounding document context. This matters for reproducibility.
+#' An earlier implementation wrapped each bullet in its own `#pad()`, which is
+#' a block-level element in Typst; the gap between two bullets was therefore
+#' governed by the document's `par.spacing` (Typst default `1.2em`) while
+#' wrapping inside a single bullet was governed by `par.leading` (default
+#' `0.65em`). That asymmetry produced conspicuously wide inter-bullet gaps,
+#' and — because both values resolve against whatever `#set par(...)` happens
+#' to be in scope at render time — it made the rendered spacing a property of
+#' the document rather than of the package. Setting `leading` and the list's
+#' own `spacing` inside a scoped content block removes that dependency, so the
+#' same data renders identically regardless of the enclosing template.
 #'
 #' @param title A character string. The main entry label.
 #' @param organization A character string. The secondary line: employer,
-#'   institution, publisher, or venue. Defaults to `""`.
+#'   institution, publisher, or venue. Accepted for call-site symmetry with
+#'   `.cv_entry()` but not rendered — organization context is expected to be
+#'   embedded in the detail text itself.
 #' @param details A character vector. One element per bullet point.
 #' @param when A character string. The date or date range. Defaults to `""`.
 #' @param where A character string. Location associated with the entry.
@@ -149,21 +165,56 @@ cv_section <- function(title) {
     right_parts <- c(when, where)
     right       <- paste(right_parts[nzchar(right_parts)], collapse = "\\\n")
 
-    # Build each bullet line as a Typst content line
-    bullet_lines <- vapply(details, function(d) {
-        sprintf(
-            "    #pad(left: 1em)[#text(size: 8.25pt, fill: bodygray)[\u25aa #h(0.3em) %s]]\\",
-            typst_escape(d)
+    # -- Layout constants for the bulleted list -------------------------------
+    # Gathered here so the whole visual contract of the list is legible in one
+    # place, and so a future `branding`/theme option has a single seam to hook
+    # into rather than values scattered through a sprintf template.
+    bullet_marker      <- "\u25aa"   # U+25AA BLACK SMALL SQUARE
+    bullet_size        <- "8.25pt"   # matches .cv_entry() detail text
+    bullet_above       <- "0.30em"   # gap between the title line and the list
+    bullet_leading     <- "0.42em"   # between wrapped lines within one bullet
+    bullet_spacing     <- "0.46em"   # between consecutive bullets
+    bullet_indent      <- "0.55em"   # left indent of the marker column
+    bullet_body_indent <- "0.40em"   # gap between the marker and its text
+
+    # -- Build the list block -------------------------------------------------
+    # `.build_section_blocks()` only routes here when length(details) > 1, but
+    # guard anyway: `#list()` with no items is not valid Typst.
+    if (length(details) == 0L) {
+        list_block <- ""
+    } else {
+        items <- vapply(
+            details,
+            function(d) sprintf("        [%s],", typst_escape(d)),
+            character(1L),
+            USE.NAMES = FALSE
         )
-    }, character(1L))
 
-    # Last bullet should not have a trailing backslash (line break)
-    if (length(bullet_lines) > 0L) {
-        bullet_lines[[length(bullet_lines)]] <- sub("\\\\$", "",
-                                                    bullet_lines[[length(bullet_lines)]])
+        list_block <- sprintf(
+            paste0(
+                '    #block(above: %s, below: 0em)[\n',
+                '      #set par(leading: %s)\n',
+                '      #set text(size: %s, fill: bodygray)\n',
+                '      #list(\n',
+                '        marker: [%s],\n',
+                '        indent: %s,\n',
+                '        body-indent: %s,\n',
+                '        tight: false,\n',
+                '        spacing: %s,\n',
+                '%s\n',
+                '      )\n',
+                '    ]'
+            ),
+            bullet_above,
+            bullet_leading,
+            bullet_size,
+            bullet_marker,
+            bullet_indent,
+            bullet_body_indent,
+            bullet_spacing,
+            paste(items, collapse = "\n")
+        )
     }
-
-    bullets_block <- paste(bullet_lines, collapse = "\n")
 
     sprintf(
         paste0(
@@ -172,8 +223,8 @@ cv_section <- function(title) {
             '  columns: (1fr, 1.68in),\n',
             '  gutter: 0.65em,\n',
             '  [\n',
-            '    #text(size: 9.15pt, weight: "semibold", fill: dark)[%s]\\\n',
-            '    %s\n',
+            '    #text(size: 9.15pt, weight: "semibold", fill: dark)[%s]\n',
+            '%s\n',
             '  ],\n',
             '  [#align(right)[#text(size: 8.1pt, fill: accent)[%s]]]\n',
             ')\n',
@@ -181,7 +232,7 @@ cv_section <- function(title) {
             '```\n'
         ),
         title,
-        bullets_block,
+        list_block,
         right
     )
 }
