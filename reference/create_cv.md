@@ -34,7 +34,8 @@ create_cv(
 
 - output_file:
 
-  A character string. Name of the output PDF file. Defaults to
+  A character string. Name of the output PDF file, without a directory
+  component – the PDF is always written beside the workbook. Defaults to
   `"CV.pdf"`. Ignored in scaffold mode.
 
 - overwrite:
@@ -43,8 +44,8 @@ create_cv(
   In scaffold mode, controls whether the template workbook and
   placeholder image are replaced if they already exist in the
   destination directory. Has no effect in render mode – the intermediate
-  `CV.qmd` is always written to a temporary directory and never touches
-  the workbook folder.
+  `CV.qmd` is written to a temporary directory and never touches the
+  workbook folder.
 
 - variant:
 
@@ -67,9 +68,10 @@ rendered PDF.
 ## Details
 
 Called with `data` and `photo` arguments, `create_cv()` runs in **render
-mode**: it reads the workbook, generates `CV.qmd`, and renders it to PDF
-using Quarto's Typst engine. Both `CV.qmd` and `CV.pdf` are written to
-the same directory as the workbook.
+mode**: it reads the workbook, generates an intermediate `CV.qmd` in a
+temporary directory, renders it to PDF there using Quarto's Typst
+engine, and copies only the finished PDF back beside the workbook.
+Nothing else is written to the workbook folder.
 
 **Scaffold mode** (no arguments):
 
@@ -93,12 +95,26 @@ the same directory as the workbook.
 
 4.  Writes an intermediate `CV.qmd` to a temporary directory by
     injecting all resolved values into the package template via sentinel
-    substitution. The temporary file is deleted automatically after
-    rendering – it never appears in the workbook directory.
+    substitution.
 
-5.  Calls
-    [`quarto::quarto_render()`](https://quarto-dev.github.io/quarto-r/reference/quarto_render.html)
-    to produce the PDF, written to the same directory as the workbook.
+5.  Renders that file to PDF **inside the temporary directory**, then
+    copies the finished PDF beside the workbook. The temporary directory
+    and everything in it are removed when the call returns.
+
+Rendering in a temporary directory rather than in the workbook folder is
+a deliberate reproducibility choice. Quarto stages Typst packages into a
+`.quarto/` cache in whichever directory it renders, and it walks up the
+directory tree looking for a `_quarto.yml` to decide whether it is
+inside a project. Rendering in the workbook folder therefore made the
+output depend on where the workbook happened to live: a folder carrying
+a stale package cache, or sitting beneath someone's unrelated Quarto
+project, could render the same workbook differently. A fresh temporary
+directory has neither, so every render starts from the same conditions.
+It also means curriculr never creates or deletes files in a directory it
+does not own.
+
+Because the workbook and photo paths are injected into the template as
+absolute paths, they resolve correctly from the temporary directory.
 
 When `variant = "resume"`, row-level filtering is controlled entirely by
 the `include_in_resume` column in each section sheet. Check the rows you
@@ -115,12 +131,12 @@ filled from defaults.
 # \donttest{
 # Scaffold mode — copy template files to a temp directory
 withr::with_dir(tempdir(), create_cv())
-#> ✔ Created /tmp/RtmpXtyHAV/cv-data-template.xlsx
-#> ✔ Created /tmp/RtmpXtyHAV/placeholder.png
+#> ✔ Created /tmp/RtmpvzD6BJ/cv-data-template.xlsx
+#> ✔ Created /tmp/RtmpvzD6BJ/placeholder.png
 #> ℹ Next steps:
-#> Open /tmp/RtmpXtyHAV/cv-data-template.xlsx and fill in the "profile" sheet with
+#> Open /tmp/RtmpvzD6BJ/cv-data-template.xlsx and fill in the "profile" sheet with
 #> your information.
-#> Replace /tmp/RtmpXtyHAV/placeholder.png with your own profile photo.
+#> Replace /tmp/RtmpvzD6BJ/placeholder.png with your own profile photo.
 #> Call `create_cv(data = 'cv-data-template.xlsx', photo = 'your-photo.png')` to
 #> render your CV.
 # }

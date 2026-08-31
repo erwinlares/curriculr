@@ -79,7 +79,8 @@ two-column header layout.</p></dd>
 
 
 <dt id="arg-output-file">output_file<a class="anchor" aria-label="anchor" href="#arg-output-file"></a></dt>
-<dd><p>A character string. Name of the output PDF file.
+<dd><p>A character string. Name of the output PDF file, without
+a directory component – the PDF is always written beside the workbook.
 Defaults to <code>"CV.pdf"</code>. Ignored in scaffold mode.</p></dd>
 
 
@@ -88,8 +89,7 @@ Defaults to <code>"CV.pdf"</code>. Ignored in scaffold mode.</p></dd>
 to <code>FALSE</code>. In scaffold mode, controls whether the template workbook and
 placeholder image are replaced if they already exist in the destination
 directory. Has no effect in render mode – the intermediate <code>CV.qmd</code> is
-always written to a temporary directory and never touches the workbook
-folder.</p></dd>
+written to a temporary directory and never touches the workbook folder.</p></dd>
 
 
 <dt id="arg-variant">variant<a class="anchor" aria-label="anchor" href="#arg-variant"></a></dt>
@@ -113,9 +113,10 @@ the rendered PDF.</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Called with <code>data</code> and <code>photo</code> arguments, <code>create_cv()</code> runs in <strong>render
-mode</strong>: it reads the workbook, generates <code>CV.qmd</code>, and renders it to PDF
-using Quarto's Typst engine. Both <code>CV.qmd</code> and <code>CV.pdf</code> are written to
-the same directory as the workbook.</p>
+mode</strong>: it reads the workbook, generates an intermediate <code>CV.qmd</code> in a
+temporary directory, renders it to PDF there using Quarto's Typst engine,
+and copies only the finished PDF back beside the workbook. Nothing else is
+written to the workbook folder.</p>
 <p><strong>Scaffold mode</strong> (no arguments):</p><ol><li><p>Copies <code>cv-data-template.xlsx</code> to <code><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd()</a></code>.</p></li>
 <li><p>Copies <code>placeholder.png</code> to <code><a href="https://rdrr.io/r/base/getwd.html" class="external-link">getwd()</a></code>.</p></li>
 <li><p>Prints instructions for editing the workbook and rendering the CV.</p></li>
@@ -123,12 +124,23 @@ the same directory as the workbook.</p>
 <li><p>Reads the workbook with <code><a href="read_cv_data.html">read_cv_data()</a></code>, applying <code>variant</code> filtering.</p></li>
 <li><p>Resolves theme values from the workbook or built-in defaults.</p></li>
 <li><p>Writes an intermediate <code>CV.qmd</code> to a temporary directory by injecting
-all resolved values into the package template via sentinel substitution.
-The temporary file is deleted automatically after rendering – it never
-appears in the workbook directory.</p></li>
-<li><p>Calls <code><a href="https://quarto-dev.github.io/quarto-r/reference/quarto_render.html" class="external-link">quarto::quarto_render()</a></code> to produce the PDF, written to the same
-directory as the workbook.</p></li>
-</ol><p>When <code>variant = "resume"</code>, row-level filtering is controlled entirely by
+all resolved values into the package template via sentinel substitution.</p></li>
+<li><p>Renders that file to PDF <strong>inside the temporary directory</strong>, then copies
+the finished PDF beside the workbook. The temporary directory and
+everything in it are removed when the call returns.</p></li>
+</ol><p>Rendering in a temporary directory rather than in the workbook folder is a
+deliberate reproducibility choice. Quarto stages Typst packages into a
+<code>.quarto/</code> cache in whichever directory it renders, and it walks up the
+directory tree looking for a <code>_quarto.yml</code> to decide whether it is inside a
+project. Rendering in the workbook folder therefore made the output depend
+on where the workbook happened to live: a folder carrying a stale package
+cache, or sitting beneath someone's unrelated Quarto project, could render
+the same workbook differently. A fresh temporary directory has neither, so
+every render starts from the same conditions. It also means curriculr never
+creates or deletes files in a directory it does not own.</p>
+<p>Because the workbook and photo paths are injected into the template as
+absolute paths, they resolve correctly from the temporary directory.</p>
+<p>When <code>variant = "resume"</code>, row-level filtering is controlled entirely by
 the <code>include_in_resume</code> column in each section sheet. Check the rows you
 want included in the resume and leave the rest unchecked.</p>
 <p>Theme values (fonts, colors, page layout) are read from the <code>theme</code> sheet
@@ -142,12 +154,12 @@ defaults.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="co"># Scaffold mode — copy template files to a temp directory</span></span></span>
 <span class="r-in"><span><span class="fu">withr</span><span class="fu">::</span><span class="fu"><a href="https://withr.r-lib.org/reference/with_dir.html" class="external-link">with_dir</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="fu">create_cv</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Created <span style="color: #0000BB;">/tmp/RtmpXtyHAV/cv-data-template.xlsx</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Created <span style="color: #0000BB;">/tmp/RtmpXtyHAV/placeholder.png</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Created <span style="color: #0000BB;">/tmp/RtmpvzD6BJ/cv-data-template.xlsx</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Created <span style="color: #0000BB;">/tmp/RtmpvzD6BJ/placeholder.png</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Next steps:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Open <span style="color: #0000BB;">/tmp/RtmpXtyHAV/cv-data-template.xlsx</span> and fill in the <span style="color: #0000BB;">"profile"</span> sheet with</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Open <span style="color: #0000BB;">/tmp/RtmpvzD6BJ/cv-data-template.xlsx</span> and fill in the <span style="color: #0000BB;">"profile"</span> sheet with</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> your information.</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Replace <span style="color: #0000BB;">/tmp/RtmpXtyHAV/placeholder.png</span> with your own profile photo.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Replace <span style="color: #0000BB;">/tmp/RtmpvzD6BJ/placeholder.png</span> with your own profile photo.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Call `create_cv(data = 'cv-data-template.xlsx', photo = 'your-photo.png')` to</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> render your CV.</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
