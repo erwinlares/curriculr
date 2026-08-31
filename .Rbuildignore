@@ -17,3 +17,5 @@
 ^codecov\.yml$
 ^CRAN-SUBMISSION$
 ^cran-comments\.md$
+^inst/extdata/\.quarto$
+^inst/extdata/CV\.qmd$
